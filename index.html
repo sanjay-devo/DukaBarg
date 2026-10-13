@@ -115,6 +115,15 @@
   </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-neutral-800 antialiased select-none">
+<div id="access-gate" class="fixed inset-0 z-50 flex items-center justify-center bg-app-bg p-6" role="status" aria-live="polite">
+  <div class="max-w-md rounded-2xl border border-app-border bg-white p-8 text-center shadow-card">
+    <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-brand-pale border-t-brand-orange" id="gate-spinner"></div>
+    <p class="text-sm font-semibold text-neutral-800" id="gate-message">Checking your administrator access...</p>
+    <p class="mt-2 text-xs text-neutral-500" id="gate-error"></p>
+    <button id="gate-logout" class="mt-5 hidden rounded-lg bg-brand-orange px-5 py-2 text-xs font-semibold text-white hover:bg-brand-dark">Sign out</button>
+  </div>
+</div>
+<div id="dashboard-app" hidden>
 <!-- BEGIN: TopHeader -->
 <header class="h-16 bg-white border-b border-app-border px-6 flex items-center justify-between z-30 flex-shrink-0">
 <!-- Brand Info -->
@@ -137,14 +146,14 @@
 <path d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
 </svg>
 </span>
-<input class="w-full pl-10 pr-4 py-2 text-xs bg-app-input border-transparent rounded-lg text-neutral-800 placeholder-neutral-400" placeholder="Search unavailable until data is connected" type="text" disabled aria-label="Search unavailable: backend is not configured"/>
+<input class="w-full pl-10 pr-4 py-2 text-xs bg-app-input border-transparent rounded-lg text-neutral-800 placeholder-neutral-400" placeholder="Search is not available yet" type="text" disabled aria-label="Search is not available yet"/>
 </div>
 </div>
 <!-- Right Actions -->
 <div class="flex items-center space-x-4">
-<div class="pl-4 border-l border-neutral-200 text-xs text-neutral-500" role="status">
-          Data source not configured
-</div>
+<span id="admin-identity" class="hidden sm:block text-xs text-neutral-500"></span>
+<div class="pl-4 border-l border-neutral-200 text-xs text-neutral-500" role="status" id="connection-status">Connecting to Firebase...</div>
+<button id="logout-button" class="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:border-brand-orange hover:text-brand-orange">Log out</button>
 </div>
 </header>
 <!-- END: TopHeader -->
@@ -232,7 +241,7 @@
 <!-- Timeframe selector -->
 <div class="inline-flex items-center bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-xs text-neutral-600 shadow-sm">
 <svg class="w-3.5 h-3.5 mr-2 text-neutral-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Data unavailable</span>
+<span id="date-summary">Live data</span>
 </div>
 </div>
 </div>
@@ -242,8 +251,8 @@
 <div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
 <div class="space-y-1">
 <span class="text-xs font-medium text-neutral-500">Total Sales</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight">—</h3>
-<span class="text-[11px] text-neutral-400">Data unavailable</span>
+<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="total-sales">—</h3>
+<span class="text-[11px] text-neutral-400">From recorded orders</span>
 </div>
 <div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center">
 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -253,8 +262,8 @@
 <div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
 <div class="space-y-1">
 <span class="text-xs font-medium text-neutral-500">Total Orders</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight">—</h3>
-<span class="text-[11px] text-neutral-400">Data unavailable</span>
+<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="total-orders">0</h3>
+<span class="text-[11px] text-neutral-400">All recorded orders</span>
 </div>
 <div class="w-10 h-10 rounded-xl bg-red-50 text-brand-dark flex items-center justify-center">
 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -264,8 +273,8 @@
 <div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
 <div class="space-y-1">
 <span class="text-xs font-medium text-neutral-500">Active Products</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight">—</h3>
-<span class="text-[11px] text-neutral-400">Data unavailable</span>
+<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="active-products">0</h3>
+<span class="text-[11px] text-neutral-400">Active catalog items</span>
 </div>
 <div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center">
 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -275,8 +284,8 @@
 <div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
 <div class="space-y-1">
 <span class="text-xs font-medium text-neutral-500">Pending Orders</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight">—</h3>
-<span class="text-[11px] text-neutral-400">Data unavailable</span>
+<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="pending-orders">0</h3>
+<span class="text-[11px] text-neutral-400">Awaiting processing</span>
 </div>
 <div class="w-10 h-10 rounded-xl bg-amber-50 text-status-pending flex items-center justify-center">
 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -290,14 +299,14 @@
 <div class="flex items-center justify-between mb-4">
 <div>
 <h4 class="text-sm font-bold text-neutral-900">Sales Overview</h4>
-<p class="text-xs text-neutral-400">Revenue trend unavailable</p>
+<p class="text-xs text-neutral-400">Revenue from recorded orders</p>
 </div>
 <div class="text-xs border border-neutral-200 rounded-lg px-2 py-1 text-neutral-400">
                 No data
               </div>
 </div>
 <!-- Vector Line Representation of Sales Chart -->
-<div class="h-56 flex items-center justify-center text-xs text-neutral-400" role="status">
+<div class="h-56 flex items-center justify-center text-xs text-neutral-400" role="status" id="sales-empty">
                 No sales data available
 </div>
 </div>
@@ -307,10 +316,10 @@
 <h4 class="text-sm font-bold text-neutral-900">Order Status</h4>
 <span class="text-xs text-neutral-400">No data</span>
 </div>
-<div class="flex items-center justify-center relative my-3 h-36 text-xs text-neutral-400" role="status">
+<div class="flex items-center justify-center relative my-3 h-36 text-xs text-neutral-400" role="status" id="order-status-summary">
                 Order data unavailable
 </div>
-<div class="text-xs text-neutral-400 text-center pt-2 border-t border-neutral-100">No order status data available</div>
+<div class="text-xs text-neutral-400 text-center pt-2 border-t border-neutral-100" id="order-status-empty">No order status data available</div>
 </div>
 </div>
 <!-- Recent Orders & Top Selling Products -->
@@ -335,8 +344,8 @@
 <th class="py-3 px-4 text-center">Action</th>
 </tr>
 </thead>
-<tbody class="divide-y divide-neutral-100 text-neutral-700">
-<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="6">No orders yet. Order data is unavailable until a backend is configured.</td></tr>
+<tbody class="divide-y divide-neutral-100 text-neutral-700" id="recent-orders-body">
+<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="6">No orders yet.</td></tr>
 </tbody>
 </table>
 </div>
@@ -344,17 +353,47 @@
 <!-- Top Selling Products (1 col) -->
 <div class="bg-white rounded-2xl border border-app-border shadow-card p-5">
 <div class="flex items-center justify-between mb-4 border-b border-app-divider pb-3">
-<h4 class="text-sm font-bold text-neutral-900">Top Selling Products</h4>
+<h4 class="text-sm font-bold text-neutral-900">Product Snapshot</h4>
 <button class="text-xs font-semibold text-brand-orange hover:text-brand-dark flex items-center" onclick="switchView('products')">
                 View All <span class="ml-1">→</span>
 </button>
 </div>
-<div class="py-8 text-center text-xs text-neutral-400" role="status">No products found. Product data is unavailable until a backend is configured.</div>
+<div class="py-8 text-center text-xs text-neutral-400" role="status" id="top-products-empty">No products found.</div>
 </div>
 </div>
 </div>
 <!-- ============================================== -->
-<!-- VIEW 2: PRODUCTS (CATALOG MANAGEMENT)          -->
+<!-- VIEW: ORDERS                                   -->
+<!-- ============================================== -->
+<div class="hidden space-y-6" id="view-orders">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-neutral-900">Orders</h1>
+<p class="text-xs text-neutral-500 mt-1">All orders recorded in the marketplace.</p>
+</div>
+<span class="text-xs text-neutral-400" id="orders-count">0 orders</span>
+</div>
+<div class="bg-white rounded-2xl border border-app-border shadow-card overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead class="bg-neutral-50 text-neutral-400 uppercase font-medium text-[10px]">
+<tr>
+<th class="py-3 px-4">Order ID</th>
+<th class="py-3 px-4">Customer</th>
+<th class="py-3 px-4">Date</th>
+<th class="py-3 px-4">Amount</th>
+<th class="py-3 px-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-neutral-100 text-neutral-700" id="orders-body">
+<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="5">No orders yet.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- ============================================== -->
+<!-- VIEW: PRODUCTS (CATALOG MANAGEMENT)            -->
 <!-- ============================================== -->
 <div class="hidden space-y-6" id="view-products">
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -362,11 +401,11 @@
 <h1 class="text-2xl font-bold tracking-tight text-neutral-900">Products</h1>
 <p class="text-xs text-neutral-500 mt-1">Manage all products in your marketplace.</p>
 </div>
-<span class="text-xs text-neutral-400">Product management requires a configured backend</span>
+<span class="text-xs text-neutral-400">Live product catalog</span>
 </div>
 <!-- Filter bar -->
 <div class="bg-white p-4 rounded-xl border border-app-border flex flex-wrap items-center justify-between gap-4">
-<span class="text-xs text-neutral-400">Search and filters unavailable until data is connected</span>
+<span class="text-xs text-neutral-400">Showing products from the live catalog</span>
 </div>
 <!-- Product Table -->
 <div class="bg-white rounded-2xl border border-app-border shadow-card overflow-hidden">
@@ -384,13 +423,13 @@
 <th class="py-3.5 px-4 text-center">Action</th>
 </tr>
 </thead>
-<tbody class="divide-y divide-neutral-100">
-<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="8">No products found. Product data is unavailable until a backend is configured.</td></tr>
+<tbody class="divide-y divide-neutral-100" id="products-body">
+<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="8">No products found.</td></tr>
 </tbody>
 </table>
 </div>
 <!-- Pagination -->
-<div class="p-4 border-t border-app-divider text-xs text-neutral-400">No product records loaded</div>
+<div class="p-4 border-t border-app-divider text-xs text-neutral-400" id="products-count">0 products</div>
 </div>
 </div>
 <!-- ============================================== -->
@@ -400,11 +439,11 @@
 <div class="flex items-center justify-between">
 <div>
 <h1 class="text-2xl font-bold tracking-tight text-neutral-900">Delivery Management</h1>
-<p class="text-xs text-neutral-500 mt-1">Track direct-to-customer dispatches once the delivery backend is connected.</p>
+<p class="text-xs text-neutral-500 mt-1">Track direct-to-customer dispatches.</p>
 </div>
 </div>
 <div class="bg-white rounded-2xl border border-app-border shadow-card p-8 text-center">
-<p class="text-xs text-neutral-400">No delivery records available. Connect the real delivery data source to populate this view.</p>
+<p class="text-xs text-neutral-400" id="deliveries-empty">No delivery records available.</p>
 </div>
 </div>
 <!-- ============================================== -->
@@ -418,7 +457,7 @@
 </div>
 </div>
 <div class="bg-white rounded-2xl border border-app-border shadow-card p-8 text-center">
-<p class="text-xs text-neutral-400">No categories configured. Connect the product catalog data source to populate this section.</p>
+<p class="text-xs text-neutral-400" id="categories-empty">No categories configured.</p>
 </div>
 </div>
 <!-- ============================================== -->
@@ -441,13 +480,14 @@
 </main>
 <!-- END: MainContentArea -->
 </div>
+</div>
 
 <!-- BEGIN: InteractiveScripts -->
 <script data-purpose="tab-navigation-and-modals">
     // Switch Views function for rich dashboard interaction
     function switchView(tabKey) {
-      const knownViews = ['dashboard', 'products', 'delivery', 'categories'];
-      const allViewIds = ['view-dashboard', 'view-products', 'view-delivery', 'view-categories', 'view-generic'];
+      const knownViews = ['dashboard', 'orders', 'products', 'delivery', 'categories'];
+      const allViewIds = ['view-dashboard', 'view-orders', 'view-products', 'view-delivery', 'view-categories', 'view-generic'];
       
       // Hide all containers
       allViewIds.forEach(id => {
@@ -491,4 +531,297 @@
     });
   </script>
 <!-- END: InteractiveScripts -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getDatabase, onValue, ref } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCc54Az1Y3aN-VfqDdcFTa5R0p8a9oiqfw",
+    authDomain: "dukabarg.firebaseapp.com",
+    databaseURL: "https://dukabarg-default-rtdb.firebaseio.com",
+    projectId: "dukabarg",
+    storageBucket: "dukabarg.firebasestorage.app",
+    messagingSenderId: "994703153320",
+    appId: "1:994703153320:web:d71e07c0b4f72d92280a9d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+  const gate = document.getElementById("access-gate");
+  const gateMessage = document.getElementById("gate-message");
+  const gateError = document.getElementById("gate-error");
+  const gateSpinner = document.getElementById("gate-spinner");
+  const gateLogout = document.getElementById("gate-logout");
+  const dashboard = document.getElementById("dashboard-app");
+  let stopProfileListener = null;
+  let stopDataListeners = [];
+
+  function clearDataListeners() {
+    stopDataListeners.forEach(stop => stop());
+    stopDataListeners = [];
+  }
+
+  function showGate(message, error = "", canSignOut = false) {
+    dashboard.hidden = true;
+    gate.classList.remove("hidden");
+    gateMessage.textContent = message;
+    gateError.textContent = error;
+    gateSpinner.classList.toggle("hidden", !message.includes("Checking"));
+    gateLogout.classList.toggle("hidden", !canSignOut);
+  }
+
+  function authErrorMessage(error) {
+    if (error.code?.includes("api-key-not-valid")) {
+      return "Firebase rejected this app's API key. Copy the current Web app configuration from Firebase Console → Project settings → General, then update the apiKey in index.html, login.html, and register.html. Check that the key allows the Identity Toolkit API.";
+    }
+    return error.message;
+  }
+
+  function clearListeners() {
+    if (stopProfileListener) {
+      stopProfileListener();
+      stopProfileListener = null;
+    }
+    clearDataListeners();
+  }
+
+  function asRecords(snapshotValue) {
+    if (!snapshotValue || typeof snapshotValue !== "object") return [];
+    return Object.entries(snapshotValue).filter(([, value]) => value && typeof value === "object")
+      .map(([key, value]) => ({ id: key, ...value }));
+  }
+
+  function valueOf(record, keys, fallback = "") {
+    for (const key of keys) {
+      if (record[key] !== undefined && record[key] !== null && record[key] !== "") return record[key];
+    }
+    return fallback;
+  }
+
+  function setEmptyRow(element, columns, message) {
+    element.replaceChildren();
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = columns;
+    cell.className = "py-8 px-4 text-center text-neutral-400";
+    cell.textContent = message;
+    row.append(cell);
+    element.append(row);
+  }
+
+  function formatDate(value) {
+    if (!value) return "—";
+    const date = new Date(typeof value === "number" ? value : String(value));
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
+  }
+
+  function dateValue(value) {
+    if (!value) return 0;
+    const date = new Date(typeof value === "number" ? value : String(value));
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+  }
+
+  function formatMoney(value) {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(amount) : "—";
+  }
+
+  function makeOrderRow(order, includeAction = false) {
+    const row = document.createElement("tr");
+    [valueOf(order, ["orderId", "id"], order.id), valueOf(order, ["customerName", "name", "customer"], "—"), formatDate(valueOf(order, ["createdAt", "timestamp", "date"])), formatMoney(valueOf(order, ["total", "totalAmount", "amount", "price"])), valueOf(order, ["status"], "—")].forEach(text => {
+      const cell = document.createElement("td");
+      cell.className = "py-3 px-4";
+      cell.textContent = String(text);
+      row.append(cell);
+    });
+    if (includeAction) {
+      const action = document.createElement("td");
+      action.className = "py-3 px-4 text-center text-neutral-400";
+      action.textContent = "—";
+      row.append(action);
+    }
+    return row;
+  }
+
+  function renderOrders(orders) {
+    const body = document.getElementById("recent-orders-body");
+    const allOrdersBody = document.getElementById("orders-body");
+    document.getElementById("orders-count").textContent = `${orders.length} order${orders.length === 1 ? "" : "s"}`;
+    if (!orders.length) {
+      setEmptyRow(allOrdersBody, 5, "No orders yet.");
+    } else {
+      allOrdersBody.replaceChildren(...orders.map(order => makeOrderRow(order)));
+    }
+    const rows = orders.slice().sort((a, b) => dateValue(valueOf(b, ["createdAt", "timestamp", "date"])) - dateValue(valueOf(a, ["createdAt", "timestamp", "date"]))).slice(0, 5);
+    if (!rows.length) {
+      setEmptyRow(body, 6, "No orders yet.");
+      document.getElementById("order-status-summary").textContent = "No order data available";
+      document.getElementById("order-status-empty").textContent = "No order status data available";
+      return;
+    }
+    body.replaceChildren();
+    rows.forEach(order => body.append(makeOrderRow(order, true)));
+    const pending = orders.filter(order => String(valueOf(order, ["status"], "")).toLowerCase() === "pending").length;
+    const complete = orders.filter(order => ["completed", "complete", "delivered"].includes(String(valueOf(order, ["status"], "")).toLowerCase())).length;
+    document.getElementById("order-status-summary").textContent = `${pending} pending · ${complete} completed`;
+    document.getElementById("order-status-empty").textContent = `${orders.length} total orders`;
+  }
+
+  function renderProducts(products) {
+    const body = document.getElementById("products-body");
+    document.getElementById("products-count").textContent = `${products.length} product${products.length === 1 ? "" : "s"}`;
+    const active = products.filter(product => String(valueOf(product, ["status"], "active")).toLowerCase() === "active" && product.active !== false);
+    document.getElementById("active-products").textContent = String(active.length);
+    if (!products.length) {
+      setEmptyRow(body, 8, "No products found.");
+      document.getElementById("top-products-empty").textContent = "No products found.";
+      return;
+    }
+    body.replaceChildren();
+    products.forEach((product, index) => {
+      const row = document.createElement("tr");
+      const values = [index + 1, valueOf(product, ["imageUrl", "image"], "—"), valueOf(product, ["name", "title", "productName"], "Untitled product"), valueOf(product, ["categoryName", "category"], "—"), formatMoney(valueOf(product, ["price", "sellingPrice"])), valueOf(product, ["stock", "quantity"], "—"), valueOf(product, ["status"], product.active === false ? "inactive" : "active")];
+      values.forEach((value, column) => {
+        const cell = document.createElement("td");
+        cell.className = "py-3.5 px-4";
+        if (column === 1 && typeof value === "string" && /^https?:\/\//i.test(value)) {
+          const image = document.createElement("img");
+          image.src = value;
+          image.alt = "";
+          image.className = "h-10 w-10 rounded-lg object-cover";
+          image.loading = "lazy";
+          cell.append(image);
+        } else {
+          cell.textContent = String(value);
+        }
+        row.append(cell);
+      });
+      const action = document.createElement("td");
+      action.className = "py-3.5 px-4 text-center text-neutral-400";
+      action.textContent = "—";
+      row.append(action);
+      body.append(row);
+    });
+    const productNames = products.slice(0, 5).map(product => String(valueOf(product, ["name", "title", "productName"], "Untitled product")));
+    const remaining = products.length > productNames.length ? ` and ${products.length - productNames.length} more` : "";
+    document.getElementById("top-products-empty").textContent = `${products.length} product${products.length === 1 ? "" : "s"} in catalog: ${productNames.join(", ")}${remaining}`;
+  }
+
+  function startDashboardData() {
+    const collections = ["orders", "products", "categories", "deliveries"];
+    const state = { orders: [], products: [], categories: [], deliveries: [] };
+    const loadedCollections = new Set();
+    const dataErrors = new Map();
+    document.getElementById("connection-status").textContent = "Loading dashboard data...";
+    function updateConnectionStatus() {
+      const status = document.getElementById("connection-status");
+      if (dataErrors.size) status.textContent = `Data load errors (${dataErrors.size})`;
+      else if (loadedCollections.size === collections.length) status.textContent = "Firebase connected";
+      else status.textContent = "Loading dashboard data...";
+    }
+    collections.forEach(collection => {
+      const unsubscribe = onValue(ref(database, collection), snapshot => {
+        state[collection] = asRecords(snapshot.val());
+        loadedCollections.add(collection);
+        dataErrors.delete(collection);
+        document.getElementById(`data-error-${collection}`)?.remove();
+        if (collection === "orders") {
+          document.getElementById("total-orders").textContent = String(state.orders.length);
+          document.getElementById("pending-orders").textContent = String(state.orders.filter(order => String(valueOf(order, ["status"], "")).toLowerCase() === "pending").length);
+          const total = state.orders.reduce((sum, order) => sum + (Number(valueOf(order, ["total", "totalAmount", "amount", "price"], 0)) || 0), 0);
+          document.getElementById("total-sales").textContent = formatMoney(total);
+          document.getElementById("sales-empty").textContent = state.orders.length ? `${state.orders.length} orders · ${formatMoney(total)} recorded revenue` : "No sales data available";
+          renderOrders(state.orders);
+        } else if (collection === "products") {
+          renderProducts(state.products);
+        } else if (collection === "categories") {
+          const names = state.categories.slice(0, 5).map(category => String(valueOf(category, ["name", "title", "categoryName"], "Unnamed category")));
+          const remaining = state.categories.length > names.length ? ` and ${state.categories.length - names.length} more` : "";
+          document.getElementById("categories-empty").textContent = state.categories.length ? `${state.categories.length} categor${state.categories.length === 1 ? "y" : "ies"}: ${names.join(", ")}${remaining}` : "No categories configured.";
+        } else {
+          const summaries = state.deliveries.slice(0, 4).map(delivery => {
+            const id = valueOf(delivery, ["deliveryId", "trackingId", "id"], "Delivery");
+            const status = valueOf(delivery, ["status"], "");
+            return status ? `${id} (${status})` : String(id);
+          });
+          const remaining = state.deliveries.length > summaries.length ? ` and ${state.deliveries.length - summaries.length} more` : "";
+          document.getElementById("deliveries-empty").textContent = state.deliveries.length ? `${state.deliveries.length} delivery record${state.deliveries.length === 1 ? "" : "s"}: ${summaries.join(", ")}${remaining}` : "No delivery records available.";
+        }
+        updateConnectionStatus();
+      }, error => {
+        loadedCollections.add(collection);
+        dataErrors.set(collection, error);
+        const id = `data-error-${collection}`;
+        let alert = document.getElementById(id);
+        if (!alert) {
+          const alert = document.createElement("p");
+          alert.id = id;
+          alert.className = "mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700";
+          alert.setAttribute("role", "alert");
+          document.querySelector("main").prepend(alert);
+          alert.textContent = `Could not load ${collection}: ${error.message}`;
+        } else {
+          alert.textContent = `Could not load ${collection}: ${error.message}`;
+        }
+        updateConnectionStatus();
+      });
+      stopDataListeners.push(unsubscribe);
+    });
+  }
+
+  function checkProfile(user) {
+    const profileRef = ref(database, `users/${user.uid}`);
+    let dashboardStarted = false;
+    stopProfileListener = onValue(profileRef, snapshot => {
+      const profile = snapshot.val();
+      if (!profile || profile.role !== "admin" || profile.status !== "active") {
+        if (dashboardStarted) {
+          clearDataListeners();
+          dashboardStarted = false;
+        }
+        showGate(profile?.role === "user" || profile?.status === "pending"
+          ? "Your account is pending admin approval."
+          : "This account is not authorized to access the dashboard.", "", true);
+        return;
+      }
+      document.getElementById("admin-identity").textContent = user.email || user.displayName || "Administrator";
+      gate.classList.add("hidden");
+      dashboard.hidden = false;
+      if (!dashboardStarted) {
+        dashboardStarted = true;
+        startDashboardData();
+      }
+    }, error => {
+      if (dashboardStarted) {
+        clearListeners();
+        dashboardStarted = false;
+      }
+      showGate("Unable to verify administrator access.", authErrorMessage(error), true);
+    });
+  }
+
+  onAuthStateChanged(auth, user => {
+    clearListeners();
+    if (!user) {
+      window.location.replace("login.html");
+      return;
+    }
+    showGate("Checking your administrator access...");
+    checkProfile(user);
+  });
+
+  async function logout() {
+    try {
+      await signOut(auth);
+      window.location.replace("login.html");
+    } catch (error) {
+      showGate("Could not sign out.", authErrorMessage(error), true);
+    }
+  }
+
+  document.getElementById("logout-button").addEventListener("click", logout);
+  gateLogout.addEventListener("click", logout);
+</script>
 </body></html>

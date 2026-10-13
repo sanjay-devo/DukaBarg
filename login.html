@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FF572E">
+  <title>Sign in | DukaBarg Admin</title>
+  <style>
+    :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#25211f;background:#f8f7f5;font-synthesis:none;text-rendering:optimizeLegibility}
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top right,#fff0e9,transparent 38%),#f8f7f5}
+    .card{width:min(100%,440px);padding:40px;background:#fff;border:1px solid #e8e5e1;border-radius:22px;box-shadow:0 16px 48px #1717170d}
+    .brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:30px;color:#e83d18;font-size:19px;font-weight:800;letter-spacing:-.04em}
+    .brand-mark{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:#fff0e9;color:#ff572e;font-size:21px}
+    h1{margin:0;font-size:27px;letter-spacing:-.04em} .intro{margin:9px 0 25px;color:#777;font-size:14px;line-height:1.6}
+    label{display:block;margin:16px 0 7px;font-size:13px;font-weight:650}input{width:100%;height:46px;padding:0 13px;border:1px solid #e8e5e1;border-radius:10px;background:#fff;font:inherit;font-size:14px;outline:none}
+    input:focus{border-color:#ff7957;box-shadow:0 0 0 3px #ff572e1a}button,.google{width:100%;height:46px;border:0;border-radius:10px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+    .primary{margin-top:22px;background:#ff572e;color:white;box-shadow:0 6px 18px #ff572e33}.primary:hover{background:#f0441e}.primary:disabled{opacity:.65;cursor:wait}
+    .google{margin-top:12px;border:1px solid #e8e5e1;background:#fff;color:#333}.google:hover{background:#faf9f8}
+    .row{display:flex;justify-content:flex-end;margin-top:14px}.link{color:#e83d18;text-decoration:none;font-size:13px;font-weight:650}.link:hover{text-decoration:underline}
+    .divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#999;font-size:12px}.divider:before,.divider:after{height:1px;flex:1;background:#edeae7;content:""}
+    .footer{margin:24px 0 0;text-align:center;color:#777;font-size:13px}.message{display:none;margin:16px 0 0;padding:12px 13px;border-radius:9px;background:#fff4de;color:#76530d;font-size:13px;line-height:1.5}.message.error{background:#fdecec;color:#a12622}.message.success{background:#e7f7ee;color:#176c43}
+    @media(max-width:480px){.card{padding:29px 23px}.brand{margin-bottom:24px}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">D</span><span>DukaBarg Admin</span></div>
+    <h1>Welcome back</h1>
+    <p class="intro">Sign in to continue to the DukaBarg administration dashboard.</p>
+    <form id="login-form">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <div class="row"><a class="link" href="#" id="forgot-password">Forgot password?</a></div>
+      <button class="primary" id="login-button" type="submit">Log in</button>
+    </form>
+    <div class="divider">or</div>
+    <button class="google" id="google-button" type="button">Continue with Google</button>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <p class="footer">Don't have an account? <a class="link" href="register.html">Create an account</a></p>
+  </main>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { get, getDatabase, onValue, ref, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCc54Az1Y3aN-VfqDdcFTa5R0p8a9oiqfw",
+      authDomain: "dukabarg.firebaseapp.com",
+      databaseURL: "https://dukabarg-default-rtdb.firebaseio.com",
+      projectId: "dukabarg",
+      storageBucket: "dukabarg.firebasestorage.app",
+      messagingSenderId: "994703153320",
+      appId: "1:994703153320:web:d71e07c0b4f72d92280a9d"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    const message = document.getElementById("message");
+    const form = document.getElementById("login-form");
+    const loginButton = document.getElementById("login-button");
+    const googleButton = document.getElementById("google-button");
+    let profileListener = null;
+    let observedUid = null;
+
+    function showMessage(text, kind = "") {
+      message.textContent = text;
+      message.className = `message ${kind}`;
+      message.style.display = "block";
+    }
+
+    function explainError(error) {
+      if (error.code?.includes("api-key-not-valid")) {
+        return "Firebase rejected this app's API key. In Firebase Console, open Project settings → General, copy the Web app configuration, and replace this page's apiKey with the current value. Also check that the Google Cloud API key allows the Identity Toolkit API.";
+      }
+      const known = {
+        "auth/invalid-credential": "The email or password is incorrect.",
+        "auth/user-not-found": "No account was found for this email.",
+        "auth/wrong-password": "The email or password is incorrect.",
+        "auth/invalid-email": "Enter a valid email address.",
+        "auth/popup-closed-by-user": "The Google sign-in window was closed before completing sign-in.",
+        "auth/unauthorized-domain": "This website domain is not authorized for Firebase Authentication."
+      };
+      return known[error.code] || error.message || "Sign-in failed. Please try again.";
+    }
+
+    function watchProfile(user) {
+      if (observedUid === user.uid) return;
+      if (profileListener) profileListener();
+      observedUid = user.uid;
+      const profileRef = ref(database, `users/${user.uid}`);
+      profileListener = onValue(profileRef, snapshot => {
+        const profile = snapshot.val();
+        if (profile?.role === "admin" && profile.status === "active") {
+          window.location.replace("index.html");
+        } else if (profile?.role === "user") {
+          showMessage("You are not an admin. Please download the DukaBarg App.");
+        } else if (profile?.status === "pending") {
+          showMessage("Your account is pending admin approval. This page will update automatically when an administrator approves your account.");
+        } else {
+          showMessage("This account is not authorized. If you just registered, make sure your profile was saved successfully.", "error");
+        }
+      }, error => showMessage(`Could not read your account status: ${error.message}`, "error"));
+    }
+
+    async function ensureGoogleProfile(user) {
+      const profileRef = ref(database, `users/${user.uid}`);
+      const existing = await get(profileRef);
+      if (existing.exists()) return;
+      await runTransaction(profileRef, current => {
+        if (current !== null) return;
+        const now = Date.now();
+        return {
+          uid: user.uid,
+          name: user.displayName || "",
+          mobile: "",
+          email: user.email || "",
+          role: "user",
+          status: "pending",
+          createdAt: now,
+          updatedAt: now
+        };
+      });
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        observedUid = null;
+        if (profileListener) profileListener();
+        profileListener = null;
+        return;
+      }
+      watchProfile(user);
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      loginButton.disabled = true;
+      loginButton.textContent = "Signing in...";
+      try {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        watchProfile(credential.user);
+      } catch (error) {
+        showMessage(explainError(error), "error");
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Log in";
+      }
+    });
+
+    googleButton.addEventListener("click", async () => {
+      googleButton.disabled = true;
+      googleButton.textContent = "Connecting to Google...";
+      try {
+        const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+        await ensureGoogleProfile(credential.user);
+        watchProfile(credential.user);
+      } catch (error) {
+        showMessage(explainError(error), "error");
+      } finally {
+        googleButton.disabled = false;
+        googleButton.textContent = "Continue with Google";
+      }
+    });
+
+    document.getElementById("forgot-password").addEventListener("click", async event => {
+      event.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      if (!email) {
+        showMessage("Enter your email address first, then choose Forgot password.", "error");
+        document.getElementById("email").focus();
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage("Password reset email sent. Check your inbox.", "success");
+      } catch (error) {
+        showMessage(explainError(error), "error");
+      }
+    });
+  </script>
+</body>
+</html>
