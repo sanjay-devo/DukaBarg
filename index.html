@@ -7,7 +7,7 @@
       name="description"
       content="InApp Inventory Dashboard for managing products, orders, payments, and customers."
     />
-    <title>Inventory Dashboard | InApp</title>
+    <title>DukaBarg Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -58,6 +58,8 @@
         --motion-instant: 150ms;
         --motion-fast: 300ms;
         --color-backdrop: rgb(0 0 0 / 60%);
+        --sidebar-expanded-width: 260px;
+        --sidebar-collapsed-width: 72px;
       }
 
       *,
@@ -88,12 +90,13 @@
         z-index: 5;
         inset: 0 auto 0 0;
         display: flex;
-        width: 264px;
+        width: var(--sidebar-expanded-width);
         flex-direction: column;
         padding: var(--space-7) var(--space-6) var(--space-6);
         overflow-y: auto;
         background: var(--color-surface-muted);
         border-right: var(--space-1) solid var(--color-border-muted);
+        transition: width var(--motion-fast) ease;
       }
 
       .brand {
@@ -114,29 +117,9 @@
         color: var(--color-text-inverse);
       }
 
-      .brand-mark {
-        display: grid;
-        width: 39px;
-        height: 39px;
-        flex: 0 0 auto;
-        place-items: center;
-        color: var(--color-border-strong);
-        background: var(--color-surface-base);
-        border-radius: var(--radius-lg);
-      }
-
-      .brand-mark svg {
-        width: 23px;
-        height: 23px;
-      }
-
       .brand-name {
         font-size: var(--font-size-lg);
         font-weight: 700;
-      }
-
-      .brand-name span {
-        color: var(--color-border-strong);
       }
 
       .nav-section + .nav-section {
@@ -164,6 +147,7 @@
         align-items: center;
         gap: var(--space-5);
         padding: 0 var(--space-5);
+        overflow: hidden;
         color: var(--color-text-tertiary);
         border-radius: var(--radius-lg);
         font-size: var(--font-size-sm);
@@ -183,7 +167,8 @@
 
       .nav-link:focus-visible,
       .brand:focus-visible,
-      .menu-toggle:focus-visible {
+      .menu-toggle:focus-visible,
+      .sidebar-toggle:focus-visible {
         outline: 2px solid var(--color-border-strong);
         outline-offset: 2px;
       }
@@ -250,6 +235,9 @@
       .nav-text {
         min-width: 0;
         flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .new-badge {
@@ -326,20 +314,21 @@
 
       .main {
         min-height: 100vh;
-        margin-left: 264px;
+        margin-left: var(--sidebar-expanded-width);
+        transition: margin-left var(--motion-fast) ease;
       }
 
       .topbar {
         display: flex;
         height: 72px;
         align-items: center;
-        justify-content: space-between;
         padding: 0 var(--space-7);
         background: var(--color-surface-muted);
         border-bottom: var(--space-1) solid var(--color-border-muted);
       }
 
       .breadcrumb {
+        margin-left: var(--space-5);
         color: var(--color-text-inverse);
         font-size: var(--font-size-sm);
       }
@@ -353,6 +342,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-5);
+        margin-left: auto;
       }
 
       .store-status {
@@ -453,19 +443,130 @@
         display: none;
       }
 
+      .sidebar-toggle {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 auto;
+        place-items: center;
+        padding: 0;
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: background-color var(--motion-instant) ease;
+      }
+
+      .sidebar-toggle:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .sidebar-toggle:active {
+        background: var(--color-border-muted);
+      }
+
+      .sidebar-toggle:disabled,
+      .sidebar-toggle[aria-disabled="true"] {
+        color: var(--color-text-inverse);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .sidebar-toggle[aria-busy="true"] {
+        cursor: progress;
+        pointer-events: none;
+      }
+
+      .sidebar-toggle[data-state="error"] {
+        outline: 2px solid var(--color-border-strong);
+      }
+
+      .sidebar-toggle svg {
+        width: 20px;
+        height: 20px;
+        transition: transform var(--motion-fast) ease;
+      }
+
+      @media (min-width: 761px) {
+        .app-shell.is-sidebar-collapsed .sidebar {
+          width: var(--sidebar-collapsed-width);
+          padding-right: var(--space-3);
+          padding-left: var(--space-3);
+        }
+
+        .app-shell.is-sidebar-collapsed .main {
+          margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .app-shell.is-sidebar-collapsed .sidebar-toggle svg {
+          transform: rotate(180deg);
+        }
+
+        .app-shell.is-sidebar-collapsed .brand {
+          justify-content: center;
+          margin-right: 0;
+          margin-left: 0;
+        }
+
+        .app-shell.is-sidebar-collapsed .brand-name,
+        .app-shell.is-sidebar-collapsed .section-label,
+        .app-shell.is-sidebar-collapsed .new-badge,
+        .app-shell.is-sidebar-collapsed .account-copy,
+        .app-shell.is-sidebar-collapsed .account-more {
+          display: none;
+        }
+
+        .app-shell.is-sidebar-collapsed .nav-text {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+        }
+
+        .app-shell.is-sidebar-collapsed .nav-link {
+          justify-content: center;
+          gap: 0;
+          padding-right: 0;
+          padding-left: 0;
+          border-inline-start-color: transparent;
+        }
+
+        .app-shell.is-sidebar-collapsed .nav-link[aria-current="page"] {
+          border-inline-start-color: var(--color-border-strong);
+        }
+
+        .app-shell.is-sidebar-collapsed .account {
+          justify-content: center;
+          padding-right: 0;
+          padding-left: 0;
+        }
+      }
+
       .sidebar-backdrop {
         display: none;
       }
 
       @media (max-width: 760px) {
         .sidebar {
-          width: 264px;
+          width: var(--sidebar-expanded-width);
+          padding-right: var(--space-6);
+          padding-left: var(--space-6);
           transform: translateX(-100%);
-          transition: transform var(--motion-fast) ease;
+          transition:
+            transform var(--motion-fast) ease,
+            width var(--motion-fast) ease;
         }
 
         .sidebar.is-open {
           transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+          display: none;
         }
 
         .sidebar-backdrop.is-visible {
@@ -530,15 +631,15 @@
           height: 20px;
         }
 
+        .topbar .sidebar-toggle {
+          display: none;
+        }
+
         .mobile-brand {
           display: block;
           flex: 1;
           font-size: var(--font-size-md);
           font-weight: 600;
-        }
-
-        .mobile-brand span {
-          color: var(--color-border-strong);
         }
 
         .breadcrumb {
@@ -594,26 +695,8 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-        <a class="brand" href="#dashboard" aria-label="InApp home">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 10.5 12 4l8 6.5v8.25A1.25 1.25 0 0 1 18.75 20h-13A1.75 1.75 0 0 1 4 18.25V10.5Z"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.8"
-              />
-              <path
-                d="M9 20v-6h6v6M3 10l9-7 9 7"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.8"
-              />
-            </svg>
-          </span>
-          <span class="brand-name">InApp</span>
+        <a class="brand" href="#dashboard" aria-label="DUKABARG home">
+          <span class="brand-name">DUKABARG</span>
         </a>
 
         <nav aria-label="Store sections">
@@ -796,6 +879,23 @@
       <main class="main" id="dashboard">
         <header class="topbar">
           <button
+            class="sidebar-toggle"
+            type="button"
+            aria-label="Collapse sidebar"
+            aria-controls="sidebar"
+            aria-expanded="true"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 4h16v16H4zM9 4v16m6-11-3 3 3 3"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.7"
+              />
+            </svg>
+          </button>
+          <button
             class="menu-toggle"
             type="button"
             aria-label="Open navigation"
@@ -811,7 +911,7 @@
               />
             </svg>
           </button>
-          <span class="mobile-brand">InApp</span>
+          <span class="mobile-brand">DUKANS</span>
           <div class="breadcrumb">Store / <strong>Dashboard</strong></div>
           <div class="topbar-right">
             <span class="store-status"><span class="status-dot"></span>Store is live</span>
@@ -857,7 +957,28 @@
     <script>
       const sidebar = document.querySelector(".sidebar");
       const menuToggle = document.querySelector(".menu-toggle");
+      const sidebarToggle = document.querySelector(".sidebar-toggle");
       const backdrop = document.querySelector(".sidebar-backdrop");
+      const appShell = document.querySelector(".app-shell");
+      const desktopMedia = window.matchMedia("(min-width: 761px)");
+      let isSidebarCollapsed = false;
+
+      function updateSidebarMode() {
+        const isDesktopCollapsed = isSidebarCollapsed && desktopMedia.matches;
+        appShell.classList.toggle("is-sidebar-collapsed", isDesktopCollapsed);
+        sidebarToggle.setAttribute("aria-expanded", String(!isSidebarCollapsed));
+        sidebarToggle.setAttribute(
+          "aria-label",
+          isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar",
+        );
+        sidebar.querySelectorAll(".nav-link").forEach((link) => {
+          if (isDesktopCollapsed) {
+            link.title = link.querySelector(".nav-text").textContent.trim();
+          } else {
+            link.removeAttribute("title");
+          }
+        });
+      }
 
       function setSidebarOpen(isOpen) {
         sidebar.classList.toggle("is-open", isOpen);
@@ -886,7 +1007,13 @@
       }
 
       updateCurrentLink();
+      updateSidebarMode();
       window.addEventListener("hashchange", updateCurrentLink);
+
+      sidebarToggle.addEventListener("click", () => {
+        isSidebarCollapsed = !isSidebarCollapsed;
+        updateSidebarMode();
+      });
 
       menuToggle.addEventListener("click", () => {
         setSidebarOpen(!sidebar.classList.contains("is-open"));
@@ -901,7 +1028,14 @@
       });
 
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
+        if (event.key === "Escape" && sidebar.classList.contains("is-open")) {
+          setSidebarOpen(false);
+        }
+      });
+
+      desktopMedia.addEventListener("change", () => {
+        updateSidebarMode();
+        if (desktopMedia.matches) {
           setSidebarOpen(false);
         }
       });
