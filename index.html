@@ -83,6 +83,74 @@
 
       .app-shell {
         min-height: 100vh;
+        visibility: hidden;
+      }
+
+      body.is-admin-authorized .app-shell {
+        visibility: visible;
+      }
+
+      .auth-gate {
+        position: fixed;
+        z-index: 20;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: var(--space-6);
+        background: var(--color-surface-muted);
+      }
+
+      .auth-gate[hidden] {
+        display: none;
+      }
+
+      .auth-gate-card {
+        width: min(100%, 440px);
+        padding: var(--space-8);
+        background: var(--color-surface-raised);
+        border: var(--space-1) solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .auth-gate-card h1 {
+        margin: 0;
+        font-size: var(--font-size-xl);
+        font-weight: 600;
+      }
+
+      .auth-gate-card p {
+        margin: var(--space-5) 0 0;
+        color: var(--color-text-inverse);
+      }
+
+      .auth-gate-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-5);
+        margin-top: var(--space-6);
+      }
+
+      .auth-gate-actions a,
+      .auth-gate-actions button {
+        min-height: 40px;
+        padding: var(--space-3) var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .auth-gate-actions a:focus-visible,
+      .auth-gate-actions button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .auth-gate-actions a:hover,
+      .auth-gate-actions button:hover {
+        border-color: var(--color-border-strong);
       }
 
       .sidebar {
@@ -601,6 +669,16 @@
     </style>
   </head>
   <body>
+    <section class="auth-gate" id="auth-gate" role="status" aria-live="polite">
+      <div class="auth-gate-card">
+        <h1 id="auth-gate-title">Verifying admin access</h1>
+        <p id="auth-gate-message">Please wait while we verify your account.</p>
+        <div class="auth-gate-actions" id="auth-gate-actions" hidden>
+          <button id="auth-retry" type="button">Try again</button>
+          <a href="./login.html">Return to sign in</a>
+        </div>
+      </div>
+    </section>
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
         <div class="sidebar-header">
@@ -936,6 +1014,84 @@
         if (desktopMedia.matches) {
           setSidebarOpen(false);
         }
+      });
+    </script>
+    <script type="module">
+      import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+      import { get, getDatabase, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
+        authDomain: "dukans-flutter-app.firebaseapp.com",
+        databaseURL: "https://dukans-flutter-app-default-rtdb.firebaseio.com",
+        projectId: "dukans-flutter-app",
+        storageBucket: "dukans-flutter-app.firebasestorage.app",
+        messagingSenderId: "719695900144",
+        appId: "1:719695900144:web:6f209f60d5b71ccb010135",
+      };
+
+      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+      const gateTitle = document.querySelector("#auth-gate-title");
+      const gateMessage = document.querySelector("#auth-gate-message");
+      const gateActions = document.querySelector("#auth-gate-actions");
+      const retryButton = document.querySelector("#auth-retry");
+      let isChecking = false;
+
+      function showGateError(message) {
+        gateTitle.textContent = "We couldn’t verify access";
+        gateMessage.textContent = message;
+        gateActions.hidden = false;
+      }
+
+      async function checkAdminAccess(user) {
+        if (!user) {
+          window.location.replace("./login.html");
+          return;
+        }
+        if (isChecking) {
+          return;
+        }
+
+        isChecking = true;
+        gateTitle.textContent = "Verifying admin access";
+        gateMessage.textContent = "Please wait while we verify your account.";
+        gateActions.hidden = true;
+        try {
+          const profile = await get(ref(database, `users/${user.uid}`));
+          if (!profile.exists() || typeof profile.child("role").val() !== "string") {
+            window.location.replace("./login.html?profile=missing");
+            return;
+          }
+          if (profile.child("role").val() !== "admin") {
+            window.location.replace("./login.html?access=denied");
+            return;
+          }
+
+          document.body.classList.add("is-admin-authorized");
+          document.querySelector("#auth-gate").hidden = true;
+        } catch (error) {
+          console.error("Unable to verify admin access:", error);
+          showGateError(
+            "Firebase could not verify your user profile. Check your connection and the Realtime Database security rules, then retry.",
+          );
+        } finally {
+          isChecking = false;
+        }
+      }
+
+      retryButton.addEventListener("click", () => {
+        if (auth.currentUser) {
+          void checkAdminAccess(auth.currentUser);
+        } else {
+          window.location.replace("./login.html");
+        }
+      });
+
+      onAuthStateChanged(auth, (user) => {
+        void checkAdminAccess(user);
       });
     </script>
   </body>

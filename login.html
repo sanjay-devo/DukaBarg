@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sign in to the DukaBarg administration panel."
+    />
+    <meta name="theme-color" content="#f5f5f5" />
+    <title>Admin sign in | DukaBarg</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Poppins, sans-serif;
+        font-size: var(--font-size-md);
+        line-height: 21px;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        --font-size-xs: 11.9px;
+        --font-size-sm: 12.25px;
+        --font-size-md: 14px;
+        --font-size-lg: 17.5px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24.5px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 35px;
+        --line-height-base: 21px;
+        --color-text-primary: #171717;
+        --color-border-strong: #e66239;
+        --color-text-tertiary: #262626;
+        --color-text-inverse: #525252;
+        --color-surface-base: #000000;
+        --color-surface-muted: #ffffff;
+        --color-surface-raised: #f5f5f5;
+        --color-border-muted: #e5e5e5;
+        --color-accent-wash: rgb(230 98 57 / 8%);
+        --space-1: 1px;
+        --space-2: 4px;
+        --space-3: 8px;
+        --space-4: 10px;
+        --space-5: 12px;
+        --space-6: 16px;
+        --space-7: 24px;
+        --space-8: 40px;
+        --radius-xs: 4px;
+        --radius-sm: 5px;
+        --radius-md: 6px;
+        --radius-lg: 8px;
+        --radius-xl: 50px;
+        --motion-instant: 150ms;
+        --motion-fast: 300ms;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        display: grid;
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        padding: var(--space-7);
+        color: var(--color-text-primary);
+        background:
+          radial-gradient(ellipse at 10% 15%, var(--color-accent-wash), transparent 36%),
+          var(--color-surface-raised);
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .login-shell {
+        width: min(100%, 440px);
+      }
+
+      .login-card {
+        padding: clamp(var(--space-7), 8vw, var(--space-8));
+        background: var(--color-surface-muted);
+        border: var(--space-1) solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .eyebrow {
+        margin: 0 0 var(--space-3);
+        color: var(--color-border-strong);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(var(--font-size-2xl), 7vw, var(--font-size-3xl));
+        font-weight: 600;
+        letter-spacing: -0.035em;
+        line-height: 1.25;
+      }
+
+      .intro {
+        margin: var(--space-5) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+        line-height: 1.7;
+      }
+
+      .sign-in-button {
+        display: flex;
+        width: 100%;
+        min-height: 52px;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-5);
+        margin-top: var(--space-8);
+        padding: var(--space-5) var(--space-6);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        transition:
+          background-color var(--motion-instant) ease,
+          border-color var(--motion-instant) ease,
+          box-shadow var(--motion-instant) ease,
+          transform var(--motion-instant) ease;
+      }
+
+      .sign-in-button:hover:not(:disabled) {
+        background: var(--color-surface-raised);
+        border-color: var(--color-text-inverse);
+      }
+
+      .sign-in-button:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+
+      .sign-in-button:focus-visible,
+      .help-link:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 3px;
+      }
+
+      .sign-in-button:disabled {
+        cursor: progress;
+        opacity: 0.65;
+      }
+
+      .google-mark {
+        width: 19px;
+        height: 19px;
+        flex: 0 0 auto;
+      }
+
+      .button-label[data-loading="true"]::before {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-right: var(--space-3);
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        content: "";
+        vertical-align: -2px;
+        animation: spin 700ms linear infinite;
+      }
+
+      .status {
+        min-height: 0;
+        margin: var(--space-5) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        line-height: 1.65;
+      }
+
+      .status:empty {
+        display: none;
+      }
+
+      .status[data-kind="error"] {
+        padding: var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-accent-wash);
+        border-inline-start: 3px solid var(--color-border-strong);
+        border-radius: var(--radius-xs);
+      }
+
+      .access-denied {
+        margin-top: var(--space-6);
+        padding: var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-sm);
+        line-height: 1.6;
+      }
+
+      .access-denied[hidden] {
+        display: none;
+      }
+
+      .help-link {
+        display: inline-block;
+        margin-top: var(--space-6);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        text-decoration-color: var(--color-border-muted);
+        text-underline-offset: 3px;
+      }
+
+      .help-link[hidden] {
+        display: none;
+      }
+
+      .help-link:hover {
+        color: var(--color-text-primary);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: var(--space-6);
+        }
+
+        .login-card {
+          padding: var(--space-7) var(--space-6);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-card" aria-labelledby="page-title">
+        <p class="eyebrow">Admin panel</p>
+        <h1 id="page-title">Welcome back</h1>
+        <p class="intro">
+          Sign in securely with your Google account to continue to DukaBarg.
+        </p>
+
+        <button class="sign-in-button" id="google-sign-in" type="button">
+          <svg class="google-mark" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" />
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.92c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.4 38.05 46.98 31.8 46.98 24.55Z" />
+            <path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z" />
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" />
+          </svg>
+          <span class="button-label" id="button-label">Continue with Google</span>
+        </button>
+
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="access-denied" id="access-denied" role="alert" hidden>
+          This Google account does not have admin access. If you believe this is
+          a mistake, contact your DukaBarg administrator.
+        </p>
+        <a class="help-link" id="sign-out-link" href="#" hidden>
+          Sign out and use a different account
+        </a>
+      </section>
+
+    </main>
+
+    <script type="module">
+      import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        onAuthStateChanged,
+        signInWithPopup,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+      import {
+        get,
+        getDatabase,
+        ref,
+        runTransaction,
+      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
+        authDomain: "dukans-flutter-app.firebaseapp.com",
+        databaseURL: "https://dukans-flutter-app-default-rtdb.firebaseio.com",
+        projectId: "dukans-flutter-app",
+        storageBucket: "dukans-flutter-app.firebasestorage.app",
+        messagingSenderId: "719695900144",
+        appId: "1:719695900144:web:6f209f60d5b71ccb010135",
+      };
+
+      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const button = document.querySelector("#google-sign-in");
+      const buttonLabel = document.querySelector("#button-label");
+      const status = document.querySelector("#status");
+      const deniedNotice = document.querySelector("#access-denied");
+      const signOutLink = document.querySelector("#sign-out-link");
+      let isBusy = false;
+      let popupInProgress = false;
+      let processedUid = null;
+
+      function setBusy(busy, message = "") {
+        isBusy = busy;
+        button.disabled = busy;
+        button.setAttribute("aria-busy", String(busy));
+        buttonLabel.dataset.loading = String(busy);
+        buttonLabel.textContent = busy ? message : "Continue with Google";
+        if (!busy) {
+          buttonLabel.removeAttribute("data-loading");
+        }
+      }
+
+      function displayError(message) {
+        status.dataset.kind = "error";
+        status.textContent = message;
+        setBusy(false);
+      }
+
+      function messageForError(error) {
+        switch (error?.code) {
+          case "auth/popup-closed-by-user":
+          case "auth/cancelled-popup-request":
+            return "Sign-in was cancelled. You can try again whenever you’re ready.";
+          case "auth/popup-blocked":
+            return "Your browser blocked the Google sign-in window. Allow pop-ups for this site, then try again.";
+          case "auth/unauthorized-domain":
+            return "This site is not authorized for Firebase sign-in. Add its domain in Firebase Authentication settings.";
+          case "auth/network-request-failed":
+            return "A network error interrupted sign-in. Check your connection and try again.";
+          case "PERMISSION_DENIED":
+          case "permission_denied":
+            return "Firebase denied access to the user profile. Check that the Realtime Database security rules are published.";
+          default:
+            return "We couldn’t complete sign-in. Please try again. If the problem continues, contact your administrator.";
+        }
+      }
+
+      async function verifyProfile(user) {
+        if (processedUid === user.uid) {
+          return;
+        }
+        processedUid = user.uid;
+        setBusy(true, "Checking your access…");
+        status.removeAttribute("data-kind");
+        status.textContent = "";
+        deniedNotice.hidden = true;
+        signOutLink.hidden = true;
+
+        try {
+          const profileRef = ref(database, `users/${user.uid}`);
+          const snapshot = await get(profileRef);
+          if (!snapshot.exists()) {
+            const profile = {
+              uid: user.uid,
+              name: user.displayName || "",
+              email: user.email || "",
+              photoURL: user.photoURL || "",
+              role: "user",
+              createdAt: Date.now(),
+            };
+            const result = await runTransaction(
+              profileRef,
+              (existingProfile) => existingProfile ?? profile,
+              { applyLocally: false },
+            );
+            if (!result.committed || !result.snapshot.exists()) {
+              throw new Error("The user profile could not be created.");
+            }
+          }
+
+          const currentProfile = (await get(profileRef)).val();
+          if (!currentProfile || typeof currentProfile.role !== "string") {
+            throw new Error("The user profile is incomplete.");
+          }
+          if (currentProfile.role !== "admin") {
+            setBusy(false);
+            deniedNotice.hidden = false;
+            signOutLink.hidden = false;
+            return;
+          }
+
+          window.location.replace("./index.html");
+        } catch (error) {
+          console.error("Unable to verify the DukaBarg user profile:", error);
+          processedUid = null;
+          signOutLink.hidden = false;
+          displayError(
+            error?.message === "The user profile is incomplete."
+              ? "Your account profile is incomplete. Please contact an administrator to review it."
+              : messageForError(error),
+          );
+        }
+      }
+
+      button.addEventListener("click", async () => {
+        if (isBusy) {
+          return;
+        }
+        popupInProgress = true;
+        setBusy(true, "Connecting to Google…");
+        status.removeAttribute("data-kind");
+        status.textContent = "";
+        deniedNotice.hidden = true;
+
+        try {
+          const credential = await signInWithPopup(auth, provider);
+          await verifyProfile(credential.user);
+        } catch (error) {
+          console.error("Google sign-in failed:", error);
+          processedUid = null;
+          displayError(messageForError(error));
+        } finally {
+          popupInProgress = false;
+        }
+      });
+
+      signOutLink.addEventListener("click", async (event) => {
+        event.preventDefault();
+        setBusy(true, "Signing out…");
+        try {
+          await signOut(auth);
+          processedUid = null;
+          deniedNotice.hidden = true;
+          signOutLink.hidden = true;
+          status.removeAttribute("data-kind");
+          status.textContent = "";
+          setBusy(false);
+        } catch (error) {
+          console.error("Firebase sign-out failed:", error);
+          displayError("We couldn’t sign you out. Please refresh the page and try again.");
+        }
+      });
+
+      if (new URLSearchParams(window.location.search).get("access") === "denied") {
+        deniedNotice.hidden = false;
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (user && !popupInProgress) {
+          void verifyProfile(user);
+        }
+      });
+    </script>
+  </body>
+</html>
