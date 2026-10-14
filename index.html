@@ -103,10 +103,18 @@
         display: flex;
         align-items: center;
         gap: var(--space-5);
-        margin: 0 var(--space-4) var(--space-7);
+        min-width: 0;
+        margin: 0 var(--space-4);
         color: var(--color-text-primary);
         text-decoration: none;
         transition: color var(--motion-instant) ease;
+      }
+
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-7);
       }
 
       .brand:hover {
@@ -250,68 +258,6 @@
         line-height: 1.4;
       }
 
-      .sidebar-bottom {
-        margin-top: auto;
-        padding-top: var(--space-6);
-      }
-
-      .sidebar-divider {
-        height: 1px;
-        margin: 0 var(--space-2) var(--space-5);
-        background: var(--color-border-muted);
-      }
-
-      .account {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: var(--space-3);
-        border-radius: var(--radius-lg);
-      }
-
-      .avatar {
-        display: grid;
-        width: 35px;
-        height: 35px;
-        flex: 0 0 auto;
-        place-items: center;
-        color: var(--color-surface-muted);
-        background: var(--color-surface-base);
-        border-radius: var(--radius-xl);
-        font-size: var(--font-size-xs);
-        font-weight: 600;
-      }
-
-      .account-copy {
-        min-width: 0;
-        flex: 1;
-      }
-
-      .account-name,
-      .account-role {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .account-name {
-        font-size: var(--font-size-xs);
-        font-weight: 600;
-      }
-
-      .account-role {
-        margin-top: var(--space-2);
-        color: var(--color-text-inverse);
-        font-size: var(--font-size-xs);
-      }
-
-      .account-more {
-        width: 17px;
-        height: 17px;
-        color: var(--color-text-inverse);
-      }
-
       .main {
         min-height: 100vh;
         margin-left: var(--sidebar-expanded-width);
@@ -336,32 +282,6 @@
       .breadcrumb strong {
         color: var(--color-text-primary);
         font-weight: 600;
-      }
-
-      .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: var(--space-5);
-        margin-left: auto;
-      }
-
-      .store-status {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: var(--space-3) var(--space-4);
-        color: var(--color-text-primary);
-        background: var(--color-surface-raised);
-        border-radius: var(--radius-xl);
-        font-size: var(--font-size-xs);
-        font-weight: 600;
-      }
-
-      .status-dot {
-        width: 7px;
-        height: 7px;
-        background: var(--color-border-strong);
-        border-radius: 50%;
       }
 
       .main-content {
@@ -504,16 +424,16 @@
         }
 
         .app-shell.is-sidebar-collapsed .brand {
+          display: none;
+        }
+
+        .app-shell.is-sidebar-collapsed .sidebar-header {
           justify-content: center;
-          margin-right: 0;
-          margin-left: 0;
         }
 
         .app-shell.is-sidebar-collapsed .brand-name,
         .app-shell.is-sidebar-collapsed .section-label,
-        .app-shell.is-sidebar-collapsed .new-badge,
-        .app-shell.is-sidebar-collapsed .account-copy,
-        .app-shell.is-sidebar-collapsed .account-more {
+        .app-shell.is-sidebar-collapsed .new-badge {
           display: none;
         }
 
@@ -539,11 +459,6 @@
           border-inline-start-color: var(--color-border-strong);
         }
 
-        .app-shell.is-sidebar-collapsed .account {
-          justify-content: center;
-          padding-right: 0;
-          padding-left: 0;
-        }
       }
 
       .sidebar-backdrop {
@@ -631,10 +546,6 @@
           height: 20px;
         }
 
-        .topbar .sidebar-toggle {
-          display: none;
-        }
-
         .mobile-brand {
           display: block;
           flex: 1;
@@ -646,21 +557,12 @@
           display: none;
         }
 
-        .topbar-right {
-          margin-left: auto;
-        }
-
         .main-content {
           padding: var(--space-7) var(--space-6);
         }
       }
 
       @media (max-width: 480px) {
-        .store-status {
-          padding: var(--space-3);
-          font-size: var(--font-size-xs);
-        }
-
         .welcome-card {
           min-height: 165px;
           padding: var(--space-6);
@@ -695,9 +597,28 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-        <a class="brand" href="#dashboard" aria-label="DUKABARG home">
-          <span class="brand-name">DUKABARG</span>
-        </a>
+        <div class="sidebar-header">
+          <a class="brand" href="#dashboard" aria-label="DUKABARG home">
+            <span class="brand-name">DUKABARG</span>
+          </a>
+          <button
+            class="sidebar-toggle"
+            type="button"
+            aria-label="Collapse sidebar"
+            aria-controls="sidebar"
+            aria-expanded="true"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 4h16v16H4zM9 4v16m6-11-3 3 3 3"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.7"
+              />
+            </svg>
+          </button>
+        </div>
 
         <nav aria-label="Store sections">
           <section class="nav-section" aria-labelledby="main-label">
@@ -845,28 +766,6 @@
           </section>
         </nav>
 
-        <div class="sidebar-bottom">
-          <div class="sidebar-divider"></div>
-          <div class="account">
-            <span class="avatar" aria-hidden="true">IA</span>
-            <span class="account-copy">
-              <span class="account-name">InApp Store</span>
-              <span class="account-role">Store administrator</span>
-            </span>
-            <svg
-              class="account-more"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <circle cx="5" cy="12" r="1" />
-              <circle cx="12" cy="12" r="1" />
-              <circle cx="19" cy="12" r="1" />
-            </svg>
-          </div>
-        </div>
       </aside>
 
       <button
@@ -878,23 +777,6 @@
 
       <main class="main" id="dashboard">
         <header class="topbar">
-          <button
-            class="sidebar-toggle"
-            type="button"
-            aria-label="Collapse sidebar"
-            aria-controls="sidebar"
-            aria-expanded="true"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 4h16v16H4zM9 4v16m6-11-3 3 3 3"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.7"
-              />
-            </svg>
-          </button>
           <button
             class="menu-toggle"
             type="button"
@@ -912,21 +794,18 @@
             </svg>
           </button>
           <span class="mobile-brand">DUKANS</span>
-          <div class="breadcrumb">Store / <strong>Dashboard</strong></div>
-          <div class="topbar-right">
-            <span class="store-status"><span class="status-dot"></span>Store is live</span>
-          </div>
+          <div class="breadcrumb">Store / <strong id="breadcrumb-current">Dashboard</strong></div>
         </header>
 
         <section class="main-content" aria-labelledby="page-heading">
           <h1 class="page-heading" id="page-heading">Dashboard</h1>
-          <p class="page-subtitle">Here’s what’s happening with your store today.</p>
+          <p class="page-subtitle" id="page-subtitle">Manage your store’s dashboard from here.</p>
 
           <div class="welcome-card">
             <div class="welcome-copy">
-              <p class="welcome-eyebrow">YOUR STORE, AT A GLANCE</p>
-              <h2 class="welcome-title">Welcome to your dashboard</h2>
-              <p class="welcome-description">
+              <p class="welcome-eyebrow" id="welcome-eyebrow">YOUR DASHBOARD AT A GLANCE</p>
+              <h2 class="welcome-title" id="welcome-title">Welcome to your dashboard</h2>
+              <p class="welcome-description" id="welcome-description">
                 Use the navigation to manage products, orders, customers, payments, and
                 everything else in your store.
               </p>
@@ -960,6 +839,11 @@
       const sidebarToggle = document.querySelector(".sidebar-toggle");
       const backdrop = document.querySelector(".sidebar-backdrop");
       const appShell = document.querySelector(".app-shell");
+      const pageHeading = document.querySelector("#page-heading");
+      const breadcrumbCurrent = document.querySelector("#breadcrumb-current");
+      const pageSubtitle = document.querySelector("#page-subtitle");
+      const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
+      const welcomeTitle = document.querySelector("#welcome-title");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
 
@@ -1001,9 +885,17 @@
         const currentLink = Array.from(links).find(
           (link) => link.hash === window.location.hash,
         );
+        const activeLink = currentLink || links[0];
+        const pageName = activeLink.querySelector(".nav-text").textContent.trim();
 
         links.forEach((link) => link.removeAttribute("aria-current"));
-        (currentLink || links[0])?.setAttribute("aria-current", "page");
+        activeLink.setAttribute("aria-current", "page");
+        pageHeading.textContent = pageName;
+        breadcrumbCurrent.textContent = pageName;
+        pageSubtitle.textContent = `Manage your store’s ${pageName.toLowerCase()} from here.`;
+        welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
+        welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
+        document.title = `${pageName} | DukaBarg`;
       }
 
       updateCurrentLink();
