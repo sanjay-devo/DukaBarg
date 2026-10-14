@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="InApp Inventory Dashboard for managing products, orders, payments, and customers."
+    />
+    <title>Inventory Dashboard | InApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Poppins, sans-serif;
+        font-size: var(--font-size-md);
+        font-weight: 400;
+        line-height: var(--line-height-base);
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        --font-size-xs: 11.9px;
+        --font-size-sm: 12.25px;
+        --font-size-md: 14px;
+        --font-size-lg: 17.5px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24.5px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 35px;
+        --line-height-base: 21px;
+        --color-text-primary: #171717;
+        --color-border-strong: #e66239;
+        --color-text-tertiary: #262626;
+        --color-text-inverse: #525252;
+        --color-surface-base: #000000;
+        --color-surface-muted: #ffffff;
+        --color-surface-raised: #f5f5f5;
+        --color-border-muted: #e5e5e5;
+        --space-1: 1px;
+        --space-2: 4px;
+        --space-3: 8px;
+        --space-4: 10px;
+        --space-5: 12px;
+        --space-6: 16px;
+        --space-7: 24px;
+        --space-8: 40px;
+        --radius-xs: 4px;
+        --radius-sm: 5px;
+        --radius-md: 6px;
+        --radius-lg: 8px;
+        --radius-xl: 50px;
+        --motion-instant: 150ms;
+        --motion-fast: 300ms;
+        --color-backdrop: rgb(0 0 0 / 60%);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: fixed;
+        z-index: 5;
+        inset: 0 auto 0 0;
+        display: flex;
+        width: 264px;
+        flex-direction: column;
+        padding: var(--space-7) var(--space-6) var(--space-6);
+        overflow-y: auto;
+        background: var(--color-surface-muted);
+        border-right: var(--space-1) solid var(--color-border-muted);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+        margin: 0 var(--space-4) var(--space-7);
+        color: var(--color-text-primary);
+        text-decoration: none;
+        transition: color var(--motion-instant) ease;
+      }
+
+      .brand:hover {
+        color: var(--color-border-strong);
+      }
+
+      .brand:active {
+        color: var(--color-text-inverse);
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 39px;
+        height: 39px;
+        flex: 0 0 auto;
+        place-items: center;
+        color: var(--color-border-strong);
+        background: var(--color-surface-base);
+        border-radius: var(--radius-lg);
+      }
+
+      .brand-mark svg {
+        width: 23px;
+        height: 23px;
+      }
+
+      .brand-name {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+      }
+
+      .brand-name span {
+        color: var(--color-border-strong);
+      }
+
+      .nav-section + .nav-section {
+        margin-top: var(--space-7);
+      }
+
+      .section-label {
+        margin: 0 var(--space-5) var(--space-3);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .nav-list {
+        display: grid;
+        gap: var(--space-2);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .nav-link {
+        display: flex;
+        min-height: 40px;
+        align-items: center;
+        gap: var(--space-5);
+        padding: 0 var(--space-5);
+        color: var(--color-text-tertiary);
+        border-radius: var(--radius-lg);
+        font-size: var(--font-size-sm);
+        font-weight: 400;
+        border-inline-start: 2px solid transparent;
+        text-decoration: none;
+        transition:
+          color var(--motion-instant) ease,
+          background-color var(--motion-instant) ease,
+          border-color var(--motion-instant) ease;
+      }
+
+      .nav-link:hover {
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+      }
+
+      .nav-link:focus-visible,
+      .brand:focus-visible,
+      .menu-toggle:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .brand[aria-disabled="true"] {
+        pointer-events: none;
+        opacity: 0.6;
+      }
+
+      .brand[data-state="loading"] {
+        cursor: progress;
+        pointer-events: none;
+        opacity: 0.6;
+      }
+
+      .brand[data-state="error"] {
+        text-decoration: underline;
+        text-decoration-color: var(--color-border-strong);
+        text-underline-offset: var(--space-2);
+      }
+
+      .nav-link[aria-current="page"] {
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-inline-start-color: var(--color-border-strong);
+        font-weight: 600;
+      }
+
+      .nav-link:active {
+        background: var(--color-border-muted);
+      }
+
+      .nav-link[aria-disabled="true"],
+      .nav-link:disabled {
+        color: var(--color-text-inverse);
+        cursor: not-allowed;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .nav-link[data-state="loading"] {
+        cursor: progress;
+        pointer-events: none;
+      }
+
+      .nav-link[data-state="error"] {
+        color: var(--color-text-primary);
+        text-decoration: underline;
+        text-decoration-color: var(--color-border-strong);
+        text-underline-offset: var(--space-2);
+      }
+
+      .nav-icon {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.75;
+      }
+
+      .nav-text {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .new-badge {
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      .sidebar-bottom {
+        margin-top: auto;
+        padding-top: var(--space-6);
+      }
+
+      .sidebar-divider {
+        height: 1px;
+        margin: 0 var(--space-2) var(--space-5);
+        background: var(--color-border-muted);
+      }
+
+      .account {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        border-radius: var(--radius-lg);
+      }
+
+      .avatar {
+        display: grid;
+        width: 35px;
+        height: 35px;
+        flex: 0 0 auto;
+        place-items: center;
+        color: var(--color-surface-muted);
+        background: var(--color-surface-base);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .account-copy {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .account-name,
+      .account-role {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .account-name {
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .account-role {
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .account-more {
+        width: 17px;
+        height: 17px;
+        color: var(--color-text-inverse);
+      }
+
+      .main {
+        min-height: 100vh;
+        margin-left: 264px;
+      }
+
+      .topbar {
+        display: flex;
+        height: 72px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--space-7);
+        background: var(--color-surface-muted);
+        border-bottom: var(--space-1) solid var(--color-border-muted);
+      }
+
+      .breadcrumb {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .breadcrumb strong {
+        color: var(--color-text-primary);
+        font-weight: 600;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+      }
+
+      .store-status {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        background: var(--color-border-strong);
+        border-radius: 50%;
+      }
+
+      .main-content {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: var(--space-8) var(--space-7);
+      }
+
+      .page-heading {
+        margin: 0;
+        font-size: var(--font-size-2xl);
+        font-weight: 600;
+      }
+
+      .page-subtitle {
+        margin: var(--space-3) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .welcome-card {
+        display: flex;
+        min-height: 190px;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-7);
+        margin-top: var(--space-7);
+        padding: var(--space-7);
+        overflow: hidden;
+        background: var(--color-surface-raised);
+        border: var(--space-1) solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .welcome-copy {
+        max-width: 440px;
+      }
+
+      .welcome-eyebrow {
+        margin: 0 0 var(--space-3);
+        color: var(--color-text-primary);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .welcome-title {
+        margin: 0;
+        font-size: var(--font-size-xl);
+        font-weight: 600;
+      }
+
+      .welcome-description {
+        margin: var(--space-3) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-base);
+      }
+
+      .welcome-art {
+        display: grid;
+        width: 104px;
+        height: 104px;
+        flex: 0 0 auto;
+        place-items: center;
+        color: var(--color-border-strong);
+        background: var(--color-surface-muted);
+        border: var(--space-1) solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .welcome-art svg {
+        width: 49px;
+        height: 49px;
+        color: var(--color-text-primary);
+      }
+
+      .menu-toggle,
+      .mobile-brand {
+        display: none;
+      }
+
+      .sidebar-backdrop {
+        display: none;
+      }
+
+      @media (max-width: 760px) {
+        .sidebar {
+          width: 264px;
+          transform: translateX(-100%);
+          transition: transform var(--motion-fast) ease;
+        }
+
+        .sidebar.is-open {
+          transform: translateX(0);
+        }
+
+        .sidebar-backdrop.is-visible {
+          position: fixed;
+          z-index: 4;
+          inset: 0;
+          display: block;
+          background: var(--color-backdrop);
+        }
+
+        .main {
+          margin-left: 0;
+        }
+
+        .topbar {
+          height: 64px;
+          justify-content: flex-start;
+          gap: var(--space-5);
+          padding: 0 var(--space-6);
+        }
+
+        .menu-toggle {
+          display: grid;
+          width: 36px;
+          height: 36px;
+          flex: 0 0 auto;
+          place-items: center;
+          padding: 0;
+          color: var(--color-text-primary);
+          background: transparent;
+          border: 0;
+          border-radius: var(--radius-lg);
+          cursor: pointer;
+        }
+
+        .menu-toggle:hover {
+          background: var(--color-surface-raised);
+        }
+
+        .menu-toggle:active {
+          background: var(--color-border-muted);
+        }
+
+        .menu-toggle:disabled,
+        .menu-toggle[aria-disabled="true"] {
+          color: var(--color-text-inverse);
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        .menu-toggle[aria-busy="true"] {
+          cursor: progress;
+          pointer-events: none;
+        }
+
+        .menu-toggle[data-state="error"] {
+          outline: 2px solid var(--color-border-strong);
+        }
+
+        .menu-toggle svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .mobile-brand {
+          display: block;
+          flex: 1;
+          font-size: var(--font-size-md);
+          font-weight: 600;
+        }
+
+        .mobile-brand span {
+          color: var(--color-border-strong);
+        }
+
+        .breadcrumb {
+          display: none;
+        }
+
+        .topbar-right {
+          margin-left: auto;
+        }
+
+        .main-content {
+          padding: var(--space-7) var(--space-6);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .store-status {
+          padding: var(--space-3);
+          font-size: var(--font-size-xs);
+        }
+
+        .welcome-card {
+          min-height: 165px;
+          padding: var(--space-6);
+        }
+
+        .welcome-art {
+          width: 69px;
+          height: 69px;
+          border-radius: var(--radius-lg);
+        }
+
+        .welcome-art svg {
+          width: 35px;
+          height: 35px;
+        }
+
+        .welcome-title {
+          font-size: var(--font-size-lg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#dashboard" aria-label="InApp home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 10.5 12 4l8 6.5v8.25A1.25 1.25 0 0 1 18.75 20h-13A1.75 1.75 0 0 1 4 18.25V10.5Z"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+              />
+              <path
+                d="M9 20v-6h6v6M3 10l9-7 9 7"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+              />
+            </svg>
+          </span>
+          <span class="brand-name">InApp</span>
+        </a>
+
+        <nav aria-label="Store sections">
+          <section class="nav-section" aria-labelledby="main-label">
+            <h2 class="section-label" id="main-label">MAIN</h2>
+            <ul class="nav-list">
+              <li>
+                <a class="nav-link" href="#dashboard" aria-current="page">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+                    <rect x="13.5" y="3.5" width="7" height="5" rx="1.5" />
+                    <rect x="13.5" y="11.5" width="7" height="9" rx="1.5" />
+                    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+                  </svg>
+                  <span class="nav-text">Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#products">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m4 7 8-4 8 4-8 4-8-4Z" />
+                    <path d="M4 7v10l8 4 8-4V7M12 11v10" />
+                  </svg>
+                  <span class="nav-text">Products</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#categories">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+                    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+                    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+                    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+                  </svg>
+                  <span class="nav-text">Categories</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#inventory">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 5v14M7 5v14M10 5v14M14 5v14M17 5v14M20 5v14" />
+                    <path d="M3 3.5h18v17H3z" />
+                  </svg>
+                  <span class="nav-text">Inventory &amp; Barcode</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section class="nav-section" aria-labelledby="business-label">
+            <h2 class="section-label" id="business-label">BUSINESS</h2>
+            <ul class="nav-list">
+              <li>
+                <a class="nav-link" href="#orders">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 8h14l1 12H4L5 8Z" />
+                    <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+                  </svg>
+                  <span class="nav-text">Orders</span>
+                  <span class="new-badge">New</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#customers">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
+                    <circle cx="9.5" cy="7.5" r="3.5" />
+                    <path d="M17 4.3a3.5 3.5 0 0 1 0 6.8M21 20v-1.5a4 4 0 0 0-3-3.87" />
+                  </svg>
+                  <span class="nav-text">Customers</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#customer-support">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 13v-2a8 8 0 0 1 16 0v2" />
+                    <path d="M4 12h3v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 1-2Zm16 0h-3v6h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-1-2Z" />
+                    <path d="M17 19a5 5 0 0 1-5 2" />
+                  </svg>
+                  <span class="nav-text">Customer Support</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section class="nav-section" aria-labelledby="finance-label">
+            <h2 class="section-label" id="finance-label">FINANCE</h2>
+            <ul class="nav-list">
+              <li>
+                <a class="nav-link" href="#payments">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="M3 10h18M7 15h3" />
+                  </svg>
+                  <span class="nav-text">Payments &amp; Refunds</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#payment-settings">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="m19.4 15 .1.1 1.1.9-1.4 2.4-1.4-.5a7.9 7.9 0 0 1-1.7 1l-.3 1.5h-2.8l-.3-1.5a7.9 7.9 0 0 1-1.7-1l-1.4.5-1.4-2.4 1.2-.9a7.2 7.2 0 0 1 0-2L8.2 12l1.4-2.4 1.4.5a7.9 7.9 0 0 1 1.7-1l.3-1.5h2.8l.3 1.5a7.9 7.9 0 0 1 1.7 1l1.4-.5 1.4 2.4-1.2.9a7.2 7.2 0 0 1 0 2Z" />
+                  </svg>
+                  <span class="nav-text">Payment Settings</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section class="nav-section" aria-labelledby="management-label">
+            <h2 class="section-label" id="management-label">MANAGEMENT</h2>
+            <ul class="nav-list">
+              <li>
+                <a class="nav-link" href="#push-notifications">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
+                  </svg>
+                  <span class="nav-text">Push Notifications</span>
+                </a>
+              </li>
+              <li>
+                <a class="nav-link" href="#reports">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 19V5M4 19h17" />
+                    <path d="m7 15 4-4 3 2 6-7" />
+                    <path d="M16 6h4v4" />
+                  </svg>
+                  <span class="nav-text">Reports &amp; Analytics</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section class="nav-section" aria-label="Preferences">
+            <ul class="nav-list">
+              <li>
+                <a class="nav-link" href="#settings">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="m19.4 15 .1.1 1.1.9-1.4 2.4-1.4-.5a7.9 7.9 0 0 1-1.7 1l-.3 1.5h-2.8l-.3-1.5a7.9 7.9 0 0 1-1.7-1l-1.4.5-1.4-2.4 1.2-.9a7.2 7.2 0 0 1 0-2L8.2 12l1.4-2.4 1.4.5a7.9 7.9 0 0 1 1.7-1l.3-1.5h2.8l.3 1.5a7.9 7.9 0 0 1 1.7 1l1.4-.5 1.4 2.4-1.2.9a7.2 7.2 0 0 1 0 2Z" />
+                  </svg>
+                  <span class="nav-text">Settings</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-divider"></div>
+          <div class="account">
+            <span class="avatar" aria-hidden="true">IA</span>
+            <span class="account-copy">
+              <span class="account-name">InApp Store</span>
+              <span class="account-role">Store administrator</span>
+            </span>
+            <svg
+              class="account-more"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <circle cx="5" cy="12" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+            </svg>
+          </div>
+        </div>
+      </aside>
+
+      <button
+        class="sidebar-backdrop"
+        type="button"
+        aria-label="Close navigation"
+        tabindex="-1"
+      ></button>
+
+      <main class="main" id="dashboard">
+        <header class="topbar">
+          <button
+            class="menu-toggle"
+            type="button"
+            aria-label="Open navigation"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 6h16M4 12h16M4 18h16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="1.8"
+              />
+            </svg>
+          </button>
+          <span class="mobile-brand">InApp</span>
+          <div class="breadcrumb">Store / <strong>Dashboard</strong></div>
+          <div class="topbar-right">
+            <span class="store-status"><span class="status-dot"></span>Store is live</span>
+          </div>
+        </header>
+
+        <section class="main-content" aria-labelledby="page-heading">
+          <h1 class="page-heading" id="page-heading">Dashboard</h1>
+          <p class="page-subtitle">Here’s what’s happening with your store today.</p>
+
+          <div class="welcome-card">
+            <div class="welcome-copy">
+              <p class="welcome-eyebrow">YOUR STORE, AT A GLANCE</p>
+              <h2 class="welcome-title">Welcome to your dashboard</h2>
+              <p class="welcome-description">
+                Use the navigation to manage products, orders, customers, payments, and
+                everything else in your store.
+              </p>
+            </div>
+            <span class="welcome-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path
+                  d="m8 19 16-13 16 13v19a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V19Z"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.4"
+                />
+                <path
+                  d="M18 41V27h12v14M6 19l18-15 18 15"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.4"
+                />
+              </svg>
+            </span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const sidebar = document.querySelector(".sidebar");
+      const menuToggle = document.querySelector(".menu-toggle");
+      const backdrop = document.querySelector(".sidebar-backdrop");
+
+      function setSidebarOpen(isOpen) {
+        sidebar.classList.toggle("is-open", isOpen);
+        backdrop.classList.toggle("is-visible", isOpen);
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+        menuToggle.setAttribute(
+          "aria-label",
+          isOpen ? "Close navigation" : "Open navigation",
+        );
+
+        if (isOpen) {
+          sidebar.querySelector(".nav-link")?.focus();
+        } else if (window.matchMedia("(max-width: 760px)").matches) {
+          menuToggle.focus();
+        }
+      }
+
+      function updateCurrentLink() {
+        const links = sidebar.querySelectorAll(".nav-link");
+        const currentLink = Array.from(links).find(
+          (link) => link.hash === window.location.hash,
+        );
+
+        links.forEach((link) => link.removeAttribute("aria-current"));
+        (currentLink || links[0])?.setAttribute("aria-current", "page");
+      }
+
+      updateCurrentLink();
+      window.addEventListener("hashchange", updateCurrentLink);
+
+      menuToggle.addEventListener("click", () => {
+        setSidebarOpen(!sidebar.classList.contains("is-open"));
+      });
+
+      backdrop.addEventListener("click", () => setSidebarOpen(false));
+
+      sidebar.querySelectorAll(".nav-link").forEach((link) => {
+        link.addEventListener("click", () => {
+          setSidebarOpen(false);
+        });
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          setSidebarOpen(false);
+        }
+      });
+    </script>
+  </body>
+</html>
