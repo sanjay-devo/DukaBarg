@@ -1,827 +1,647 @@
-<!DOCTYPE html>
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="utf-8">
+  <title>InApp Inventory Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
 
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>DukaBarg - Multi-Vendor Admin Dashboard</title>
-<!-- Tailwind CSS v3 with Forms & Container Queries -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Configuration matching DukaBarg Design System -->
-<script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              orange: '#FF572E',
-              dark: '#F0441E',
-              deep: '#E83D18',
-              light: '#FF7957',
-              pale: '#FFF0E9',
-              soft: '#FFE0D3'
-            },
-            app: {
-              bg: '#F8F7F5',
-              secondary: '#F1F0EE',
-              card: '#FFFFFF',
-              input: '#F0EDE7',
-              disabled: '#ECEBEF',
-              border: '#E8E5E1',
-              divider: '#EDEAE7'
-            },
-            status: {
-              success: '#20A464',
-              'success-light': '#E7F7EE',
-              error: '#E53935',
-              'error-light': '#FDECEC',
-              warning: '#F5A623',
-              'warning-light': '#FFF4DE',
-              info: '#3182CE',
-              'info-light': '#EAF3FF',
-              pending: '#D99A16',
-              offline: '#929292'
-            }
-          },
-          boxShadow: {
-            'card': '0 4px 16px rgba(0, 0, 0, 0.04)',
-            'floating': '0 8px 24px rgba(0, 0, 0, 0.06)',
-            'btn-orange': '0 6px 18px rgba(255, 87, 46, 0.20)',
-          }
-        }
-      }
-    }
-  </script>
-<!-- Core Palette CSS Variables -->
-<style data-purpose="custom-variables">
-    :root {
-      --primary-orange: #FF572E;
-      --dark-orange: #F0441E;
-      --deep-orange: #E83D18;
-      --light-orange: #FF7957;
-      --pale-orange: #FFF0E9;
-      --soft-orange: #FFE0D3;
-      --app-background: #F8F7F5;
-      --secondary-background: #F1F0EE;
-      --card-background: #FFFFFF;
-      --input-background: #F0EDE7;
-      --disabled-background: #ECEBEF;
-      --primary-text: #171717;
-      --secondary-text: #777777;
-      --tertiary-text: #999999;
-      --placeholder-text: #A5A19D;
-      --text-on-orange: #FFFFFF;
-      --border: #E8E5E1;
-      --divider: #EDEAE7;
-      --input-focus: #EFA18D;
-      --success: #20A464;
-      --success-light: #E7F7EE;
-      --error: #E53935;
-      --error-light: #FDECEC;
-      --warning: #F5A623;
-      --warning-light: #FFF4DE;
-      --info: #3182CE;
-      --info-light: #EAF3FF;
-      --pending: #D99A16;
-      --offline: #929292;
-      --map-background: #F3F0E5;
-      --map-road: #F4C54A;
-      --delivery-route: #F06A50;
-      --location-pin: #FF6848;
-      --map-water: #B9DCE8;
-      --map-green: #C8E4B4;
-    }
-
-    body {
-      background-color: var(--app-background);
-      color: var(--primary-text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #F1F0EE;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #DDD8D0;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #C4BEB4;
-    }
-  </style>
+  <script type="module" src="js/main.js"></script>
+  <link rel="stylesheet" crossorigin="" href="css/main.css">
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-neutral-800 antialiased select-none">
-<div id="access-gate" class="fixed inset-0 z-50 flex items-center justify-center bg-app-bg p-6" role="status" aria-live="polite">
-  <div class="max-w-md rounded-2xl border border-app-border bg-white p-8 text-center shadow-card">
-    <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-brand-pale border-t-brand-orange" id="gate-spinner"></div>
-    <p class="text-sm font-semibold text-neutral-800" id="gate-message">Checking your administrator access...</p>
-    <p class="mt-2 text-xs text-neutral-500" id="gate-error"></p>
-    <button id="gate-logout" class="mt-5 hidden rounded-lg bg-brand-orange px-5 py-2 text-xs font-semibold text-white hover:bg-brand-dark">Sign out</button>
-  </div>
-</div>
-<div id="dashboard-app" hidden>
-<!-- BEGIN: TopHeader -->
-<header class="h-16 bg-white border-b border-app-border px-6 flex items-center justify-between z-30 flex-shrink-0">
-<!-- Brand Info -->
-<div class="flex items-center space-x-6">
-<div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('dashboard')">
-<img class="w-50 h-14 object-contain" src="assets/dukabarg_logo.png" alt="DukaBarg - Local Shopping, Bigger Possibilities"/>
-</div>
-<!-- Quick Nav Toggle Button -->
-<button class="text-neutral-400 hover:text-neutral-600 p-1.5 rounded-lg border border-neutral-200 lg:hidden" id="sidebar-toggle">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</button>
-</div>
-<!-- Search Bar -->
-<div class="hidden md:flex items-center flex-1 max-w-md mx-8">
-<div class="relative w-full">
-<span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-neutral-400">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-<path d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</span>
-<input class="w-full pl-10 pr-4 py-2 text-xs bg-app-input border-transparent rounded-lg text-neutral-800 placeholder-neutral-400" placeholder="Search is not available yet" type="text" disabled aria-label="Search is not available yet"/>
-</div>
-</div>
-<!-- Right Actions -->
-<div class="flex items-center space-x-4">
-<span id="admin-identity" class="hidden sm:block text-xs text-neutral-500"></span>
-<div class="pl-4 border-l border-neutral-200 text-xs text-neutral-500" role="status" id="connection-status">Connecting to Firebase...</div>
-<button id="logout-button" class="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:border-brand-orange hover:text-brand-orange">Log out</button>
-</div>
-</header>
-<!-- END: TopHeader -->
-<div class="flex flex-1 overflow-hidden">
-<!-- BEGIN: SidebarNavigation -->
-<aside class="w-64 bg-white border-r border-app-border flex flex-col justify-between overflow-y-auto flex-shrink-0 transition-all duration-200" id="sidebar-menu">
-<div class="p-4 space-y-6">
-<!-- Section: Main -->
-<div>
-<p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider px-3 mb-2">Main</p>
-<nav class="space-y-1">
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-brand-orange bg-brand-pale transition" data-tab="dashboard" onclick="switchView('dashboard')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Dashboard</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="products" onclick="switchView('products')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Products</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="categories" onclick="switchView('categories')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Categories</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="inventory" onclick="switchView('inventory')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Inventory &amp; Barcode</span>
-</button>
-</nav>
-</div>
-<!-- Section: Business -->
-<div>
-<p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider px-3 mb-2">Business</p>
-<nav class="space-y-1">
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="orders" onclick="switchView('orders')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Orders</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="customers" onclick="switchView('customers')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Customers</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="delivery" onclick="switchView('delivery')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Delivery Management</span>
-</button>
-</nav>
-</div>
-<!-- Section: Management & Marketing -->
-<div>
-<p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider px-3 mb-2">Management</p>
-<nav class="space-y-1">
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="promotions" onclick="switchView('promotions')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Promotions &amp; Banners</span>
-</button>
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="reports" onclick="switchView('reports')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Reports &amp; Analytics</span>
-</button>
-</nav>
-</div>
-</div>
-<!-- Bottom Settings Group -->
-<div class="p-4 border-t border-app-border space-y-1">
-<button class="sidebar-item w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition" data-tab="settings" onclick="switchView('settings')">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span>Settings</span>
-</button>
-</div>
-</aside>
-<!-- END: SidebarNavigation -->
-<!-- BEGIN: MainContentArea -->
-<main class="flex-1 overflow-y-auto bg-app-bg p-6 lg:p-8 relative">
-<!-- ============================================== -->
-<!-- VIEW 1: DASHBOARD (DEFAULT ACTIVE VIEW)       -->
-<!-- ============================================== -->
-<div class="space-y-6" id="view-dashboard">
-<!-- Header Section -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-<div>
-<h1 class="text-2xl font-bold tracking-tight text-neutral-900">DukaBarg Overview</h1>
-<p class="text-xs text-neutral-500 mt-1">Direct-to-customer operations overview.</p>
-</div>
-<div class="flex items-center space-x-3">
-<!-- Timeframe selector -->
-<div class="inline-flex items-center bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-xs text-neutral-600 shadow-sm">
-<svg class="w-3.5 h-3.5 mr-2 text-neutral-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span id="date-summary">Live data</span>
-</div>
-</div>
-</div>
-<!-- 4 KPI Stat Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-<!-- Stat 1: Total Sales -->
-<div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
-<div class="space-y-1">
-<span class="text-xs font-medium text-neutral-500">Total Sales</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="total-sales">—</h3>
-<span class="text-[11px] text-neutral-400">From recorded orders</span>
-</div>
-<div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<!-- Stat 2: Total Orders -->
-<div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
-<div class="space-y-1">
-<span class="text-xs font-medium text-neutral-500">Total Orders</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="total-orders">0</h3>
-<span class="text-[11px] text-neutral-400">All recorded orders</span>
-</div>
-<div class="w-10 h-10 rounded-xl bg-red-50 text-brand-dark flex items-center justify-center">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<!-- Stat 3: Active Products -->
-<div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
-<div class="space-y-1">
-<span class="text-xs font-medium text-neutral-500">Active Products</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="active-products">0</h3>
-<span class="text-[11px] text-neutral-400">Active catalog items</span>
-</div>
-<div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<!-- Stat 4: Pending Orders -->
-<div class="bg-white p-5 rounded-2xl border border-app-border shadow-card flex items-start justify-between">
-<div class="space-y-1">
-<span class="text-xs font-medium text-neutral-500">Pending Orders</span>
-<h3 class="text-2xl font-black text-neutral-900 tracking-tight" id="pending-orders">0</h3>
-<span class="text-[11px] text-neutral-400">Awaiting processing</span>
-</div>
-<div class="w-10 h-10 rounded-xl bg-amber-50 text-status-pending flex items-center justify-center">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-</div>
-<!-- Charts Grid (Sales Spline & Order Donut) -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Sales Overview Spline Chart (2 cols) -->
-<div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-app-border shadow-card">
-<div class="flex items-center justify-between mb-4">
-<div>
-<h4 class="text-sm font-bold text-neutral-900">Sales Overview</h4>
-<p class="text-xs text-neutral-400">Revenue from recorded orders</p>
-</div>
-<div class="text-xs border border-neutral-200 rounded-lg px-2 py-1 text-neutral-400">
-                No data
-              </div>
-</div>
-<!-- Vector Line Representation of Sales Chart -->
-<div class="h-56 flex items-center justify-center text-xs text-neutral-400" role="status" id="sales-empty">
-                No sales data available
-</div>
-</div>
-<!-- Order Status Donut Chart (1 col) -->
-<div class="bg-white p-6 rounded-2xl border border-app-border shadow-card flex flex-col justify-between">
-<div class="flex items-center justify-between mb-2">
-<h4 class="text-sm font-bold text-neutral-900">Order Status</h4>
-<span class="text-xs text-neutral-400">No data</span>
-</div>
-<div class="flex items-center justify-center relative my-3 h-36 text-xs text-neutral-400" role="status" id="order-status-summary">
-                Order data unavailable
-</div>
-<div class="text-xs text-neutral-400 text-center pt-2 border-t border-neutral-100" id="order-status-empty">No order status data available</div>
-</div>
-</div>
-<!-- Recent Orders & Top Selling Products -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Recent Orders (2 cols) -->
-<div class="lg:col-span-2 bg-white rounded-2xl border border-app-border shadow-card overflow-hidden">
-<div class="p-5 flex items-center justify-between border-b border-app-divider">
-<h4 class="text-sm font-bold text-neutral-900">Recent Orders</h4>
-<button class="text-xs font-semibold text-brand-orange hover:text-brand-dark flex items-center" onclick="switchView('orders')">
-                View All <span class="ml-1">→</span>
-</button>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs">
-<thead class="bg-neutral-50 text-neutral-400 uppercase font-medium text-[10px]">
-<tr>
-<th class="py-3 px-4">Order ID</th>
-<th class="py-3 px-4">Customer</th>
-<th class="py-3 px-4">Date</th>
-<th class="py-3 px-4">Amount</th>
-<th class="py-3 px-4">Status</th>
-<th class="py-3 px-4 text-center">Action</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-neutral-100 text-neutral-700" id="recent-orders-body">
-<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="6">No orders yet.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Top Selling Products (1 col) -->
-<div class="bg-white rounded-2xl border border-app-border shadow-card p-5">
-<div class="flex items-center justify-between mb-4 border-b border-app-divider pb-3">
-<h4 class="text-sm font-bold text-neutral-900">Product Snapshot</h4>
-<button class="text-xs font-semibold text-brand-orange hover:text-brand-dark flex items-center" onclick="switchView('products')">
-                View All <span class="ml-1">→</span>
-</button>
-</div>
-<div class="py-8 text-center text-xs text-neutral-400" role="status" id="top-products-empty">No products found.</div>
-</div>
-</div>
-</div>
-<!-- ============================================== -->
-<!-- VIEW: ORDERS                                   -->
-<!-- ============================================== -->
-<div class="hidden space-y-6" id="view-orders">
-<div class="flex items-center justify-between">
-<div>
-<h1 class="text-2xl font-bold tracking-tight text-neutral-900">Orders</h1>
-<p class="text-xs text-neutral-500 mt-1">All orders recorded in the marketplace.</p>
-</div>
-<span class="text-xs text-neutral-400" id="orders-count">0 orders</span>
-</div>
-<div class="bg-white rounded-2xl border border-app-border shadow-card overflow-hidden">
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs">
-<thead class="bg-neutral-50 text-neutral-400 uppercase font-medium text-[10px]">
-<tr>
-<th class="py-3 px-4">Order ID</th>
-<th class="py-3 px-4">Customer</th>
-<th class="py-3 px-4">Date</th>
-<th class="py-3 px-4">Amount</th>
-<th class="py-3 px-4">Status</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-neutral-100 text-neutral-700" id="orders-body">
-<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="5">No orders yet.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<!-- ============================================== -->
-<!-- VIEW: PRODUCTS (CATALOG MANAGEMENT)            -->
-<!-- ============================================== -->
-<div class="hidden space-y-6" id="view-products">
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-<div>
-<h1 class="text-2xl font-bold tracking-tight text-neutral-900">Products</h1>
-<p class="text-xs text-neutral-500 mt-1">Manage all products in your marketplace.</p>
-</div>
-<span class="text-xs text-neutral-400">Live product catalog</span>
-</div>
-<!-- Filter bar -->
-<div class="bg-white p-4 rounded-xl border border-app-border flex flex-wrap items-center justify-between gap-4">
-<span class="text-xs text-neutral-400">Showing products from the live catalog</span>
-</div>
-<!-- Product Table -->
-<div class="bg-white rounded-2xl border border-app-border shadow-card overflow-hidden">
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs">
-<thead class="bg-neutral-50 text-neutral-400 uppercase font-medium text-[10px]">
-<tr>
-<th class="py-3.5 px-4 w-12">#</th>
-<th class="py-3.5 px-4">Image</th>
-<th class="py-3.5 px-4">Product Name</th>
-<th class="py-3.5 px-4">Category</th>
-<th class="py-3.5 px-4">Price</th>
-<th class="py-3.5 px-4">Stock</th>
-<th class="py-3.5 px-4">Status</th>
-<th class="py-3.5 px-4 text-center">Action</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-neutral-100" id="products-body">
-<tr><td class="py-8 px-4 text-center text-neutral-400" colspan="8">No products found.</td></tr>
-</tbody>
-</table>
-</div>
-<!-- Pagination -->
-<div class="p-4 border-t border-app-divider text-xs text-neutral-400" id="products-count">0 products</div>
-</div>
-</div>
-<!-- ============================================== -->
-<!-- VIEW 3: DELIVERY MANAGEMENT                    -->
-<!-- ============================================== -->
-<div class="hidden space-y-6" id="view-delivery">
-<div class="flex items-center justify-between">
-<div>
-<h1 class="text-2xl font-bold tracking-tight text-neutral-900">Delivery Management</h1>
-<p class="text-xs text-neutral-500 mt-1">Track direct-to-customer dispatches.</p>
-</div>
-</div>
-<div class="bg-white rounded-2xl border border-app-border shadow-card p-8 text-center">
-<p class="text-xs text-neutral-400" id="deliveries-empty">No delivery records available.</p>
-</div>
-</div>
-<!-- ============================================== -->
-<!-- VIEW 4: CATEGORIES                             -->
-<!-- ============================================== -->
-<div class="hidden space-y-6" id="view-categories">
-<div class="flex items-center justify-between">
-<div>
-<h1 class="text-2xl font-bold tracking-tight text-neutral-900">Categories</h1>
-<p class="text-xs text-neutral-500 mt-1">Manage product categories and subcategories.</p>
-</div>
-</div>
-<div class="bg-white rounded-2xl border border-app-border shadow-card p-8 text-center">
-<p class="text-xs text-neutral-400" id="categories-empty">No categories configured.</p>
-</div>
-</div>
-<!-- ============================================== -->
-<!-- GENERIC PLACEHOLDER FOR OTHER MODULES          -->
-<!-- ============================================== -->
-<div class="hidden space-y-6" id="view-generic">
-<div class="bg-white p-8 rounded-2xl border border-app-border shadow-card text-center max-w-lg mx-auto my-12 space-y-4">
-<div class="w-16 h-16 bg-brand-pale text-brand-orange rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
-            ⚡
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+
+    <!-- MOBILE -->
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div>
+      <!-- Navbar nav -->
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <!-- Pages link -->
+
+        <!-- Bell icon -->
+        <li>
+          <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle" data-bs-toggle="dropdown" aria-expanded="false" href="#" role="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bell">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"></path>
+              <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
+            </svg>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger mt-2 ms-n2">
+              2
+              <span class="visually-hidden">unread messages</span>
+            </span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end dropdown-menu-md p-0">
+            <ul class="list-unstyled p-0 m-0">
+              <li class="p-3 border-bottom ">
+                <div class="d-flex gap-3">
+                  <img src="images/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle">
+                  <div class="flex-grow-1 small">
+                    <p class="mb-0">New order received</p>
+                    <p class="mb-1">Order #12345 has been placed</p>
+                    <div class="text-secondary">5 minutes ago</div>
+                  </div>
+                </div>
+              </li>
+              <li class="p-3 border-bottom ">
+                <div class="d-flex gap-3">
+                  <img src="images/avatar-4.jpg" alt="" class="avatar avatar-sm rounded-circle">
+                  <div class="flex-grow-1 small">
+                    <p class="mb-0">New user registered</p>
+                    <p class="mb-1">User @john_doe has signed up</p>
+                    <div class="text-secondary">30 minutes ago</div>
+                  </div>
+              </div></li>
+
+              <li class="p-3 border-bottom">
+                <div class="d-flex gap-3">
+                  <img src="images/avatar-2.jpg" alt="" class="avatar avatar-sm rounded-circle">
+                  <div class="flex-grow-1 small">
+                    <p class="mb-0">Payment confirmed</p>
+                    <p class="mb-1">Payment of $299 has been received</p>
+                    <div class="text-secondary">1 hour ago</div>
+                  </div>
+                </div>
+              </li>
+              <li class="px-4 py-3 text-center">
+                <a href="#" class="text-primary ">View all notifications</a>
+              </li>
+            </ul>
           </div>
-<h2 class="text-xl font-bold text-neutral-900" id="generic-title">Module Not Available</h2>
-<p class="text-xs text-neutral-500 leading-relaxed" id="generic-desc">
-            This section is not connected to a configured backend. Connect the real data source to enable records, actions, and analytics.
-          </p>
-<button class="bg-brand-orange hover:bg-brand-dark text-white px-5 py-2 rounded-lg text-xs font-semibold shadow-btn-orange" onclick="switchView('dashboard')">
-            Return to Dashboard
-          </button>
-</div>
-</div>
-</main>
-<!-- END: MainContentArea -->
-</div>
-</div>
+        </li>
+        <!-- Dropdown -->
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="images/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle">
+          </a>
+          <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
+            <div>
+              <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
+                <img src="images/avatar-1.jpg" alt="" class="avatar avatar-md rounded-circle">
+                <div>
+                  <h4 class="mb-0 small">Shrina Tesla</h4>
+                  <p class="mb-0  small">@imshrina</p>
+                </div>
+              </div>
+              <div class="p-3 d-flex flex-column gap-1 small lh-lg">
+                <a href="#!" class="">
 
-<!-- BEGIN: InteractiveScripts -->
-<script data-purpose="tab-navigation-and-modals">
-    // Switch Views function for rich dashboard interaction
-    function switchView(tabKey) {
-      const knownViews = ['dashboard', 'orders', 'products', 'delivery', 'categories'];
-      const allViewIds = ['view-dashboard', 'view-orders', 'view-products', 'view-delivery', 'view-categories', 'view-generic'];
-      
-      // Hide all containers
-      allViewIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('hidden');
-      });
+                  <span>Home</span>
+                </a>
+                <a href="#!" class="">
 
-      // Update sidebar visual indicator
-      document.querySelectorAll('.sidebar-item').forEach(btn => {
-        const targetTab = btn.getAttribute('data-tab');
-        if (targetTab === tabKey) {
-          btn.classList.add('bg-brand-pale', 'text-brand-orange', 'font-semibold');
-          btn.classList.remove('text-neutral-600', 'font-medium');
-        } else {
-          btn.classList.remove('bg-brand-pale', 'text-brand-orange', 'font-semibold');
-          btn.classList.add('text-neutral-600', 'font-medium');
-        }
-      });
+                  <span> Inbox</span>
+                </a>
+                <a href="#!" class="">
 
-      // Show selected or generic fallback
-      if (knownViews.includes(tabKey)) {
-        document.getElementById(`view-${tabKey}`).classList.remove('hidden');
-      } else {
-        const genericView = document.getElementById('view-generic');
-        const titleEl = document.getElementById('generic-title');
-        const descEl = document.getElementById('generic-desc');
-        
-        // Format tab name for heading
-        const formattedTitle = tabKey.charAt(0).toUpperCase() + tabKey.slice(1);
-        titleEl.textContent = `${formattedTitle} Overview`;
-        descEl.textContent = `This section is not connected to a configured backend. Connect the real data source to enable records and actions.`;
-        
-        genericView.classList.remove('hidden');
-      }
-    }
+                  <span> Chat</span>
+                </a>
+                <a href="#!" class="">
 
-    // Mobile Sidebar responsiveness
-    document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-      const sb = document.getElementById('sidebar-menu');
-      sb.classList.toggle('hidden');
-    });
-  </script>
-<!-- END: InteractiveScripts -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getDatabase, onValue, ref } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+                  <span> Activity</span>
+                </a>
+                <a href="#!" class="">
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCc54Az1Y3aN-VfqDdcFTa5R0p8a9oiqfw",
-    authDomain: "dukabarg.firebaseapp.com",
-    databaseURL: "https://dukabarg-default-rtdb.firebaseio.com",
-    projectId: "dukabarg",
-    storageBucket: "dukabarg.firebasestorage.app",
-    messagingSenderId: "994703153320",
-    appId: "1:994703153320:web:d71e07c0b4f72d92280a9d"
-  };
+                  <span> Account Settings</span>
+                </a>
+              </div>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const database = getDatabase(app);
-  const gate = document.getElementById("access-gate");
-  const gateMessage = document.getElementById("gate-message");
-  const gateError = document.getElementById("gate-error");
-  const gateSpinner = document.getElementById("gate-spinner");
-  const gateLogout = document.getElementById("gate-logout");
-  const dashboard = document.getElementById("dashboard-app");
-  let stopProfileListener = null;
-  let stopDataListeners = [];
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
 
-  function clearDataListeners() {
-    stopDataListeners.forEach(stop => stop());
-    stopDataListeners = [];
-  }
+  </nav>
 
-  function showGate(message, error = "", canSignOut = false) {
-    dashboard.hidden = true;
-    gate.classList.remove("hidden");
-    gateMessage.textContent = message;
-    gateError.textContent = error;
-    gateSpinner.classList.toggle("hidden", !message.includes("Checking"));
-    gateLogout.classList.toggle("hidden", !canSignOut);
-  }
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <div class="logo-area">
+     <a href="index.html" class="d-inline-flex"><img src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e" alt="" width="24">
+        <span class="logo-text ms-2"> <img src="images/logo.svg" alt=""></span>
+      </a>
+    </div>
+    <ul class="nav flex-column">
+      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+      <li><a class="nav-link active" href="index.html"><i class="ti ti-home"></i><span class="nav-text">Dashboard</span></a></li>
+      <li><a class="nav-link" href="inventory.html"><i class="ti ti-box-seam"></i><span class="nav-text">Inventory</span></a></li>
+      <li><a class="nav-link" href="create-product.html"><i class="ti ti-plus"></i><span class="nav-text">Add
+            Product</span></a></li>
+    <li><a class="nav-link" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reports</span></a>
+      </li>
+    <li><a class="nav-link" href="404-error.html"><i class="ti ti-alert-circle"></i><span class="nav-text">404 Error</span></a>
+      </li>
+      <li><a class="nav-link" href="docs.html"><i class="ti ti-file-text"></i><span class="nav-text">Docs</span></a></li>
 
-  function authErrorMessage(error) {
-    if (error.code?.includes("api-key-not-valid")) {
-      return "Firebase rejected this app's API key. Copy the current Web app configuration from Firebase Console → Project settings → General, then update the apiKey in index.html, login.html, and register.html. Check that the key allows the Identity Toolkit API.";
-    }
-    return error.message;
-  }
 
-  function clearListeners() {
-    if (stopProfileListener) {
-      stopProfileListener();
-      stopProfileListener = null;
-    }
-    clearDataListeners();
-  }
+      <li class="px-4 pt-4 pb-2"><small class="nav-text">Account</small></li>
+      <li><a class="nav-link" href="signin.html"><i class="ti ti-logout"></i><span class="nav-text">Log in</span></a>
+      </li>
+      <li><a class="nav-link" href="signup.html"><i class="ti ti-user-plus"></i><span class="nav-text">Sign
+            up</span></a></li>
+    </ul>
 
-  function asRecords(snapshotValue) {
-    if (!snapshotValue || typeof snapshotValue !== "object") return [];
-    return Object.entries(snapshotValue).filter(([, value]) => value && typeof value === "object")
-      .map(([key, value]) => ({ id: key, ...value }));
-  }
+  </aside>
 
-  function valueOf(record, keys, fallback = "") {
-    for (const key of keys) {
-      if (record[key] !== undefined && record[key] !== null && record[key] !== "") return record[key];
-    }
-    return fallback;
-  }
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      <div class="row ">
+        <div class="col-12">
+          <div class="mb-6">
+            <h1 class="fs-3 mb-1">Dashboard</h1>
+            <p>Your main content goes here…</p>
+          </div>
+        </div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-lg-3 col-12">
 
-  function setEmptyRow(element, columns, message) {
-    element.replaceChildren();
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
-    cell.colSpan = columns;
-    cell.className = "py-8 px-4 text-center text-neutral-400";
-    cell.textContent = message;
-    row.append(cell);
-    element.append(row);
-  }
+          <div class="card p-4  bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-2">
 
-  function formatDate(value) {
-    if (!value) return "—";
-    const date = new Date(typeof value === "number" ? value : String(value));
-    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
-  }
+            <div class="d-flex gap-3 ">
+              <div class="icon-shape icon-md bg-primary text-white rounded-2">
+                <i class="ti ti-report-analytics fs-4"></i>
+              </div>
+              <div>
+                <h2 class="mb-3 fs-6">Total Sales</h2>
+                <h3 class="fw-bold mb-0">$25,000</h3>
+                <p class="text-primary mb-0 small">+5% since last month</p>
+              </div>
+            </div>
+          </div>
 
-  function dateValue(value) {
-    if (!value) return 0;
-    const date = new Date(typeof value === "number" ? value : String(value));
-    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-  }
 
-  function formatMoney(value) {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(amount) : "—";
-  }
+        </div>
+        <div class="col-lg-3 col-12">
 
-  function makeOrderRow(order, includeAction = false) {
-    const row = document.createElement("tr");
-    [valueOf(order, ["orderId", "id"], order.id), valueOf(order, ["customerName", "name", "customer"], "—"), formatDate(valueOf(order, ["createdAt", "timestamp", "date"])), formatMoney(valueOf(order, ["total", "totalAmount", "amount", "price"])), valueOf(order, ["status"], "—")].forEach(text => {
-      const cell = document.createElement("td");
-      cell.className = "py-3 px-4";
-      cell.textContent = String(text);
-      row.append(cell);
-    });
-    if (includeAction) {
-      const action = document.createElement("td");
-      action.className = "py-3 px-4 text-center text-neutral-400";
-      action.textContent = "—";
-      row.append(action);
-    }
-    return row;
-  }
+          <div class="card p-4  bg-success bg-opacity-10 border border-success border-opacity-25 rounded-2">
 
-  function renderOrders(orders) {
-    const body = document.getElementById("recent-orders-body");
-    const allOrdersBody = document.getElementById("orders-body");
-    document.getElementById("orders-count").textContent = `${orders.length} order${orders.length === 1 ? "" : "s"}`;
-    if (!orders.length) {
-      setEmptyRow(allOrdersBody, 5, "No orders yet.");
-    } else {
-      allOrdersBody.replaceChildren(...orders.map(order => makeOrderRow(order)));
-    }
-    const rows = orders.slice().sort((a, b) => dateValue(valueOf(b, ["createdAt", "timestamp", "date"])) - dateValue(valueOf(a, ["createdAt", "timestamp", "date"]))).slice(0, 5);
-    if (!rows.length) {
-      setEmptyRow(body, 6, "No orders yet.");
-      document.getElementById("order-status-summary").textContent = "No order data available";
-      document.getElementById("order-status-empty").textContent = "No order status data available";
-      return;
-    }
-    body.replaceChildren();
-    rows.forEach(order => body.append(makeOrderRow(order, true)));
-    const pending = orders.filter(order => String(valueOf(order, ["status"], "")).toLowerCase() === "pending").length;
-    const complete = orders.filter(order => ["completed", "complete", "delivered"].includes(String(valueOf(order, ["status"], "")).toLowerCase())).length;
-    document.getElementById("order-status-summary").textContent = `${pending} pending · ${complete} completed`;
-    document.getElementById("order-status-empty").textContent = `${orders.length} total orders`;
-  }
+            <div class="d-flex gap-3 ">
+              <div class="icon-shape icon-md bg-success text-white rounded-2">
+                <i class="ti ti-repeat fs-4"></i>
+              </div>
+              <div>
+                <h2 class="mb-3 fs-6">Total Purchase</h2>
+                <h3 class="fw-bold mb-0">$18,000</h3>
+                <p class="text-success mb-0 small">+22% since last month</p>
+              </div>
+            </div>
+          </div>
 
-  function renderProducts(products) {
-    const body = document.getElementById("products-body");
-    document.getElementById("products-count").textContent = `${products.length} product${products.length === 1 ? "" : "s"}`;
-    const active = products.filter(product => String(valueOf(product, ["status"], "active")).toLowerCase() === "active" && product.active !== false);
-    document.getElementById("active-products").textContent = String(active.length);
-    if (!products.length) {
-      setEmptyRow(body, 8, "No products found.");
-      document.getElementById("top-products-empty").textContent = "No products found.";
-      return;
-    }
-    body.replaceChildren();
-    products.forEach((product, index) => {
-      const row = document.createElement("tr");
-      const values = [index + 1, valueOf(product, ["imageUrl", "image"], "—"), valueOf(product, ["name", "title", "productName"], "Untitled product"), valueOf(product, ["categoryName", "category"], "—"), formatMoney(valueOf(product, ["price", "sellingPrice"])), valueOf(product, ["stock", "quantity"], "—"), valueOf(product, ["status"], product.active === false ? "inactive" : "active")];
-      values.forEach((value, column) => {
-        const cell = document.createElement("td");
-        cell.className = "py-3.5 px-4";
-        if (column === 1 && typeof value === "string" && /^https?:\/\//i.test(value)) {
-          const image = document.createElement("img");
-          image.src = value;
-          image.alt = "";
-          image.className = "h-10 w-10 rounded-lg object-cover";
-          image.loading = "lazy";
-          cell.append(image);
-        } else {
-          cell.textContent = String(value);
-        }
-        row.append(cell);
-      });
-      const action = document.createElement("td");
-      action.className = "py-3.5 px-4 text-center text-neutral-400";
-      action.textContent = "—";
-      row.append(action);
-      body.append(row);
-    });
-    const productNames = products.slice(0, 5).map(product => String(valueOf(product, ["name", "title", "productName"], "Untitled product")));
-    const remaining = products.length > productNames.length ? ` and ${products.length - productNames.length} more` : "";
-    document.getElementById("top-products-empty").textContent = `${products.length} product${products.length === 1 ? "" : "s"} in catalog: ${productNames.join(", ")}${remaining}`;
-  }
 
-  function startDashboardData() {
-    const collections = ["orders", "products", "categories", "deliveries"];
-    const state = { orders: [], products: [], categories: [], deliveries: [] };
-    const loadedCollections = new Set();
-    const dataErrors = new Map();
-    document.getElementById("connection-status").textContent = "Loading dashboard data...";
-    function updateConnectionStatus() {
-      const status = document.getElementById("connection-status");
-      if (dataErrors.size) status.textContent = `Data load errors (${dataErrors.size})`;
-      else if (loadedCollections.size === collections.length) status.textContent = "Firebase connected";
-      else status.textContent = "Loading dashboard data...";
-    }
-    collections.forEach(collection => {
-      const unsubscribe = onValue(ref(database, collection), snapshot => {
-        state[collection] = asRecords(snapshot.val());
-        loadedCollections.add(collection);
-        dataErrors.delete(collection);
-        document.getElementById(`data-error-${collection}`)?.remove();
-        if (collection === "orders") {
-          document.getElementById("total-orders").textContent = String(state.orders.length);
-          document.getElementById("pending-orders").textContent = String(state.orders.filter(order => String(valueOf(order, ["status"], "")).toLowerCase() === "pending").length);
-          const total = state.orders.reduce((sum, order) => sum + (Number(valueOf(order, ["total", "totalAmount", "amount", "price"], 0)) || 0), 0);
-          document.getElementById("total-sales").textContent = formatMoney(total);
-          document.getElementById("sales-empty").textContent = state.orders.length ? `${state.orders.length} orders · ${formatMoney(total)} recorded revenue` : "No sales data available";
-          renderOrders(state.orders);
-        } else if (collection === "products") {
-          renderProducts(state.products);
-        } else if (collection === "categories") {
-          const names = state.categories.slice(0, 5).map(category => String(valueOf(category, ["name", "title", "categoryName"], "Unnamed category")));
-          const remaining = state.categories.length > names.length ? ` and ${state.categories.length - names.length} more` : "";
-          document.getElementById("categories-empty").textContent = state.categories.length ? `${state.categories.length} categor${state.categories.length === 1 ? "y" : "ies"}: ${names.join(", ")}${remaining}` : "No categories configured.";
-        } else {
-          const summaries = state.deliveries.slice(0, 4).map(delivery => {
-            const id = valueOf(delivery, ["deliveryId", "trackingId", "id"], "Delivery");
-            const status = valueOf(delivery, ["status"], "");
-            return status ? `${id} (${status})` : String(id);
-          });
-          const remaining = state.deliveries.length > summaries.length ? ` and ${state.deliveries.length - summaries.length} more` : "";
-          document.getElementById("deliveries-empty").textContent = state.deliveries.length ? `${state.deliveries.length} delivery record${state.deliveries.length === 1 ? "" : "s"}: ${summaries.join(", ")}${remaining}` : "No delivery records available.";
-        }
-        updateConnectionStatus();
-      }, error => {
-        loadedCollections.add(collection);
-        dataErrors.set(collection, error);
-        const id = `data-error-${collection}`;
-        let alert = document.getElementById(id);
-        if (!alert) {
-          const alert = document.createElement("p");
-          alert.id = id;
-          alert.className = "mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700";
-          alert.setAttribute("role", "alert");
-          document.querySelector("main").prepend(alert);
-          alert.textContent = `Could not load ${collection}: ${error.message}`;
-        } else {
-          alert.textContent = `Could not load ${collection}: ${error.message}`;
-        }
-        updateConnectionStatus();
-      });
-      stopDataListeners.push(unsubscribe);
-    });
-  }
+        </div>
+        <div class="col-lg-3 col-12">
 
-  function checkProfile(user) {
-    const profileRef = ref(database, `users/${user.uid}`);
-    let dashboardStarted = false;
-    stopProfileListener = onValue(profileRef, snapshot => {
-      const profile = snapshot.val();
-      if (!profile || profile.role !== "admin" || profile.status !== "active") {
-        if (dashboardStarted) {
-          clearDataListeners();
-          dashboardStarted = false;
-        }
-        showGate(profile?.role === "user" || profile?.status === "pending"
-          ? "Your account is pending admin approval."
-          : "This account is not authorized to access the dashboard.", "", true);
-        return;
-      }
-      document.getElementById("admin-identity").textContent = user.email || user.displayName || "Administrator";
-      gate.classList.add("hidden");
-      dashboard.hidden = false;
-      if (!dashboardStarted) {
-        dashboardStarted = true;
-        startDashboardData();
-      }
-    }, error => {
-      if (dashboardStarted) {
-        clearListeners();
-        dashboardStarted = false;
-      }
-      showGate("Unable to verify administrator access.", authErrorMessage(error), true);
-    });
-  }
+          <div class="card p-4  bg-info bg-opacity-10 border border-info border-opacity-25 rounded-2">
 
-  onAuthStateChanged(auth, user => {
-    clearListeners();
-    if (!user) {
-      window.location.replace("login.html");
-      return;
-    }
-    showGate("Checking your administrator access...");
-    checkProfile(user);
-  });
+            <div class="d-flex gap-3 ">
+              <div class="icon-shape icon-md bg-info text-white rounded-2">
+                <i class="ti ti-currency-dollar fs-4"></i>
+              </div>
+              <div>
+                <h2 class="mb-3 fs-6">Total Expenses</h2>
+                <h3 class="fw-bold mb-0">$9,000</h3>
+                <p class="text-info mb-0 small">+10% since last month</p>
+              </div>
+            </div>
+          </div>
 
-  async function logout() {
-    try {
-      await signOut(auth);
-      window.location.replace("login.html");
-    } catch (error) {
-      showGate("Could not sign out.", authErrorMessage(error), true);
-    }
-  }
 
-  document.getElementById("logout-button").addEventListener("click", logout);
-  gateLogout.addEventListener("click", logout);
-</script>
+        </div>
+        <div class="col-lg-3 col-12">
+
+          <div class="card p-4  bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-2">
+
+            <div class="d-flex gap-3 ">
+              <div class="icon-shape icon-md bg-warning text-white rounded-2">
+                <i class="ti ti-notes fs-4"></i>
+              </div>
+              <div>
+                <h2 class="mb-3 fs-6">Invoice Due</h2>
+                <h3 class="fw-bold mb-0">$25,000</h3>
+                <p class="text-warning mb-0 small">+35% since last month</p>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-lg-4 col-12">
+          <div class="card">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
+                <div>
+                  <h3 class="fw-bold h4">$25,458</h3>
+                  <span>Total Profit</span>
+                </div>
+                <div>
+                  <i class="ti ti-layers-subtract fs-1 text-primary"></i>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center small">
+                <div class="text-muted"><span class="text-success">+35%</span> vs Last Month</div>
+                <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-lg-4 col-12">
+          <div class="card">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
+                <div>
+                  <h3 class="fw-bold h4">$45,458</h3>
+                  <span>Total Payment Returns</span>
+                </div>
+                <div>
+                  <i class="ti ti-credit-card fs-1 text-danger"></i>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center small">
+                <div class="text-muted"><span class="text-danger">-20%</span> vs Last Month</div>
+                 <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-lg-4 col-12">
+          <div class="card">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
+                <div>
+                  <h3 class="fw-bold h4">$34,458</h3>
+                  <span>Total Expenses</span>
+                </div>
+                <div>
+                  <i class="ti ti-cash-banknote fs-1 text-warning"></i>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center small">
+                <div class="text-muted"><span class="text-warning">-20%</span> vs Last Month</div>
+                <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center bg-transparent px-4 py-3">
+              <h3 class="h5 mb-0">Sales vs Purchase</h3>
+              <div>
+                <select class="form-select form-select-sm">
+                  <option selected="">This Year</option>
+                  <option>This Month</option>
+                  <option>This Week</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body p-4">
+
+              <div id="salesPurchaseChart"></div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center bg-transparent px-4 py-3">
+              <h3 class="h5 mb-0">Overall Information</h3>
+              <div>
+                <select class="form-select form-select-sm">
+                  <option selected="">Last 6 Months</option>
+                  <option>This Month</option>
+                  <option>This Week</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body p-4">
+              <h3 class="h6">Customers Overview</h3>
+              <div class="row align-items-center">
+                <div class="col-sm-6">
+                  <div id="customerChart">
+
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="row">
+                    <div class="col-6 border-end">
+                      <div class="text-center ">
+                        <h2 class="mb-1">5.5K</h2>
+                        <p class="text-success mb-2">First Time</p>
+                        <span class="badge bg-success"><i class="ti ti-arrow-up-left me-1"></i>25%</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="text-center">
+                        <h2 class="mb-1">3.5K</h2>
+                        <p class="text-warning mb-2">Return</p>
+                        <span class="badge bg-success badge-xs d-inline-flex align-items-center"><i class="ti ti-arrow-up-left me-1"></i>21%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+              <div class="row text-center border-top mt-4 pt-4">
+                <div class="col-4 border-end">
+                  <h3 class="fw-bold mb-2">6987</h3>
+                  <small class="text-secondary">Suppliers</small>
+                </div>
+                <div class="col-4 border-end">
+                  <h3 class="fw-bold mb-2">4896</h3>
+                  <small class="text-secondary">Customers</small>
+                </div>
+                <div class="col-4">
+                  <h3 class="fw-bold mb-2">487</h3>
+                  <small class="text-secondary">Orders</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-3">
+
+        <!-- CARD 1 — Top Selling Products -->
+        <div class="col-lg-4">
+          <div class="card  h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
+              <h4 class="mb-0 h5">Top Selling Products</h4>
+              <button class="btn btn-sm btn-outline-secondary">
+                <i class="ti ti-calendar"></i> Today
+              </button>
+            </div>
+
+            <ul class="list-group list-group-flush">
+
+              <!-- item -->
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-2.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Wireless Earphones</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">$89 </small>
+                    <small>•</small>
+                    <small>1,250 Units</small>
+                  </div>
+                </div>
+                <span class="badge bg-danger-subtle text-danger border border-danger">18%</span>
+              </li>
+
+              <!-- repeat -->
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-1.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Gaming Joy Stick</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">$49 </small>
+                    <small>•</small>
+                    <small>5,420 Units</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary">32%</span>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-3.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Smart Watch Pro</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">$98 </small>
+                    <small>•</small>
+                    <small>862 Units</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-info-subtle text-info border border-info">22%</span>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-4.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">USB-C Fast Charger</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">$35 </small>
+                    <small>•</small>
+                    <small>3,200 Units</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success">28%</span>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-5.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Portable Bluetooth Speaker</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">$65 </small>
+                    <small>•</small>
+                    <small>2,890 Units</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-warning-subtle text-warning border border-warning">25%</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- CARD 2 — Low Stock Products -->
+        <div class="col-lg-4">
+          <div class="card  h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
+              <div class="d-flex align-items-center">
+
+                <h4 class="mb-0 h5">Low Stock Products</h4>
+              </div>
+              <a href="#" class="small text-primary text-decoration-underline">View All</a>
+            </div>
+
+            <ul class="list-group list-group-flush">
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-8.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Wireless Headphones</p>
+                  <small>ID: #554433</small>
+                </div>
+                <div class="d-flex flex-column gap-0 align-items-center">
+                  <span class="fw-semibold text-primary">06</span>
+                  <small class="text-muted">In Stock</small>
+                </div>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-4.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">USB-C Cable Pack</p>
+                  <small>ID: #887766</small>
+                </div>
+                <div class="d-flex flex-column gap-0 align-items-center">
+                  <span class="fw-semibold text-primary">09</span>
+                  <small class="text-muted">In Stock</small>
+                </div>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-10.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Phone Screen Protector</p>
+                  <small>ID: #332211</small>
+                </div>
+                <div class="d-flex flex-column gap-0 align-items-center">
+                  <span class="fw-semibold text-primary">03</span>
+                  <small class="text-muted">In Stock</small>
+                </div>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-4.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Portable Charger 20000mAh</p>
+                  <small>ID: #998877</small>
+                </div>
+                <div class="d-flex flex-column gap-0 align-items-center">
+                  <span class="fw-semibold text-primary">07</span>
+                  <small class="text-muted">In Stock</small>
+                </div>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-6.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Mechanical Keyboard RGB</p>
+                  <small>ID: #665544</small>
+                </div>
+                <div class="d-flex flex-column gap-0 align-items-center">
+                  <span class="fw-semibold text-primary">02</span>
+                  <small class="text-muted">In Stock</small>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- CARD 3 — Recent Sales -->
+        <div class="col-lg-4">
+          <div class="card  h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
+              <h4 class="mb-0 h5">Recent Sales</h4>
+              <button class="btn btn-sm btn-outline-secondary">
+                <i class="ti ti-calendar-event"></i> Weekly
+              </button>
+            </div>
+
+            <ul class="list-group list-group-flush">
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-7.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">MacBook Pro 16"</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">Computers </small>
+                    <small>•</small>
+                    <small>2,$2,499</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-success-subtle text-success">Completed</span>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-9.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">AirPods Pro Max</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">Audio </small>
+                    <small>•</small>
+                    <small>$549</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-primary-subtle text-primary">Processing</span>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-8.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">iPad Air 11"</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">Tablets </small>
+                    <small>•</small>
+                    <small>$799</small>
+                  </div>
+                </div>
+                <span class="badge bg-success-subtle text-success">Completed</span>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-3.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Apple Watch Ultra</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">Wearables </small>
+                    <small>•</small>
+                    <small>$799</small>
+                  </div>
+                </div>
+                <span class="badge bg-warning-subtle text-warning">Pending</span>
+              </li>
+
+              <li class="list-group-item d-flex align-items-center gap-3">
+                <img src="images/product-6.png" class="rounded" width="48">
+                <div class="flex-grow-1">
+                  <p class="mb-1">Magic Keyboard</p>
+                  <div class="d-flex align-items-center gap-2 text-muted">
+                    <small class="fw-semibold">Accessories </small>
+                    <small>•</small>
+                    <small>$299</small>
+                  </div>
+
+                </div>
+                <span class="badge bg-danger-subtle text-danger">Cancelled</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-12">
+<footer class="text-center py-2 mt-6 text-secondary ">
+        <p class="mb-0">Copyright © 2026 InApp Inventory Dashboard. Developed by <a href="https://codescandy.com/" target="_blank" class="text-primary">CodesCandy</a> • Distributed by <a href="https://themewagon.com/" target="_blank" class="text-primary">ThemeWagon</a> </p>
+      </footer>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+
+
+
+
+
 </body></html>
