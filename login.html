@@ -293,9 +293,11 @@
     <script type="module">
       import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
       import {
+        browserLocalPersistence,
         getAuth,
         GoogleAuthProvider,
         onAuthStateChanged,
+        setPersistence,
         signInWithPopup,
         signOut,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -318,6 +320,7 @@
 
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
@@ -327,6 +330,9 @@
       const status = document.querySelector("#status");
       const deniedNotice = document.querySelector("#access-denied");
       const signOutLink = document.querySelector("#sign-out-link");
+      const isDevelopment =
+        window.location.protocol === "file:" ||
+        ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
       let isBusy = false;
       let popupInProgress = false;
       let processedUid = null;
@@ -349,6 +355,12 @@
       }
 
       function messageForError(error) {
+        if (isDevelopment) {
+          const code = error?.code || "unknown";
+          const message = error?.message || String(error);
+          return `Firebase error (${code}): ${message}`;
+        }
+
         switch (error?.code) {
           case "auth/popup-closed-by-user":
           case "auth/cancelled-popup-request":
@@ -377,11 +389,13 @@
         status.textContent = "";
         deniedNotice.hidden = true;
         signOutLink.hidden = true;
+        let operation = "reading the user profile";
 
         try {
           const profileRef = ref(database, `users/${user.uid}`);
           const snapshot = await get(profileRef);
           if (!snapshot.exists()) {
+            operation = "creating the user profile";
             const profile = {
               uid: user.uid,
               name: user.displayName || "",
@@ -400,6 +414,7 @@
             }
           }
 
+          operation = "verifying the user profile";
           const currentProfile = (await get(profileRef)).val();
           if (!currentProfile || typeof currentProfile.role !== "string") {
             throw new Error("The user profile is incomplete.");
@@ -413,7 +428,10 @@
 
           window.location.replace("./index.html");
         } catch (error) {
-          console.error("Unable to verify the DukaBarg user profile:", error);
+          console.error(
+            `Unable to complete ${operation} (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
+            error,
+          );
           processedUid = null;
           signOutLink.hidden = false;
           displayError(
@@ -435,10 +453,14 @@
         deniedNotice.hidden = true;
 
         try {
+          await authReady;
           const credential = await signInWithPopup(auth, provider);
           await verifyProfile(credential.user);
         } catch (error) {
-          console.error("Google sign-in failed:", error);
+          console.error(
+            `Google sign-in failed (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
+            error,
+          );
           processedUid = null;
           displayError(messageForError(error));
         } finally {
@@ -458,8 +480,11 @@
           status.textContent = "";
           setBusy(false);
         } catch (error) {
-          console.error("Firebase sign-out failed:", error);
-          displayError("We couldn’t sign you out. Please refresh the page and try again.");
+          console.error(
+            `Firebase sign-out failed (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
+            error,
+          );
+          displayError(messageForError(error));
         }
       });
 
@@ -467,11 +492,21 @@
         deniedNotice.hidden = false;
       }
 
-      onAuthStateChanged(auth, (user) => {
-        if (user && !popupInProgress) {
-          void verifyProfile(user);
-        }
-      });
+      authReady
+        .then(() =>
+          onAuthStateChanged(auth, (user) => {
+            if (user && !popupInProgress) {
+              void verifyProfile(user);
+            }
+          }),
+        )
+        .catch((error) => {
+          console.error(
+            `Firebase Auth initialization failed (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
+            error,
+          );
+          displayError(messageForError(error));
+        });
     </script>
   </body>
 </html>

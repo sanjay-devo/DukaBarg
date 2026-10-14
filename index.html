@@ -126,6 +126,7 @@
       .auth-gate-actions {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         gap: var(--space-5);
         margin-top: var(--space-6);
       }
@@ -236,6 +237,15 @@
           border-color var(--motion-instant) ease;
       }
 
+      .logout-button {
+        width: 100%;
+        border: 0;
+        border-inline-start: 2px solid transparent;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+      }
+
       .nav-link:hover {
         color: var(--color-text-primary);
         background: var(--color-surface-raised);
@@ -295,6 +305,17 @@
         text-decoration: underline;
         text-decoration-color: var(--color-border-strong);
         text-underline-offset: var(--space-2);
+      }
+
+      .logout-status {
+        margin: var(--space-3) var(--space-5) 0;
+        color: var(--color-border-strong);
+        font-size: var(--font-size-xs);
+        line-height: 1.5;
+      }
+
+      .logout-status[hidden] {
+        display: none;
       }
 
       .nav-icon {
@@ -674,7 +695,6 @@
         <h1 id="auth-gate-title">Verifying admin access</h1>
         <p id="auth-gate-message">Please wait while we verify your account.</p>
         <div class="auth-gate-actions" id="auth-gate-actions" hidden>
-          <button id="auth-retry" type="button">Try again</button>
           <a href="./login.html">Return to sign in</a>
         </div>
       </div>
@@ -845,6 +865,16 @@
                   </svg>
                   <span class="nav-text">Settings</span>
                 </a>
+              </li>
+              <li>
+                <button class="nav-link logout-button" id="logout-button" type="button">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 17l5-5-5-5M15 12H3" />
+                    <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+                  </svg>
+                  <span class="nav-text" id="logout-label">Logout</span>
+                </button>
+                <p class="logout-status" id="logout-status" role="status" aria-live="polite" hidden></p>
               </li>
             </ul>
           </section>
@@ -1018,7 +1048,13 @@
     </script>
     <script type="module">
       import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+      import {
+        browserLocalPersistence,
+        getAuth,
+        onAuthStateChanged,
+        setPersistence,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
       import { get, getDatabase, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
       const firebaseConfig = {
@@ -1033,66 +1069,154 @@
 
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
       const gateTitle = document.querySelector("#auth-gate-title");
       const gateMessage = document.querySelector("#auth-gate-message");
       const gateActions = document.querySelector("#auth-gate-actions");
-      const retryButton = document.querySelector("#auth-retry");
-      let isChecking = false;
+      const authGate = document.querySelector("#auth-gate");
+      const logoutButton = document.querySelector("#logout-button");
+      const logoutLabel = document.querySelector("#logout-label");
+      const logoutStatus = document.querySelector("#logout-status");
+      const isDevelopment =
+        window.location.protocol === "file:" ||
+        ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+      const pendingChecks = new Map();
+      let stopAuthListener = null;
 
-      function showGateError(message) {
+      function showGateError(message, error) {
+        if (error) {
+          const code = error.code || "unknown";
+          const detail = error.message || String(error);
+          console.error(
+            `${message} (Firebase code: ${code}): ${detail}`,
+            error,
+          );
+          if (isDevelopment) {
+            message = `${message} Firebase error (${code}): ${detail}`;
+          }
+        }
         gateTitle.textContent = "We couldn’t verify access";
         gateMessage.textContent = message;
         gateActions.hidden = false;
       }
 
-      async function checkAdminAccess(user) {
+      function checkAdminAccess(user) {
         if (!user) {
           window.location.replace("./login.html");
-          return;
+          return Promise.resolve();
         }
-        if (isChecking) {
-          return;
+        const existingCheck = pendingChecks.get(user.uid);
+        if (existingCheck) {
+          return existingCheck;
         }
 
-        isChecking = true;
         gateTitle.textContent = "Verifying admin access";
         gateMessage.textContent = "Please wait while we verify your account.";
         gateActions.hidden = true;
-        try {
-          const profile = await get(ref(database, `users/${user.uid}`));
-          if (!profile.exists() || typeof profile.child("role").val() !== "string") {
-            window.location.replace("./login.html?profile=missing");
-            return;
-          }
-          if (profile.child("role").val() !== "admin") {
-            window.location.replace("./login.html?access=denied");
-            return;
-          }
+        const check = (async () => {
+          try {
+            const profile = await get(ref(database, `users/${user.uid}`));
+            if (!profile.exists() || typeof profile.child("role").val() !== "string") {
+              window.location.replace("./login.html?profile=missing");
+              return;
+            }
+            if (profile.child("role").val() !== "admin") {
+              window.location.replace("./login.html?access=denied");
+              return;
+            }
 
-          document.body.classList.add("is-admin-authorized");
-          document.querySelector("#auth-gate").hidden = true;
-        } catch (error) {
-          console.error("Unable to verify admin access:", error);
-          showGateError(
-            "Firebase could not verify your user profile. Check your connection and the Realtime Database security rules, then retry.",
-          );
-        } finally {
-          isChecking = false;
-        }
+            if (auth.currentUser?.uid !== user.uid) {
+              window.location.replace("./login.html");
+              return;
+            }
+
+            document.body.classList.add("is-admin-authorized");
+            authGate.hidden = true;
+          } catch (error) {
+            showGateError(
+              "Firebase could not verify your user profile. Check your connection and the Realtime Database security rules, then retry.",
+              error,
+            );
+          } finally {
+            if (!document.body.classList.contains("is-admin-authorized")) {
+              gateActions.hidden = false;
+            }
+          }
+        })();
+        pendingChecks.set(user.uid, check);
+        void check.finally(() => {
+          if (pendingChecks.get(user.uid) === check) {
+            pendingChecks.delete(user.uid);
+          }
+        });
+        return check;
       }
 
-      retryButton.addEventListener("click", () => {
-        if (auth.currentUser) {
-          void checkAdminAccess(auth.currentUser);
-        } else {
+      logoutButton.addEventListener("click", async () => {
+        if (logoutButton.disabled) {
+          return;
+        }
+        logoutStatus.hidden = true;
+        logoutStatus.textContent = "";
+        logoutButton.disabled = true;
+        logoutButton.setAttribute("aria-busy", "true");
+        logoutButton.dataset.state = "loading";
+        logoutLabel.textContent = "Logging out…";
+
+        try {
+          await authReady;
+          await signOut(auth);
           window.location.replace("./login.html");
+        } catch (error) {
+          const code = error?.code || "unknown";
+          const detail = error?.message || String(error);
+          console.error(
+            `Firebase sign-out failed (Firebase code: ${code}): ${detail}`,
+            error,
+          );
+          logoutButton.disabled = false;
+          logoutButton.removeAttribute("aria-busy");
+          logoutButton.removeAttribute("data-state");
+          logoutLabel.textContent = "Logout";
+          logoutStatus.textContent = isDevelopment
+            ? `Sign-out failed (${code}): ${detail}`
+            : "We couldn’t sign you out. Please try again.";
+          logoutStatus.hidden = false;
         }
       });
 
-      onAuthStateChanged(auth, (user) => {
-        void checkAdminAccess(user);
-      });
+      function startAuthListener() {
+        if (stopAuthListener) {
+          if (auth.currentUser) {
+            return checkAdminAccess(auth.currentUser);
+          }
+          return Promise.resolve();
+        }
+
+        stopAuthListener = onAuthStateChanged(
+          auth,
+          (user) => {
+            void checkAdminAccess(user);
+          },
+          (error) => {
+            showGateError(
+              "We couldn’t restore your sign-in session. Retry, or return to sign in.",
+              error,
+            );
+          },
+        );
+        return Promise.resolve();
+      }
+
+      void authReady
+        .then(startAuthListener)
+        .catch((error) => {
+          showGateError(
+            "We couldn’t restore your sign-in session. Retry, or return to sign in.",
+            error,
+          );
+        });
     </script>
   </body>
 </html>
