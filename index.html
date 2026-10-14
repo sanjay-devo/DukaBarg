@@ -688,6 +688,535 @@
         }
       }
     </style>
+    <style>
+      .category-page[hidden],
+      .welcome-card[hidden] {
+        display: none;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .category-page {
+        margin-top: var(--space-7);
+      }
+
+      .category-toolbar,
+      .category-heading-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-6);
+      }
+
+      .category-heading-row {
+        margin-bottom: var(--space-6);
+      }
+
+      .category-heading-row h2 {
+        margin: 0;
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+      }
+
+      .category-heading-row p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .category-primary-button,
+      .category-secondary-button,
+      .category-danger-button {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-5);
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        transition:
+          background-color var(--motion-instant) ease,
+          border-color var(--motion-instant) ease,
+          color var(--motion-instant) ease;
+      }
+
+      .category-primary-button {
+        color: var(--color-surface-muted);
+        background: var(--color-text-primary);
+      }
+
+      .category-primary-button:hover:not(:disabled) {
+        background: var(--color-text-tertiary);
+      }
+
+      .category-secondary-button {
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border-color: var(--color-border-muted);
+      }
+
+      .category-secondary-button:hover:not(:disabled) {
+        border-color: var(--color-border-strong);
+      }
+
+      .category-danger-button {
+        color: var(--color-surface-muted);
+        background: var(--color-border-strong);
+      }
+
+      .category-danger-button:hover:not(:disabled) {
+        filter: brightness(0.94);
+      }
+
+      .category-primary-button:focus-visible,
+      .category-secondary-button:focus-visible,
+      .category-danger-button:focus-visible,
+      .category-icon-button:focus-visible,
+      .category-tab:focus-visible,
+      .category-pagination button:focus-visible,
+      .category-field input:focus-visible,
+      .category-field select:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .category-primary-button:disabled,
+      .category-secondary-button:disabled,
+      .category-danger-button:disabled,
+      .category-icon-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .category-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+
+      .category-stat {
+        min-width: 0;
+        padding: var(--space-6);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .category-stat-label {
+        display: block;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        font-weight: 500;
+      }
+
+      .category-stat-value {
+        display: block;
+        margin-top: var(--space-3);
+        font-size: var(--font-size-2xl);
+        font-weight: 600;
+        line-height: 1.25;
+      }
+
+      .category-tabs {
+        display: flex;
+        gap: var(--space-6);
+        margin: 0 0 var(--space-5);
+        padding: 0;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--color-border-muted);
+        list-style: none;
+      }
+
+      .category-tab {
+        min-height: 44px;
+        padding: var(--space-3) 0;
+        color: var(--color-text-inverse);
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-sm);
+        white-space: nowrap;
+      }
+
+      .category-tab[aria-selected="true"] {
+        color: var(--color-text-primary);
+        border-bottom-color: var(--color-border-strong);
+        font-weight: 600;
+      }
+
+      .category-filters {
+        display: grid;
+        grid-template-columns: minmax(180px, 1.5fr) repeat(2, minmax(150px, 1fr)) minmax(130px, 0.8fr);
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+      }
+
+      .category-filters input,
+      .category-filters select,
+      .category-field input,
+      .category-field select {
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .category-table-card {
+        overflow: hidden;
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .category-table-wrap {
+        overflow-x: auto;
+      }
+
+      .category-table {
+        width: 100%;
+        min-width: 830px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .category-table th {
+        padding: var(--space-5) var(--space-6);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .category-table td {
+        padding: var(--space-5) var(--space-6);
+        border-top: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+        vertical-align: middle;
+      }
+
+      .category-table tbody tr:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .category-name {
+        max-width: 230px;
+        overflow-wrap: anywhere;
+        font-weight: 600;
+      }
+
+      .category-level,
+      .category-status {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .category-level {
+        color: var(--color-text-tertiary);
+        background: var(--color-surface-raised);
+      }
+
+      .category-status[data-active="true"] {
+        color: #246b43;
+        background: #e9f5ed;
+      }
+
+      .category-status[data-active="false"] {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+      }
+
+      .category-row-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .category-icon-button {
+        min-height: 34px;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-tertiary);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-xs);
+      }
+
+      .category-icon-button:hover:not(:disabled) {
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border-color: var(--color-border-muted);
+      }
+
+      .category-icon-button[data-action="delete"] {
+        color: var(--color-border-strong);
+      }
+
+      .category-feedback {
+        padding: var(--space-6);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+        text-align: center;
+      }
+
+      .category-feedback[data-kind="error"] {
+        color: var(--color-text-primary);
+        text-align: left;
+      }
+
+      .category-feedback[hidden] {
+        display: none;
+      }
+
+      .category-skeleton {
+        display: grid;
+        gap: var(--space-5);
+      }
+
+      .category-skeleton span {
+        display: block;
+        height: 18px;
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xs);
+        animation: category-pulse 1.2s ease-in-out infinite alternate;
+      }
+
+      @keyframes category-pulse {
+        to { opacity: 0.45; }
+      }
+
+      .category-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-5);
+        padding: var(--space-5) var(--space-6);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .category-pagination-controls {
+        display: flex;
+        gap: var(--space-3);
+      }
+
+      .category-pagination button {
+        min-height: 34px;
+        padding: var(--space-2) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .category-pagination button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+
+      .category-dialog {
+        width: min(100% - var(--space-6), 520px);
+        max-height: min(90vh, 760px);
+        padding: 0;
+        overflow: auto;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .category-dialog::backdrop {
+        background: var(--color-backdrop);
+      }
+
+      .category-dialog-form {
+        padding: var(--space-7);
+      }
+
+      .category-dialog-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+
+      .category-dialog-heading h2 {
+        margin: 0;
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+      }
+
+      .category-dialog-heading p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .category-dialog-close {
+        min-height: 34px;
+        padding: 0 var(--space-3);
+        color: var(--color-text-inverse);
+        background: transparent;
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+      }
+
+      .category-form-fields {
+        display: grid;
+        gap: var(--space-5);
+      }
+
+      .category-field {
+        display: grid;
+        gap: var(--space-2);
+      }
+
+      .category-field label,
+      .category-field-label {
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .category-field-hint {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .category-dialog-error {
+        margin: var(--space-5) 0 0;
+        color: var(--color-border-strong);
+        font-size: var(--font-size-xs);
+      }
+
+      .category-dialog-error[hidden] {
+        display: none;
+      }
+
+      .category-dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: var(--space-3);
+        margin-top: var(--space-7);
+      }
+
+      .category-view-details {
+        display: grid;
+        grid-template-columns: minmax(110px, 0.7fr) 1fr;
+        gap: var(--space-4) var(--space-6);
+        margin: 0;
+        font-size: var(--font-size-sm);
+      }
+
+      .category-view-details dt {
+        color: var(--color-text-inverse);
+      }
+
+      .category-view-details dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+        font-weight: 500;
+      }
+
+      .category-toast-region {
+        position: fixed;
+        z-index: 30;
+        inset: auto var(--space-6) var(--space-6) auto;
+        display: grid;
+        width: min(360px, calc(100vw - var(--space-7) * 2));
+        gap: var(--space-3);
+      }
+
+      .category-toast {
+        padding: var(--space-5) var(--space-6);
+        color: var(--color-surface-muted);
+        background: var(--color-text-primary);
+        border-radius: var(--radius-md);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+        font-size: var(--font-size-sm);
+      }
+
+      .category-toast[data-kind="error"] {
+        background: #8c321b;
+      }
+
+      @media (max-width: 760px) {
+        .category-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .category-filters {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 480px) {
+        .category-heading-row {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .category-heading-row .category-primary-button {
+          width: 100%;
+        }
+
+        .category-filters {
+          grid-template-columns: 1fr;
+        }
+
+        .category-stat {
+          padding: var(--space-5);
+        }
+
+        .category-dialog-form {
+          padding: var(--space-6);
+        }
+
+        .category-pagination {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .category-skeleton span {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <section class="auth-gate" id="auth-gate" role="status" aria-live="polite">
@@ -943,9 +1472,176 @@
               </svg>
             </span>
           </div>
+
+          <section class="category-page" id="category-page" aria-labelledby="category-section-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="category-section-title">Category management</h2>
+                <p>Organize your catalog into clear, reusable levels.</p>
+              </div>
+              <button class="category-primary-button" id="category-add-button" type="button">
+                <span aria-hidden="true">+</span> Add Category
+              </button>
+            </div>
+
+            <div class="category-stats" aria-label="Category summary">
+              <article class="category-stat">
+                <span class="category-stat-label">Total Master Categories</span>
+                <strong class="category-stat-value" id="stat-masters">—</strong>
+              </article>
+              <article class="category-stat">
+                <span class="category-stat-label">Categories</span>
+                <strong class="category-stat-value" id="stat-categories">—</strong>
+              </article>
+              <article class="category-stat">
+                <span class="category-stat-label">Subcategories</span>
+                <strong class="category-stat-value" id="stat-subcategories">—</strong>
+              </article>
+              <article class="category-stat">
+                <span class="category-stat-label">Active Categories</span>
+                <strong class="category-stat-value" id="stat-active">—</strong>
+              </article>
+            </div>
+
+            <div class="category-table-card">
+              <div class="category-filters" aria-label="Category filters">
+                <input id="category-search" type="search" placeholder="Search by name" aria-label="Search categories by name" />
+                <select id="category-level-filter" aria-label="Filter by hierarchy level">
+                  <option value="">All levels</option>
+                  <option value="master">Master Category</option>
+                  <option value="category">Category</option>
+                  <option value="subcategory">Subcategory</option>
+                </select>
+                <select id="category-parent-filter" aria-label="Filter by parent">
+                  <option value="">All parents</option>
+                </select>
+                <select id="category-status-filter" aria-label="Filter by status">
+                  <option value="">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div role="tablist" class="category-tabs" aria-label="Category level">
+                <button class="category-tab" type="button" role="tab" data-level="all" aria-selected="true">All Categories</button>
+                <button class="category-tab" type="button" role="tab" data-level="master" aria-selected="false">Master Categories</button>
+                <button class="category-tab" type="button" role="tab" data-level="category" aria-selected="false">Categories</button>
+                <button class="category-tab" type="button" role="tab" data-level="subcategory" aria-selected="false">Subcategories</button>
+              </div>
+              <div class="category-feedback" id="category-loading" aria-live="polite">
+                <div class="category-skeleton" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
+                <span class="visually-hidden">Loading categories</span>
+              </div>
+              <div class="category-feedback" id="category-error" data-kind="error" role="alert" hidden>
+                <span id="category-error-message"></span>
+                <button class="category-secondary-button" id="category-retry" type="button">Retry loading</button>
+              </div>
+              <div class="category-feedback" id="category-empty" hidden>No categories match these filters. Try changing your search or add a category.</div>
+              <div class="category-table-wrap" id="category-table-wrap" hidden>
+                <table class="category-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Level</th>
+                      <th scope="col">Parent Category</th>
+                      <th scope="col">Product Count</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Updated At</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="category-table-body"></tbody>
+                </table>
+              </div>
+              <div class="category-pagination" id="category-pagination" hidden>
+                <span id="category-page-summary"></span>
+                <div class="category-pagination-controls">
+                  <button type="button" id="category-previous">Previous</button>
+                  <button type="button" id="category-next">Next</button>
+                </div>
+              </div>
+            </div>
+            <p class="category-feedback" id="product-read-warning" role="status" hidden></p>
+          </section>
         </section>
       </main>
     </div>
+
+    <dialog class="category-dialog" id="category-form-dialog" aria-labelledby="category-form-title">
+      <form class="category-dialog-form" id="category-form" novalidate>
+        <div class="category-dialog-heading">
+          <div>
+            <h2 id="category-form-title">Add Category</h2>
+            <p id="category-form-description">Choose a level and add a descriptive name.</p>
+          </div>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+        </div>
+        <div class="category-form-fields">
+          <div class="category-field">
+            <label for="category-level">Hierarchy level</label>
+            <select id="category-level" name="level" required>
+              <option value="master">Master Category</option>
+              <option value="category" selected>Category</option>
+              <option value="subcategory">Subcategory</option>
+            </select>
+          </div>
+          <div class="category-field" id="category-parent-field">
+            <label for="category-parent-select" id="category-parent-label">Master Category</label>
+            <select id="category-parent-select" name="parentId"></select>
+          </div>
+          <div class="category-field" id="category-master-display-field" hidden>
+            <span class="category-field-label">Master Category</span>
+            <span id="category-master-display" class="category-field-hint">Select a parent category.</span>
+          </div>
+          <div class="category-field">
+            <label for="category-name">Name</label>
+            <input id="category-name" name="name" type="text" maxlength="100" autocomplete="off" required />
+            <span class="category-field-hint">Names must be unique within the same parent.</span>
+          </div>
+          <div class="category-field">
+            <label for="category-status">Status</label>
+            <select id="category-status" name="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <p class="category-dialog-error" id="category-form-error" role="alert" hidden></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-close-dialog>Cancel</button>
+          <button class="category-primary-button" id="category-save-button" type="submit">Save Category</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="category-dialog" id="category-view-dialog" aria-labelledby="category-view-title">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div><h2 id="category-view-title">Category details</h2></div>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+        </div>
+        <dl class="category-view-details" id="category-view-details"></dl>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-close-dialog>Close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="category-dialog" id="category-confirm-dialog" aria-labelledby="category-confirm-title">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div><h2 id="category-confirm-title">Delete category?</h2></div>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+        </div>
+        <p id="category-confirm-message"></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-close-dialog>Cancel</button>
+          <button class="category-danger-button" id="category-confirm-delete" type="button">Delete</button>
+        </div>
+      </div>
+    </dialog>
+    <div class="category-toast-region" id="category-toast-region" aria-live="polite" aria-atomic="false"></div>
 
     <script>
       const sidebar = document.querySelector(".sidebar");
@@ -958,6 +1654,8 @@
       const pageSubtitle = document.querySelector("#page-subtitle");
       const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
       const welcomeTitle = document.querySelector("#welcome-title");
+      const categoryPage = document.querySelector("#category-page");
+      const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
 
@@ -1001,12 +1699,15 @@
         );
         const activeLink = currentLink || links[0];
         const pageName = activeLink.querySelector(".nav-text").textContent.trim();
+        const isCategoriesPage = activeLink.hash === "#categories";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
         pageHeading.textContent = pageName;
         breadcrumbCurrent.textContent = pageName;
         pageSubtitle.textContent = `Manage your store’s ${pageName.toLowerCase()} from here.`;
+        categoryPage.hidden = !isCategoriesPage;
+        welcomeCard.hidden = isCategoriesPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -1055,7 +1756,16 @@
         setPersistence,
         signOut,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-      import { get, getDatabase, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+      import {
+        get,
+        getDatabase,
+        onValue,
+        push,
+        ref,
+        remove,
+        set,
+        update,
+      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
@@ -1071,6 +1781,49 @@
       const auth = getAuth(app);
       const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
+      const categoryState = {
+        categories: [],
+        products: {},
+        categoriesLoaded: false,
+        productsLoaded: false,
+        productsReadable: false,
+        categoriesError: null,
+        productsError: null,
+        level: "all",
+        page: 1,
+        editingId: null,
+        deletingId: null,
+        stopCategories: null,
+        stopProducts: null,
+      };
+      const categoryTableBody = document.querySelector("#category-table-body");
+      const categoryLoading = document.querySelector("#category-loading");
+      const categoryError = document.querySelector("#category-error");
+      const categoryErrorMessage = document.querySelector("#category-error-message");
+      const categoryEmpty = document.querySelector("#category-empty");
+      const categoryTableWrap = document.querySelector("#category-table-wrap");
+      const categoryPagination = document.querySelector("#category-pagination");
+      const categorySearch = document.querySelector("#category-search");
+      const categoryLevelFilter = document.querySelector("#category-level-filter");
+      const categoryParentFilter = document.querySelector("#category-parent-filter");
+      const categoryStatusFilter = document.querySelector("#category-status-filter");
+      const categoryFormDialog = document.querySelector("#category-form-dialog");
+      const categoryForm = document.querySelector("#category-form");
+      const categoryFormError = document.querySelector("#category-form-error");
+      const categoryLevelSelect = document.querySelector("#category-level");
+      const categoryParentSelect = document.querySelector("#category-parent-select");
+      const categoryParentField = document.querySelector("#category-parent-field");
+      const categoryParentLabel = document.querySelector("#category-parent-label");
+      const categoryMasterDisplayField = document.querySelector("#category-master-display-field");
+      const categoryMasterDisplay = document.querySelector("#category-master-display");
+      const categoryNameInput = document.querySelector("#category-name");
+      const categoryStatusSelect = document.querySelector("#category-status");
+      const categorySaveButton = document.querySelector("#category-save-button");
+      const categoryToastRegion = document.querySelector("#category-toast-region");
+      const categoryConfirmDialog = document.querySelector("#category-confirm-dialog");
+      const categoryConfirmDelete = document.querySelector("#category-confirm-delete");
+      const categoryViewDialog = document.querySelector("#category-view-dialog");
+      const categoryPageSize = 10;
       const gateTitle = document.querySelector("#auth-gate-title");
       const gateMessage = document.querySelector("#auth-gate-message");
       const gateActions = document.querySelector("#auth-gate-actions");
@@ -1083,6 +1836,812 @@
         ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
       const pendingChecks = new Map();
       let stopAuthListener = null;
+
+      function showCategoryToast(message, kind = "success") {
+        const toast = document.createElement("div");
+        toast.className = "category-toast";
+        toast.dataset.kind = kind;
+        toast.setAttribute("role", kind === "error" ? "alert" : "status");
+        toast.textContent = message;
+        categoryToastRegion.append(toast);
+        window.setTimeout(() => toast.remove(), 5000);
+      }
+
+      function reportFirebaseError(action, error) {
+        const code = error?.code || "unknown";
+        console.error(`${action} failed (Firebase code: ${code}).`, error);
+        if (code.includes("permission") || code.includes("PERMISSION")) {
+          return "Firebase denied this request. Check your admin role and Realtime Database rules.";
+        }
+        if (code.includes("network") || code.includes("NETWORK")) {
+          return "A network error interrupted the request. Check your connection and retry.";
+        }
+        return isDevelopment
+          ? `${action} failed (${code}): ${error?.message || String(error)}`
+          : `${action} failed. Please retry.`;
+      }
+
+      function valueAsId(value) {
+        if (typeof value === "string" || typeof value === "number") {
+          return String(value);
+        }
+        if (value && typeof value === "object") {
+          const id = value.id || value.categoryId || value.key;
+          return id == null ? "" : String(id);
+        }
+        return "";
+      }
+
+      function rawParentId(raw) {
+        const candidates = [
+          raw.parentCategoryId,
+          raw.parentId,
+          raw.parent_id,
+          raw.parentCategory,
+          raw.parent,
+          raw.masterCategoryId,
+          raw.master_category_id,
+        ];
+        for (const candidate of candidates) {
+          const id = valueAsId(candidate);
+          if (id) {
+            return id;
+          }
+        }
+        return "";
+      }
+
+      function declaredLevel(raw) {
+        const value = String(raw.level ?? raw.categoryLevel ?? raw.category_level ?? raw.type ?? "").toLowerCase();
+        if (["master", "master category", "mastercategory", "root"].includes(value)) {
+          return "master";
+        }
+        if (["subcategory", "sub category", "sub-category", "sub_category", "child"].includes(value)) {
+          return "subcategory";
+        }
+        if (["category", "cat"].includes(value)) {
+          return "category";
+        }
+        return "";
+      }
+
+      function normalizeCategories(value) {
+        const rawById = Object.fromEntries(
+          Object.entries(value && typeof value === "object" ? value : {}).filter(
+            ([, raw]) => raw && typeof raw === "object" && !Array.isArray(raw),
+          ),
+        );
+        const levelCache = new Map();
+        function resolveLevel(id, seen = new Set()) {
+          if (levelCache.has(id)) {
+            return levelCache.get(id);
+          }
+          const raw = rawById[id];
+          if (!raw) {
+            return "master";
+          }
+          const explicit = declaredLevel(raw);
+          if (explicit) {
+            levelCache.set(id, explicit);
+            return explicit;
+          }
+          if (seen.has(id)) {
+            return "category";
+          }
+          const parentId = rawParentId(raw);
+          if (!parentId) {
+            levelCache.set(id, "master");
+            return "master";
+          }
+          const nextSeen = new Set(seen);
+          nextSeen.add(id);
+          const parentLevel = resolveLevel(parentId, nextSeen);
+          const inferred = parentLevel === "master" ? "category" : "subcategory";
+          levelCache.set(id, inferred);
+          return inferred;
+        }
+
+        return Object.entries(rawById).map(([id, raw]) => {
+          const level = resolveLevel(id);
+          const parentId = level === "master" ? "" : rawParentId(raw);
+          const name = String(raw.name ?? raw.categoryName ?? raw.title ?? raw.label ?? `Unnamed ${level}`);
+          const statusValue = raw.status;
+          const active =
+            typeof statusValue === "string"
+              ? !["inactive", "disabled", "archived", "false"].includes(statusValue.toLowerCase())
+              : typeof statusValue === "boolean"
+                ? statusValue
+                : typeof raw.active === "boolean"
+                  ? raw.active
+                  : typeof raw.isActive === "boolean"
+                    ? raw.isActive
+                    : true;
+          return {
+            id,
+            raw,
+            name,
+            level,
+            parentId,
+            masterCategoryId: valueAsId(raw.masterCategoryId ?? raw.master_category_id),
+            active,
+            updatedAt: raw.updatedAt ?? raw.updated_at ?? raw.modifiedAt ?? raw.createdAt ?? null,
+          };
+        });
+      }
+
+      function masterForCategory(category, categories = categoryState.categories) {
+        if (category.level === "master") {
+          return category;
+        }
+        if (category.masterCategoryId) {
+          const explicitMaster = categories.find(
+            (entry) => entry.id === category.masterCategoryId && entry.level === "master",
+          );
+          if (explicitMaster) {
+            return explicitMaster;
+          }
+        }
+        const parent = categories.find((entry) => entry.id === category.parentId);
+        if (!parent) {
+          return null;
+        }
+        return parent.level === "master" ? parent : masterForCategory(parent, categories);
+      }
+
+      function parentForCategory(category) {
+        return categoryState.categories.find((entry) => entry.id === category.parentId) || null;
+      }
+
+      function isCategoryActive(raw) {
+        const statusValue = raw.status;
+        if (typeof statusValue === "string") {
+          return !["inactive", "disabled", "archived", "false"].includes(statusValue.toLowerCase());
+        }
+        if (typeof statusValue === "boolean") {
+          return statusValue;
+        }
+        if (typeof raw.active === "boolean") {
+          return raw.active;
+        }
+        if (typeof raw.isActive === "boolean") {
+          return raw.isActive;
+        }
+        return true;
+      }
+
+      function productCategoryId(product) {
+        if (!product || typeof product !== "object") {
+          return "";
+        }
+        return valueAsId(product.categoryId ?? product.category_id);
+      }
+
+      function productCount(categoryId, products = categoryState.products) {
+        return Object.values(products).filter((product) => productCategoryId(product) === categoryId).length;
+      }
+
+      function childrenOf(categoryId, categories = categoryState.categories) {
+        return categories.filter((entry) => entry.parentId === categoryId);
+      }
+
+      function formatCategoryDate(value) {
+        if (value == null || value === "") {
+          return "—";
+        }
+        const parsed = typeof value === "number"
+          ? new Date(value < 1000000000000 ? value * 1000 : value)
+          : new Date(String(value));
+        if (Number.isNaN(parsed.getTime())) {
+          return "—";
+        }
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(parsed);
+      }
+
+      function escapeCategoryHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[character]);
+      }
+
+      function sortedCategories() {
+        const order = { master: 0, category: 1, subcategory: 2 };
+        return [...categoryState.categories].sort(
+          (first, second) =>
+            order[first.level] - order[second.level] ||
+            first.name.localeCompare(second.name, undefined, { sensitivity: "base" }),
+        );
+      }
+
+      function updateCategorySummary() {
+        if (!categoryState.categoriesLoaded || categoryState.categoriesError) {
+          return;
+        }
+        document.querySelector("#stat-masters").textContent = categoryState.categories.filter((entry) => entry.level === "master").length;
+        document.querySelector("#stat-categories").textContent = categoryState.categories.filter((entry) => entry.level === "category").length;
+        document.querySelector("#stat-subcategories").textContent = categoryState.categories.filter((entry) => entry.level === "subcategory").length;
+        document.querySelector("#stat-active").textContent = categoryState.categories.filter((entry) => entry.active).length;
+      }
+
+      function updateCategoryParentFilter() {
+        const selected = categoryParentFilter.value;
+        const options = ['<option value="">All parents</option>'];
+        for (const parent of sortedCategories()) {
+          if (parent.level === "subcategory") {
+            continue;
+          }
+          options.push(
+            `<option value="${escapeCategoryHtml(parent.id)}">${escapeCategoryHtml(parent.name)}</option>`,
+          );
+        }
+        categoryParentFilter.innerHTML = options.join("");
+        if (categoryState.categories.some((entry) => entry.id === selected)) {
+          categoryParentFilter.value = selected;
+        }
+      }
+
+      function renderCategoryRows() {
+        const loading = !categoryState.categoriesLoaded && !categoryState.categoriesError;
+        categoryLoading.hidden = !loading;
+        categoryError.hidden = !categoryState.categoriesError;
+        categoryErrorMessage.textContent = categoryState.categoriesError || "";
+        categoryTableWrap.hidden = true;
+        categoryEmpty.hidden = true;
+        categoryPagination.hidden = true;
+        if (loading || categoryState.categoriesError) {
+          categoryTableBody.replaceChildren();
+          return;
+        }
+
+        updateCategorySummary();
+        updateCategoryParentFilter();
+        const query = categorySearch.value.trim().toLocaleLowerCase();
+        const selectedLevel = categoryLevelFilter.value || categoryState.level;
+        const parentId = categoryParentFilter.value;
+        const status = categoryStatusFilter.value;
+        const filtered = sortedCategories().filter((entry) => {
+          const parent = parentForCategory(entry);
+          return (
+            (!selectedLevel || selectedLevel === "all" || entry.level === selectedLevel) &&
+            (!parentId || entry.parentId === parentId) &&
+            (!status || entry.active === (status === "active")) &&
+            (!query || entry.name.toLocaleLowerCase().includes(query))
+          );
+        });
+        const pageCount = Math.max(1, Math.ceil(filtered.length / categoryPageSize));
+        categoryState.page = Math.min(categoryState.page, pageCount);
+        const start = (categoryState.page - 1) * categoryPageSize;
+        const visible = filtered.slice(start, start + categoryPageSize);
+        categoryTableBody.innerHTML = visible.map((entry) => {
+          const parent = parentForCategory(entry);
+          const count = categoryState.productsReadable ? productCount(entry.id) : null;
+          const descendantCount = childrenOf(entry.id).length;
+          let deleteReason = "Delete category";
+          if (!categoryState.productsReadable) {
+            deleteReason = "Deletion unavailable until product references can be verified";
+          } else if (descendantCount > 0) {
+            deleteReason = "Delete child categories first";
+          } else if (count > 0) {
+            deleteReason = "Reassign products to another category before deleting";
+          }
+          const levelName = entry.level === "master" ? "Master Category" : entry.level === "category" ? "Category" : "Subcategory";
+          return `<tr>
+            <td class="category-name">${escapeCategoryHtml(entry.name)}</td>
+            <td><span class="category-level">${levelName}</span></td>
+            <td>${parent ? escapeCategoryHtml(parent.name) : "—"}</td>
+            <td>${count === null ? "Unavailable" : count}</td>
+            <td><span class="category-status" data-active="${entry.active}">${entry.active ? "Active" : "Inactive"}</span></td>
+            <td>${escapeCategoryHtml(formatCategoryDate(entry.updatedAt))}</td>
+            <td>
+              <div class="category-row-actions">
+                <button class="category-icon-button" type="button" data-action="view" data-id="${escapeCategoryHtml(entry.id)}" aria-label="View ${escapeCategoryHtml(entry.name)}">View</button>
+                <button class="category-icon-button" type="button" data-action="edit" data-id="${escapeCategoryHtml(entry.id)}" aria-label="Edit ${escapeCategoryHtml(entry.name)}">Edit</button>
+                <button class="category-icon-button" type="button" data-action="toggle" data-id="${escapeCategoryHtml(entry.id)}" aria-label="${entry.active ? "Deactivate" : "Activate"} ${escapeCategoryHtml(entry.name)}">${entry.active ? "Deactivate" : "Activate"}</button>
+                <button class="category-icon-button" type="button" data-action="delete" data-id="${escapeCategoryHtml(entry.id)}" title="${escapeCategoryHtml(deleteReason)}" aria-label="Delete ${escapeCategoryHtml(entry.name)}">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join("");
+
+        const warning = document.querySelector("#product-read-warning");
+        warning.hidden = categoryState.productsReadable || !categoryState.categoriesLoaded;
+        warning.textContent = categoryState.productsError
+          ? `Products could not be read (${categoryState.productsError}). Product counts and delete actions are unavailable until access is restored.`
+          : "Waiting for product data. Delete actions will be available after product references are checked.";
+
+        if (filtered.length === 0) {
+          categoryEmpty.hidden = false;
+          return;
+        }
+        categoryTableWrap.hidden = false;
+        categoryPagination.hidden = false;
+        document.querySelector("#category-page-summary").textContent =
+          `Showing ${start + 1}–${Math.min(start + categoryPageSize, filtered.length)} of ${filtered.length}`;
+        document.querySelector("#category-previous").disabled = categoryState.page <= 1;
+        document.querySelector("#category-next").disabled = categoryState.page >= pageCount;
+      }
+
+      function rebuildParentOptions() {
+        const level = categoryLevelSelect.value;
+        const editing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        const parentLevel = level === "category" ? "master" : level === "subcategory" ? "category" : "";
+        categoryParentField.hidden = !parentLevel;
+        categoryMasterDisplayField.hidden = level !== "subcategory";
+        if (!parentLevel) {
+          categoryParentSelect.required = false;
+          categoryParentSelect.replaceChildren();
+          categoryMasterDisplay.textContent = "Select a parent category.";
+          return;
+        }
+
+        categoryParentLabel.textContent = parentLevel === "master" ? "Master Category" : "Parent Category";
+        categoryParentSelect.required = true;
+        const selectedParentId = editing?.parentId || categoryParentSelect.value;
+        const options = [`<option value="">Select ${parentLevel === "master" ? "a master category" : "a category"}</option>`];
+        for (const parent of sortedCategories()) {
+          if (
+            parent.level === parentLevel &&
+            (parent.active || parent.id === selectedParentId) &&
+            parent.id !== editing?.id
+          ) {
+            options.push(
+              `<option value="${escapeCategoryHtml(parent.id)}">${escapeCategoryHtml(parent.name)}</option>`,
+            );
+          }
+        }
+        categoryParentSelect.innerHTML = options.join("");
+        if (
+          selectedParentId &&
+          Array.from(categoryParentSelect.options).some((option) => option.value === selectedParentId)
+        ) {
+          categoryParentSelect.value = selectedParentId;
+        }
+        const hasChildren = editing && childrenOf(editing.id).length > 0;
+        categoryParentSelect.disabled = Boolean(hasChildren);
+        categoryParentSelect.title = hasChildren
+          ? "This parent cannot change while child categories depend on it."
+          : "";
+        updateMasterDisplay();
+      }
+
+      function updateMasterDisplay() {
+        if (categoryLevelSelect.value !== "subcategory") {
+          return;
+        }
+        const parent = categoryState.categories.find((entry) => entry.id === categoryParentSelect.value);
+        const master = parent ? masterForCategory(parent) : null;
+        categoryMasterDisplay.textContent = master
+          ? master.name
+          : parent
+            ? "Master Category could not be resolved."
+            : "Select a parent category.";
+      }
+
+      function openCategoryForm(category = null) {
+        categoryState.editingId = category?.id || null;
+        categoryForm.reset();
+        categoryFormError.hidden = true;
+        categoryFormError.textContent = "";
+        categoryLevelSelect.disabled = Boolean(category);
+        document.querySelector("#category-form-title").textContent = category ? "Edit Category" : "Add Category";
+        document.querySelector("#category-form-description").textContent = category
+          ? "Update the category details. Existing product references remain unchanged."
+          : "Choose a level and add a descriptive name.";
+        document.querySelector("#category-save-button").textContent = category ? "Save Changes" : "Save Category";
+        categoryLevelSelect.value = category?.level || "category";
+        categoryNameInput.value = category?.name || "";
+        categoryStatusSelect.value = category?.active === false ? "inactive" : "active";
+        rebuildParentOptions();
+        if (category?.parentId) {
+          categoryParentSelect.value = category.parentId;
+        }
+        updateMasterDisplay();
+        categoryFormDialog.showModal();
+        categoryNameInput.focus();
+      }
+
+      function openCategoryView(category) {
+        const parent = parentForCategory(category);
+        const master = masterForCategory(category);
+        const details = [
+          ["Name", category.name],
+          ["Level", category.level === "master" ? "Master Category" : category.level === "category" ? "Category" : "Subcategory"],
+          ["Parent Category", parent?.name || "—"],
+          ["Master Category", master?.name || "—"],
+          ["Product Count", categoryState.productsReadable ? productCount(category.id) : "Unavailable"],
+          ["Status", category.active ? "Active" : "Inactive"],
+          ["Updated At", formatCategoryDate(category.updatedAt)],
+          ["Category ID", category.id],
+        ];
+        const list = document.querySelector("#category-view-details");
+        list.replaceChildren();
+        for (const [label, value] of details) {
+          const term = document.createElement("dt");
+          const description = document.createElement("dd");
+          term.textContent = label;
+          description.textContent = String(value);
+          list.append(term, description);
+        }
+        categoryViewDialog.showModal();
+      }
+
+      function duplicateCategoryName(name, parentId, exceptId = null) {
+        const normalizedName = name.trim().toLocaleLowerCase();
+        return categoryState.categories.some(
+          (entry) =>
+            entry.id !== exceptId &&
+            entry.parentId === parentId &&
+            entry.name.trim().toLocaleLowerCase() === normalizedName,
+        );
+      }
+
+      function categoryPatch(category, fields) {
+        const patch = { ...fields };
+        if (category.raw.categoryName !== undefined) {
+          patch.categoryName = fields.name;
+        }
+        if (category.raw.title !== undefined && category.raw.name === undefined && category.raw.categoryName === undefined) {
+          patch.title = fields.name;
+        }
+        delete patch.name;
+        if (category.raw.name !== undefined || (category.raw.categoryName === undefined && category.raw.title === undefined)) {
+          patch.name = fields.name;
+        }
+        if (category.raw.status !== undefined) {
+          patch.status = fields.status;
+        }
+        if (category.raw.active !== undefined) {
+          patch.active = fields.status === "active";
+        }
+        if (category.raw.isActive !== undefined) {
+          patch.isActive = fields.status === "active";
+        }
+        if (
+          category.raw.status === undefined &&
+          category.raw.active === undefined &&
+          category.raw.isActive === undefined
+        ) {
+          patch.status = fields.status;
+          patch.isActive = fields.status === "active";
+        }
+        if (fields.level === "master") {
+          delete patch.parentId;
+          delete patch.parentCategoryId;
+          delete patch.masterCategoryId;
+        }
+        return patch;
+      }
+
+      async function saveCategory(event) {
+        event.preventDefault();
+        categoryFormError.hidden = true;
+        const level = categoryLevelSelect.value;
+        const name = categoryNameInput.value.trim();
+        const status = categoryStatusSelect.value;
+        const parentId = level === "master" ? "" : categoryParentSelect.value;
+        const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        if (!name) {
+          categoryFormError.textContent = "Enter a category name.";
+          categoryFormError.hidden = false;
+          categoryNameInput.focus();
+          return;
+        }
+        if (name.length > 100) {
+          categoryFormError.textContent = "Category names must be 100 characters or fewer.";
+          categoryFormError.hidden = false;
+          categoryNameInput.focus();
+          return;
+        }
+        if (level !== "master") {
+          const expectedParentLevel = level === "category" ? "master" : "category";
+          const parent = categoryState.categories.find((entry) => entry.id === parentId);
+          if (!parent || parent.level !== expectedParentLevel) {
+            categoryFormError.textContent = "Select a valid parent category. The parent list may have changed; close and reopen this form if needed.";
+            categoryFormError.hidden = false;
+            return;
+          }
+        }
+        if (duplicateCategoryName(name, parentId, existing?.id || null)) {
+          categoryFormError.textContent = "A category with this name already exists under the selected parent.";
+          categoryFormError.hidden = false;
+          categoryNameInput.focus();
+          return;
+        }
+        if (existing && existing.level !== level) {
+          categoryFormError.textContent = "The hierarchy level cannot be changed for an existing category.";
+          categoryFormError.hidden = false;
+          return;
+        }
+
+        categorySaveButton.disabled = true;
+        categorySaveButton.setAttribute("aria-busy", "true");
+        categorySaveButton.textContent = "Saving…";
+        const now = Date.now();
+        const parent = categoryState.categories.find((entry) => entry.id === parentId);
+        const master = level === "master"
+          ? null
+          : level === "category"
+            ? parent
+            : parent
+              ? masterForCategory(parent)
+              : null;
+        const fields = {
+          name,
+          level,
+          status,
+          updatedAt: now,
+        };
+        if (level !== "master") {
+          fields.parentId = parentId;
+          fields.parentCategoryId = parentId;
+          fields.masterCategoryId = master?.id || "";
+        }
+        try {
+          if (existing) {
+            await update(ref(database, `categories/${existing.id}`), categoryPatch(existing, fields));
+            showCategoryToast("Category updated.");
+          } else {
+            const categoryRef = push(ref(database, "categories"));
+            await set(categoryRef, {
+              ...fields,
+              ...(level === "master"
+                ? {}
+                : {
+                    parentId,
+                    parentCategoryId: parentId,
+                    masterCategoryId: master?.id || "",
+                  }),
+              isActive: status === "active",
+              createdAt: now,
+            });
+            showCategoryToast("Category created.");
+          }
+          categoryFormDialog.close();
+        } catch (error) {
+          categoryFormError.textContent = reportFirebaseError("Saving category", error);
+          categoryFormError.hidden = false;
+        } finally {
+          categorySaveButton.disabled = false;
+          categorySaveButton.removeAttribute("aria-busy");
+          categorySaveButton.textContent = existing ? "Save Changes" : "Save Category";
+        }
+      }
+
+      function openDeleteConfirmation(category) {
+        const count = productCount(category.id);
+        const children = childrenOf(category.id).length;
+        if (!categoryState.productsReadable) {
+          showCategoryToast("Cannot verify product references. Deletion is blocked.", "error");
+          return;
+        }
+        if (children > 0) {
+          showCategoryToast("Delete or reassign child categories before deleting this category.", "error");
+          return;
+        }
+        if (count > 0) {
+          showCategoryToast(
+            `Reassign all ${count} product${count === 1 ? "" : "s"} to another category before deleting this category.`,
+            "error",
+          );
+          return;
+        }
+        categoryState.deletingId = category.id;
+        document.querySelector("#category-confirm-message").textContent =
+          `Delete “${category.name}”? This action cannot be undone.`;
+        categoryConfirmDialog.showModal();
+      }
+
+      async function deleteConfirmedCategory() {
+        const id = categoryState.deletingId;
+        const category = categoryState.categories.find((entry) => entry.id === id);
+        if (!id || !category || !categoryState.productsReadable) {
+          categoryConfirmDialog.close();
+          showCategoryToast("Deletion was cancelled because the category or product data could not be verified.", "error");
+          return;
+        }
+        categoryConfirmDelete.disabled = true;
+        categoryConfirmDelete.setAttribute("aria-busy", "true");
+        categoryConfirmDelete.textContent = "Deleting…";
+        try {
+          const [latestCategories, latestProducts] = await Promise.all([
+            get(ref(database, "categories")),
+            get(ref(database, "products")),
+          ]);
+          const categories = normalizeCategories(latestCategories.val());
+          const products = latestProducts.val() || {};
+          const latestCategory = categories.find((entry) => entry.id === id);
+          if (!latestCategory) {
+            throw new Error("This category no longer exists. Refresh the page and try again.");
+          }
+          if (childrenOf(id, categories).length > 0) {
+            throw new Error("This category now has child categories. Delete or reassign them first.");
+          }
+          const references = productCount(id, products);
+          if (references > 0) {
+            throw new Error(
+              `This category is assigned to ${references} product${references === 1 ? "" : "s"}. Reassign those products before deleting.`,
+            );
+          }
+          await remove(ref(database, `categories/${id}`));
+          categoryConfirmDialog.close();
+          showCategoryToast("Category deleted.");
+        } catch (error) {
+          showCategoryToast(
+            error?.code
+              ? reportFirebaseError("Deleting category", error)
+              : error.message || "Category deletion failed. Refresh and retry.",
+            "error",
+          );
+        } finally {
+          categoryState.deletingId = null;
+          categoryConfirmDelete.disabled = false;
+          categoryConfirmDelete.removeAttribute("aria-busy");
+          categoryConfirmDelete.textContent = "Delete";
+        }
+      }
+
+      async function toggleCategoryStatus(category) {
+        const status = category.active ? "inactive" : "active";
+        const fields = { status, updatedAt: Date.now() };
+        if (category.raw.active !== undefined) {
+          fields.active = status === "active";
+        }
+        if (category.raw.isActive !== undefined) {
+          fields.isActive = status === "active";
+        }
+        if (category.raw.status === undefined && category.raw.active === undefined && category.raw.isActive === undefined) {
+          fields.isActive = status === "active";
+        }
+        try {
+          await update(ref(database, `categories/${category.id}`), fields);
+          showCategoryToast(`Category ${status === "active" ? "activated" : "deactivated"}.`);
+        } catch (error) {
+          showCategoryToast(reportFirebaseError("Updating category status", error), "error");
+        }
+      }
+
+      function startCategoryListeners() {
+        categoryState.stopCategories?.();
+        categoryState.stopProducts?.();
+        categoryState.categoriesLoaded = false;
+        categoryState.productsLoaded = false;
+        categoryState.productsReadable = false;
+        categoryState.categoriesError = null;
+        categoryState.productsError = null;
+        renderCategoryRows();
+        categoryState.stopCategories = onValue(
+          ref(database, "categories"),
+          (snapshot) => {
+            categoryState.categories = normalizeCategories(snapshot.val());
+            categoryState.categoriesLoaded = true;
+            categoryState.categoriesError = null;
+            renderCategoryRows();
+          },
+          (error) => {
+            categoryState.categoriesError = reportFirebaseError("Reading categories", error);
+            categoryState.categoriesLoaded = false;
+            renderCategoryRows();
+          },
+        );
+        categoryState.stopProducts = onValue(
+          ref(database, "products"),
+          (snapshot) => {
+            categoryState.products = snapshot.val() || {};
+            categoryState.productsLoaded = true;
+            categoryState.productsReadable = true;
+            categoryState.productsError = null;
+            renderCategoryRows();
+          },
+          (error) => {
+            categoryState.products = {};
+            categoryState.productsLoaded = true;
+            categoryState.productsReadable = false;
+            categoryState.productsError = reportFirebaseError("Reading products", error);
+            renderCategoryRows();
+          },
+        );
+      }
+
+      document.querySelector("#category-add-button").addEventListener("click", () => openCategoryForm());
+      document.querySelector("#category-retry").addEventListener("click", startCategoryListeners);
+      categoryForm.addEventListener("submit", saveCategory);
+      categoryLevelSelect.addEventListener("change", rebuildParentOptions);
+      categoryParentSelect.addEventListener("change", updateMasterDisplay);
+      categoryConfirmDelete.addEventListener("click", deleteConfirmedCategory);
+      for (const dialog of [categoryFormDialog, categoryViewDialog, categoryConfirmDialog]) {
+        dialog.querySelectorAll("[data-close-dialog]").forEach((button) => {
+          button.addEventListener("click", () => dialog.close());
+        });
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        });
+      }
+      categoryTableBody.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button || button.disabled) {
+          return;
+        }
+        const category = categoryState.categories.find((entry) => entry.id === button.dataset.id);
+        if (!category) {
+          showCategoryToast("This category is no longer available. The table has been refreshed.", "error");
+          return;
+        }
+        if (button.dataset.action === "view") {
+          openCategoryView(category);
+        } else if (button.dataset.action === "edit") {
+          openCategoryForm(category);
+        } else if (button.dataset.action === "toggle") {
+          void toggleCategoryStatus(category);
+        } else if (button.dataset.action === "delete") {
+          openDeleteConfirmation(category);
+        }
+      });
+      for (const filter of [categorySearch, categoryParentFilter, categoryStatusFilter]) {
+        filter.addEventListener("input", () => {
+          categoryState.page = 1;
+          renderCategoryRows();
+        });
+        filter.addEventListener("change", () => {
+          categoryState.page = 1;
+          renderCategoryRows();
+        });
+      }
+      categoryLevelFilter.addEventListener("change", () => {
+        categoryState.level = categoryLevelFilter.value || "all";
+        categoryState.page = 1;
+        document.querySelectorAll(".category-tab").forEach((tab) => {
+          tab.setAttribute(
+            "aria-selected",
+            String(tab.dataset.level === categoryState.level),
+          );
+        });
+        renderCategoryRows();
+      });
+      document.querySelectorAll(".category-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          categoryState.level = tab.dataset.level;
+          categoryLevelFilter.value = tab.dataset.level === "all" ? "" : tab.dataset.level;
+          categoryState.page = 1;
+          document.querySelectorAll(".category-tab").forEach((item) => {
+            item.setAttribute("aria-selected", String(item === tab));
+          });
+          renderCategoryRows();
+        });
+        tab.addEventListener("keydown", (event) => {
+          const tabs = Array.from(document.querySelectorAll(".category-tab"));
+          const currentIndex = tabs.indexOf(tab);
+          const nextIndex = event.key === "ArrowRight"
+            ? (currentIndex + 1) % tabs.length
+            : event.key === "ArrowLeft"
+              ? (currentIndex - 1 + tabs.length) % tabs.length
+              : event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? tabs.length - 1
+                  : -1;
+          if (nextIndex >= 0) {
+            event.preventDefault();
+            tabs[nextIndex].focus();
+            tabs[nextIndex].click();
+          }
+        });
+      });
+      document.querySelector("#category-previous").addEventListener("click", () => {
+        categoryState.page -= 1;
+        renderCategoryRows();
+      });
+      document.querySelector("#category-next").addEventListener("click", () => {
+        categoryState.page += 1;
+        renderCategoryRows();
+      });
 
       function showGateError(message, error) {
         if (error) {
@@ -1133,6 +2692,9 @@
 
             document.body.classList.add("is-admin-authorized");
             authGate.hidden = true;
+            if (!categoryState.stopCategories) {
+              startCategoryListeners();
+            }
           } catch (error) {
             showGateError(
               "Firebase could not verify your user profile. Check your connection and the Realtime Database security rules, then retry.",
