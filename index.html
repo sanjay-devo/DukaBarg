@@ -1329,9 +1329,10 @@
 
       .orders-date-range {
         display: grid;
-        grid-column: span 2;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
         gap: var(--space-3);
+        align-items: end;
       }
 
       .orders-date-range-label {
@@ -1344,7 +1345,7 @@
       .orders-filter-actions {
         display: flex;
         justify-content: flex-end;
-        grid-column: 1 / -1;
+        align-items: flex-end;
       }
 
       .orders-toolbar input:focus-visible,
@@ -1356,11 +1357,74 @@
       }
 
       .orders-selection {
-        min-height: 44px;
+        box-sizing: border-box;
+        height: 36px;
+        min-height: 36px;
+        margin: 0;
+        padding: 0 var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        white-space: nowrap;
         display: flex;
         align-items: center;
-        color: var(--color-text-inverse);
+        justify-content: center;
         font-size: var(--font-size-sm);
+        line-height: 1;
+      }
+
+      .orders-selection[hidden] {
+        display: none;
+      }
+
+      .orders-bulk-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        margin: 0;
+        padding: var(--space-5) 0;
+      }
+
+      .orders-bulk-actions[hidden] {
+        display: none;
+      }
+
+      .orders-bulk-actions > .orders-selection,
+      .orders-bulk-actions > button,
+      .orders-bulk-status select,
+      .orders-bulk-status button {
+        box-sizing: border-box;
+        height: 36px;
+        min-height: 36px;
+      }
+
+      .orders-bulk-status {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+
+      .orders-bulk-status label {
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-bulk-status select {
+        min-width: 170px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-bulk-status select:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
       }
 
       .orders-feedback {
@@ -1388,7 +1452,8 @@
       .orders-table-wrap {
         overflow-x: auto;
         border: 1px solid var(--color-border-muted);
-        border-radius: var(--radius-lg);
+        border-top: 0;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
       }
 
       .orders-table-wrap[hidden] {
@@ -1401,7 +1466,7 @@
 
       .orders-table {
         width: 100%;
-        min-width: 980px;
+        min-width: 850px;
         border-collapse: collapse;
         text-align: left;
       }
@@ -1695,13 +1760,26 @@
           grid-column: auto;
         }
 
-        .orders-date-range,
+        .orders-date-range {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+        }
+
         .orders-detail-grid {
           grid-template-columns: 1fr;
         }
 
         .orders-dialog-content {
           padding: var(--space-6);
+        }
+
+        .orders-bulk-actions,
+        .orders-bulk-status {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .orders-bulk-status select {
+          width: 100%;
         }
       }
 
@@ -3109,13 +3187,24 @@
                   <input id="orders-date-from" type="date" aria-label="Order date from" />
                   <label class="visually-hidden" for="orders-date-to">To date</label>
                   <input id="orders-date-to" type="date" aria-label="Order date to" />
-                </div>
-                <div class="orders-filter-actions">
-                  <button class="category-secondary-button" id="orders-clear-filters" type="button">Clear Filters</button>
+                  <div class="orders-filter-actions">
+                    <button class="category-secondary-button" id="orders-clear-filters" type="button">Clear Filters</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="orders-selection" id="orders-selection-summary" aria-live="polite">0 selected</div>
+              <div class="orders-bulk-actions" id="orders-bulk-actions" aria-label="Selected order actions" hidden>
+                <span class="orders-selection" id="orders-selection-summary" aria-live="polite">0 selected</span>
+                <button class="category-secondary-button" id="orders-bulk-mark-paid" type="button">Mark as Paid</button>
+                <div class="orders-bulk-status">
+                  <label for="orders-bulk-status-select">Change Order Status</label>
+                  <select id="orders-bulk-status-select" aria-label="New order status for selected orders">
+                    <option value="">Choose a status</option>
+                  </select>
+                  <button class="category-secondary-button" id="orders-bulk-apply-status" type="button" disabled>Apply</button>
+                </div>
+                <button class="category-secondary-button" id="orders-clear-selection" type="button">Clear Selection</button>
+              </div>
               <div class="orders-feedback" id="orders-loading" aria-live="polite">
                 <div class="category-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="visually-hidden">Loading orders from Firebase</span>
@@ -3132,8 +3221,8 @@
               <div class="orders-table-wrap" id="orders-table-wrap" hidden>
                 <table class="orders-table">
                   <thead><tr>
-                    <th scope="col"><span class="visually-hidden">Select</span></th>
-                    <th scope="col">Order ID</th><th scope="col">Customer</th><th scope="col">Date</th><th scope="col">Items</th><th scope="col">Total</th><th scope="col">Payment</th><th scope="col">Order Status</th><th scope="col">Actions</th>
+                    <th scope="col"><input id="orders-select-all" type="checkbox" aria-label="Select all orders on this page" /></th>
+                    <th scope="col">Order ID</th><th scope="col">Customer</th><th scope="col">Date</th><th scope="col">Items</th><th scope="col">Total</th><th scope="col">Order Status</th><th scope="col">Actions</th>
                   </tr></thead>
                   <tbody id="orders-table-body"></tbody>
                 </table>
@@ -4568,6 +4657,14 @@
         return value ? value.trim() : "";
       }
 
+      function paymentStatusLabel(status) {
+        const normalized = String(status || "").trim().toUpperCase();
+        if (normalized === "COMPLETED" || normalized === "PAID") return "Paid";
+        if (normalized === "PENDING") return "Pending";
+        if (normalized === "FAILED") return "Failed";
+        return status || "Not provided";
+      }
+
       function renderCustomerRecentOrders(orders, message = "", kind = "info") {
         const list = document.querySelector("#customer-orders-list");
         const state = document.querySelector("#customer-orders-unavailable");
@@ -4596,7 +4693,7 @@
             <div class="customer-order-card-meta">
               <span>${escapeCustomerText(order.date ? formatCustomerDate(order.date, true) : "Order date not provided")}</span>
               <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.orderStatus)}">Order: ${escapeCustomerText(order.orderStatus)}</span>
-              <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.paymentStatus)}">Payment: ${escapeCustomerText(order.paymentStatus)}</span>
+              <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.paymentStatus)}">Payment: ${escapeCustomerText(paymentStatusLabel(order.paymentStatus))}</span>
               <span>${escapeCustomerText(itemSummary)}</span>
               <span>${escapeCustomerText(order.paymentMethod || "Payment method not provided")}</span>
             </div>
@@ -4619,7 +4716,7 @@
             <div class="customer-detail-item"><dt>Order ID</dt><dd>${escapeCustomerText(order.id)}</dd></div>
             <div class="customer-detail-item"><dt>Date</dt><dd>${escapeCustomerText(order.date ? formatCustomerDate(order.date, true) : "Not provided")}</dd></div>
             <div class="customer-detail-item"><dt>Order status</dt><dd>${escapeCustomerText(order.orderStatus)}</dd></div>
-            <div class="customer-detail-item"><dt>Payment status</dt><dd>${escapeCustomerText(order.paymentStatus)}</dd></div>
+            <div class="customer-detail-item"><dt>Payment status</dt><dd>${escapeCustomerText(paymentStatusLabel(order.paymentStatus))}</dd></div>
             <div class="customer-detail-item"><dt>Amount</dt><dd>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</dd></div>
             <div class="customer-detail-item"><dt>Payment method</dt><dd>${escapeCustomerText(order.paymentMethod || "Not provided")}</dd></div>
           </dl><section class="customer-detail-section"><h3>Items</h3>${items}</section>`;
@@ -5121,7 +5218,7 @@
         const selectedMethod = method.value;
         const payments = [...new Set(orderState.orders.map((order) => order.paymentStatus).filter(Boolean))].sort();
         const methods = [...new Set(orderState.orders.map((order) => order.paymentMethod).filter(Boolean))].sort();
-        payment.replaceChildren(new Option("All payment statuses", ""), ...payments.map((item) => new Option(item, item)));
+        payment.replaceChildren(new Option("All payment statuses", ""), ...payments.map((item) => new Option(paymentStatusLabel(item), item)));
         method.replaceChildren(new Option("All payment methods", ""), ...methods.map((item) => new Option(item, item)));
         payment.value = payments.includes(selectedPayment) ? selectedPayment : "";
         method.value = methods.includes(selectedMethod) ? selectedMethod : "";
@@ -5156,6 +5253,64 @@
           : `${amountCount} of ${orderState.orders.length} orders have a stored final total`;
       }
 
+      function getSelectedOrderRecords() {
+        const ordersByKey = new Map(orderState.orders.map((order) => [order.key, order]));
+        return [...orderState.selected].map((key) => ordersByKey.get(key)).filter(Boolean);
+      }
+
+      function updateOrderSelectionUi(visibleOrders = []) {
+        const selectedOrders = getSelectedOrderRecords();
+        const selectionCount = selectedOrders.length;
+        const available = new Map();
+        for (const order of selectedOrders) {
+          for (const status of orderStatusTransitions[order.orderStatus.toUpperCase()] || []) {
+            available.set(status, (available.get(status) || 0) + 1);
+          }
+        }
+        const statusLabels = {
+          CONFIRMED: "Confirmed",
+          PROCESSING: "Processing",
+          READY_TO_SHIP: "Ready to ship",
+          OUT_FOR_DELIVERY: "Out for delivery",
+          DELIVERED: "Delivered",
+          CANCELLED: "Cancelled",
+        };
+        const statusSelect = document.querySelector("#orders-bulk-status-select");
+        const previousStatus = statusSelect.value;
+        statusSelect.replaceChildren(
+          new Option("Choose a status", ""),
+          ...[...available].map(([status, count]) => new Option(
+            `${statusLabels[status] || status} (${count}/${selectionCount} eligible)`,
+            status,
+          )),
+        );
+        statusSelect.value = available.has(previousStatus) ? previousStatus : "";
+
+        const selectionSummary = document.querySelector("#orders-selection-summary");
+        const bulkActions = document.querySelector("#orders-bulk-actions");
+        const hasSelection = selectionCount > 0 && orderState.loaded && !orderState.error;
+        selectionSummary.textContent = `${selectionCount.toLocaleString("en-IN")} selected`;
+        bulkActions.hidden = !hasSelection;
+        document.querySelector("#orders-bulk-mark-paid").disabled =
+          orderState.saving || !selectedOrders.some((order) => order.path && order.paymentStatus.toUpperCase() === "PENDING");
+        statusSelect.disabled = orderState.saving;
+        document.querySelector("#orders-bulk-apply-status").disabled =
+          orderState.saving || !statusSelect.value || !available.get(statusSelect.value);
+        document.querySelector("#orders-clear-selection").disabled = orderState.saving;
+        for (const control of ordersTableBody.querySelectorAll("[data-order-select], [data-order-menu]")) {
+          control.disabled = orderState.saving;
+        }
+
+        const selectAll = document.querySelector("#orders-select-all");
+        const selectedOnPage = visibleOrders.filter((order) => orderState.selected.has(order.key)).length;
+        for (const checkbox of ordersTableBody.querySelectorAll("[data-order-select]")) {
+          checkbox.checked = orderState.selected.has(checkbox.dataset.orderSelect);
+        }
+        selectAll.checked = visibleOrders.length > 0 && selectedOnPage === visibleOrders.length;
+        selectAll.indeterminate = selectedOnPage > 0 && selectedOnPage < visibleOrders.length;
+        selectAll.disabled = orderState.saving || visibleOrders.length === 0;
+      }
+
       function renderOrdersTable() {
         const loading = document.querySelector("#orders-loading");
         const error = document.querySelector("#orders-error");
@@ -5177,9 +5332,13 @@
           ordersTableBody.replaceChildren();
           empty.hidden = true;
           pagination.hidden = true;
+          updateOrderSelectionUi();
           return;
         }
-        if (!orderState.loaded) return;
+        if (!orderState.loaded) {
+          updateOrderSelectionUi();
+          return;
+        }
         renderOrderStats();
         const filtered = getFilteredOrders();
         const pageCount = Math.max(1, Math.ceil(filtered.length / orderState.pageSize));
@@ -5188,17 +5347,13 @@
         ordersTableBody.replaceChildren();
         for (const order of visible) {
           const customer = getOrderCustomer(order);
-          const paymentTone = ["COMPLETED", "PAID", "SUCCESS", "SUCCEEDED"].includes(order.paymentStatus.toUpperCase())
-            ? "green" : ["FAILED", "CANCELLED", "CANCELED"].includes(order.paymentStatus.toUpperCase())
-              ? "red" : ["PENDING", "INITIATED", "PROCESSING"].includes(order.paymentStatus.toUpperCase()) ? "amber" : "";
           const row = document.createElement("tr");
-          row.innerHTML = `<td><input type="checkbox" data-order-select="${escapeCustomerText(order.key)}" aria-label="Select order ${escapeCustomerText(order.id)}"${orderState.selected.has(order.key) ? " checked" : ""} /></td>
+          row.innerHTML = `<td><input type="checkbox" data-order-select="${escapeCustomerText(order.key)}" aria-label="Select order ${escapeCustomerText(order.id)}"${orderState.selected.has(order.key) ? " checked" : ""}${orderState.saving ? " disabled" : ""} /></td>
             <td><button class="orders-id-button" type="button" data-order-action="view" data-order-key="${escapeCustomerText(order.key)}">${escapeCustomerText(order.id)}</button></td>
             <td><span class="orders-primary-text">${escapeCustomerText(customer.name || "Not provided")}</span><span class="orders-secondary-text">${escapeCustomerText(customer.mobile || "Not provided")}</span></td>
             <td>${escapeCustomerText(order.timestamp ? formatCustomerDate(order.timestamp, true) : "Not provided")}</td>
             <td>${order.itemCount === null ? (order.items.length ? `${order.items.length} lines` : "Not provided") : order.itemCount}</td>
             <td>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</td>
-            <td><span class="orders-primary-text">${escapeCustomerText(order.paymentMethod || "Not provided")}</span><span class="orders-status-badge"${paymentTone ? ` data-tone="${paymentTone}"` : ""}>${escapeCustomerText(order.paymentStatus || "Not provided")}</span></td>
             <td><span class="orders-status-badge"${orderStatusTone(order) ? ` data-tone="${orderStatusTone(order)}"` : ""}>${escapeCustomerText(orderStatusLabel(order))}</span></td>
             <td><button class="orders-action-trigger" type="button" aria-label="Actions for order ${escapeCustomerText(order.id)}" aria-haspopup="menu" aria-expanded="false" data-order-menu="${escapeCustomerText(order.key)}">⋮</button></td>`;
           ordersTableBody.append(row);
@@ -5230,7 +5385,7 @@
           button.addEventListener("click", () => { orderState.page = page; renderOrdersTable(); });
           pages.append(button);
         }
-        document.querySelector("#orders-selection-summary").textContent = `${orderState.selected.size.toLocaleString("en-IN")} selected`;
+        updateOrderSelectionUi(visible);
       }
 
       function renderOrders() {
@@ -5352,7 +5507,7 @@
           ["Delivery address", source.deliveryAddress ?? source.shippingAddress ?? source.address],
           ["Order status", order.orderStatus],
           ["Payment method", order.paymentMethod],
-          ["Payment status", order.paymentStatus],
+          ["Payment status", paymentStatusLabel(order.paymentStatus)],
           ["Transaction / reference ID", orderFieldText(source, ["transactionId", "referenceId", "transactionReference", "paymentId", "transaction_id"])],
         ];
         const products = order.items.length
@@ -5419,6 +5574,9 @@
         activeOrderMenuTrigger = trigger;
         trigger.setAttribute("aria-expanded", "true");
         ordersActionMenu.replaceChildren(orderMenuItem("View Order", "view", order));
+        if (order.path && order.paymentStatus.toUpperCase() === "PENDING") {
+          ordersActionMenu.append(orderMenuItem("Mark as Paid", "paid", order));
+        }
         if (order.path && (orderStatusTransitions[order.orderStatus.toUpperCase()] || []).length) {
           ordersActionMenu.append(orderMenuItem("Update Order Status", "status", order));
         }
@@ -5445,6 +5603,46 @@
         ordersStatusDialog.showModal();
       }
 
+      async function commitOrderStatus(order, status) {
+        if (!order.path) throw new Error("This order has no verified Firebase path, so its status cannot be safely updated.");
+        if (!(orderStatusTransitions[order.orderStatus.toUpperCase()] || []).includes(status)) {
+          throw new Error("That status transition is not available for this order.");
+        }
+        const result = await runTransaction(
+          ref(database, `${order.path}/orderStatus`),
+          (current) => current === order.orderStatus ? status : undefined,
+        );
+        if (!result.committed) throw new Error("The order status changed in Firebase. Reload the order list before trying again.");
+        order.raw.orderStatus = status;
+        order.orderStatus = status;
+      }
+
+      async function commitOrderPayment(order) {
+        if (!order.path) throw new Error("This order has no verified Firebase path, so its payment cannot be safely updated.");
+        if (order.paymentStatus.toUpperCase() !== "PENDING") {
+          throw new Error("The payment status is no longer pending. Reload the orders before trying again.");
+        }
+        const result = await runTransaction(
+          ref(database, `${order.path}/paymentStatus`),
+          (current) => current === "PENDING" ? "COMPLETED" : undefined,
+        );
+        if (!result.committed) throw new Error("The payment status is no longer pending. Reload the orders before trying again.");
+        order.raw.paymentStatus = "COMPLETED";
+        order.paymentStatus = "COMPLETED";
+        for (const customerOrder of customerState.ordersByCustomer[order.uid] || []) {
+          if (customerOrder.id === order.id) {
+            customerOrder.raw.paymentStatus = "COMPLETED";
+            customerOrder.paymentStatus = "COMPLETED";
+          }
+        }
+        for (const customerOrder of customerState.detailOrders) {
+          if (customerState.selectedCustomerId === order.uid && customerOrder.id === order.id) {
+            customerOrder.raw.paymentStatus = "COMPLETED";
+            customerOrder.paymentStatus = "COMPLETED";
+          }
+        }
+      }
+
       async function saveOrderStatus(event) {
         event.preventDefault();
         const order = orderState.activeOrder;
@@ -5463,17 +5661,12 @@
           return;
         }
         orderState.saving = true;
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
         button.disabled = true;
         button.setAttribute("aria-busy", "true");
         try {
           if (status === "CANCELLED" && !window.confirm(`Cancel order ${order.id}? This cannot be undone from this dashboard.`)) return;
-          const result = await runTransaction(
-            ref(database, `${order.path}/orderStatus`),
-            (current) => current === order.orderStatus ? status : undefined,
-          );
-          if (!result.committed) throw new Error("The order status changed in Firebase. Reload the order list before trying again.");
-          order.raw.orderStatus = status;
-          order.orderStatus = status;
+          await commitOrderStatus(order, status);
           renderOrders();
           ordersStatusDialog.close();
           showCategoryToast(`Order ${order.id} status updated to ${orderStatusLabel(order)}.`);
@@ -5486,6 +5679,115 @@
           orderState.saving = false;
           button.disabled = false;
           button.removeAttribute("aria-busy");
+          renderOrders();
+        }
+      }
+
+      async function markOrderAsPaid(order) {
+        if (!order.path || order.paymentStatus.toUpperCase() !== "PENDING") return;
+        if (orderState.saving) return;
+        if (!window.confirm(`Mark order ${order.id} as paid? The COD payment method and order status will remain unchanged.`)) return;
+        orderState.saving = true;
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
+        try {
+          await commitOrderPayment(order);
+          renderOrders();
+          if (customerState.loaded) renderCustomers();
+          showCategoryToast(`Order ${order.id} marked as paid. COD payment method and order status were not changed.`);
+        } catch (error) {
+          showCategoryToast(
+            error?.code ? reportFirebaseError("Marking order as paid", error) : error.message || "Could not update payment status. Retry.",
+            "error",
+          );
+        } finally {
+          orderState.saving = false;
+          renderOrders();
+        }
+      }
+
+      async function markSelectedOrdersAsPaid() {
+        if (orderState.saving) return;
+        const selectedOrders = getSelectedOrderRecords();
+        const eligible = selectedOrders.filter((order) => order.paymentStatus.toUpperCase() === "PENDING");
+        if (!eligible.length) {
+          showCategoryToast("None of the selected orders have a pending payment.", "error");
+          return;
+        }
+        if (!window.confirm(`Mark ${eligible.length} selected pending payment${eligible.length === 1 ? "" : "s"} as paid? Payment methods and order statuses will remain unchanged.`)) return;
+
+        orderState.saving = true;
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
+        let updated = 0;
+        const failures = [];
+        try {
+          for (const order of eligible) {
+            try {
+              await commitOrderPayment(order);
+              updated += 1;
+            } catch (error) {
+              const message = error?.code
+                ? reportFirebaseError(`Marking order ${order.id} as paid`, error)
+                : error.message || "Could not update payment status.";
+              failures.push(`${order.id}: ${message}`);
+            }
+          }
+          renderOrders();
+          if (customerState.loaded) renderCustomers();
+          const skipped = selectedOrders.length - eligible.length;
+          const summary = `${updated} selected order${updated === 1 ? "" : "s"} marked as paid.${skipped ? ` ${skipped} skipped because payment was not pending.` : ""}`;
+          showCategoryToast(failures.length ? `${summary} ${failures.length} failed: ${failures.join("; ")}` : summary, failures.length ? "error" : undefined);
+        } finally {
+          orderState.saving = false;
+          renderOrders();
+        }
+      }
+
+      async function applySelectedOrderStatus() {
+        if (orderState.saving) return;
+        const status = document.querySelector("#orders-bulk-status-select").value;
+        const selectedOrders = getSelectedOrderRecords();
+        if (!status || !selectedOrders.length) return;
+        const eligible = selectedOrders.filter((order) =>
+          (orderStatusTransitions[order.orderStatus.toUpperCase()] || []).includes(status));
+        const skipped = selectedOrders.length - eligible.length;
+        if (!eligible.length) {
+          showCategoryToast("The selected orders do not support that status transition.", "error");
+          return;
+        }
+        if (status === "CANCELLED" &&
+          !window.confirm(`Cancel ${eligible.length} selected order${eligible.length === 1 ? "" : "s"}? This cannot be undone from this dashboard.`)) return;
+
+        orderState.saving = true;
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
+        let updated = 0;
+        const failures = [];
+        try {
+          for (const order of eligible) {
+            try {
+              await commitOrderStatus(order, status);
+              updated += 1;
+            } catch (error) {
+              const message = error?.code
+                ? reportFirebaseError(`Updating order ${order.id} status`, error)
+                : error.message || "Could not update order status.";
+              failures.push(`${order.id}: ${message}`);
+            }
+          }
+          renderOrders();
+          if (customerState.loaded) renderCustomers();
+          const label = {
+            CONFIRMED: "Confirmed", PROCESSING: "Processing", READY_TO_SHIP: "Ready to ship",
+            OUT_FOR_DELIVERY: "Out for delivery", DELIVERED: "Delivered", CANCELLED: "Cancelled",
+          }[status] || status;
+          const skippedText = skipped ? ` ${skipped} skipped because the transition is not supported.` : "";
+          const failureText = failures.length ? ` ${failures.length} failed: ${failures.join("; ")}` : "";
+          showCategoryToast(
+            `${updated} order${updated === 1 ? "" : "s"} updated to ${label}.${skippedText}${failureText}`,
+            skipped || failures.length ? "error" : undefined,
+          );
+        } finally {
+          orderState.saving = false;
+          updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
         }
       }
 
@@ -5536,7 +5838,31 @@
         if (!checkbox) return;
         if (checkbox.checked) orderState.selected.add(checkbox.dataset.orderSelect);
         else orderState.selected.delete(checkbox.dataset.orderSelect);
-        document.querySelector("#orders-selection-summary").textContent = `${orderState.selected.size.toLocaleString("en-IN")} selected`;
+        const filtered = getFilteredOrders();
+        const visible = filtered.slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize);
+        updateOrderSelectionUi(visible);
+      });
+      document.querySelector("#orders-select-all").addEventListener("change", (event) => {
+        const filtered = getFilteredOrders();
+        const visible = filtered.slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize);
+        for (const order of visible) {
+          if (event.currentTarget.checked) orderState.selected.add(order.key);
+          else orderState.selected.delete(order.key);
+        }
+        updateOrderSelectionUi(visible);
+      });
+      document.querySelector("#orders-clear-selection").addEventListener("click", () => {
+        orderState.selected.clear();
+        renderOrdersTable();
+      });
+      document.querySelector("#orders-bulk-mark-paid").addEventListener("click", () => {
+        void markSelectedOrdersAsPaid();
+      });
+      document.querySelector("#orders-bulk-status-select").addEventListener("change", () => {
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
+      });
+      document.querySelector("#orders-bulk-apply-status").addEventListener("click", () => {
+        void applySelectedOrderStatus();
       });
       ordersActionMenu.addEventListener("click", (event) => {
         const action = event.target.closest("[data-order-action]");
@@ -5549,6 +5875,7 @@
         if (action.dataset.orderAction === "view") openOrderDetails(order);
         if (action.dataset.orderAction === "status") openOrderStatusDialog(order);
         if (action.dataset.orderAction === "customer") openOrderCustomer(order);
+        if (action.dataset.orderAction === "paid") void markOrderAsPaid(order);
       });
       document.addEventListener("click", (event) => {
         if (!ordersActionMenu.hidden && !ordersActionMenu.contains(event.target) && !event.target.closest("[data-order-menu]")) {
