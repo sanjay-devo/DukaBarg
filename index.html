@@ -408,14 +408,8 @@
       }
 
       .main-content {
-        max-width: 1050px;
-        margin: 0 auto;
+        width: 100%;
         padding: var(--space-8) var(--space-7);
-      }
-
-      .main-content.is-wide-page {
-        max-width: none;
-        margin: 0;
       }
 
       .welcome-card {
@@ -1577,18 +1571,25 @@
       }
 
       .category-pagination button,
-      .products-pagination button {
+      .products-pagination button,
+      .inventory-pagination button {
         min-width: 34px;
       }
 
       @media (max-width: 760px) {
         .category-pagination,
-        .products-pagination {
+        .products-pagination,
+        .inventory-pagination {
           align-items: flex-start;
           flex-direction: column;
         }
 
         .category-pagination-controls {
+          justify-content: flex-start;
+          width: 100%;
+        }
+
+        .inventory-pagination .category-pagination-controls {
           justify-content: flex-start;
           width: 100%;
         }
@@ -2279,7 +2280,6 @@
                 <button class="category-secondary-button" id="barcode-print-selected" type="button" disabled>Print selected labels</button>
               </div>
             </div>
-            <div class="category-table-card">
               <div class="products-filters" aria-label="Barcode filters">
                 <input id="barcode-search" type="search" placeholder="Search product, ID, SKU, barcode" aria-label="Search barcode records" />
                 <select id="barcode-master-filter" aria-label="Filter barcodes by master category"><option value="">All master categories</option></select>
@@ -2292,7 +2292,32 @@
               <div class="products-feedback" id="inventory-error" data-kind="error" role="alert" hidden><span id="inventory-error-message"></span><button class="category-secondary-button" id="inventory-retry" type="button">Retry loading</button></div>
               <div class="products-feedback" id="inventory-empty" hidden>No matching products or variants. Products without a barcode can be generated after loading.</div>
               <div class="products-table-wrap" id="barcode-grid-wrap" hidden><div class="barcode-grid" id="barcode-grid"></div></div>
-            </div>
+              <div class="products-pagination inventory-pagination" id="inventory-pagination" hidden>
+                <div class="pagination-summary">
+                  <span id="inventory-page-summary"></span>
+                  <label class="pagination-size" for="inventory-page-size">
+                    Rows per page
+                    <select id="inventory-page-size" aria-label="Inventory rows per page">
+                      <option value="10" selected>10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="500">500</option>
+                      <option value="all">All</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="inventory-previous">Previous</button>
+                  <div class="pagination-pages" id="inventory-page-buttons" aria-label="Inventory pages"></div>
+                  <label class="pagination-page-input" for="inventory-page-input">
+                    Page
+                    <input id="inventory-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to inventory page" />
+                    <span>of <span id="inventory-page-count">1</span></span>
+                  </label>
+                  <button type="button" id="inventory-next">Next</button>
+                </div>
+              </div>
           </section>
         </section>
       </main>
@@ -2486,7 +2511,6 @@
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
-        mainContent.classList.toggle("is-wide-page", isCategoriesPage || isProductsPage);
         breadcrumbCurrent.textContent = pageName;
         categoryPage.hidden = !isCategoriesPage;
         productsPage.hidden = !isProductsPage;
@@ -2606,6 +2630,10 @@
         reservedBarcodes: new Set(),
         pendingAction: null,
         importRows: [],
+      };
+      const inventoryState = {
+        page: 1,
+        pageSize: 10,
       };
       let barcodeLibraryPromise = null;
       const categoryTableBody = document.querySelector("#category-table-body");
@@ -4635,31 +4663,48 @@
         document.querySelector("#inventory-error-message").textContent = error || "";
         document.querySelector("#barcode-grid-wrap").hidden = true;
         document.querySelector("#inventory-empty").hidden = true;
+        const pagination = document.querySelector("#inventory-pagination");
+        pagination.hidden = true;
         if (loading || error) return;
         updateProductFilters();
         const records = barcodeRecords();
         const grid = document.querySelector("#barcode-grid");
+        const { start, end } = renderPaginationControls(
+          "inventory",
+          inventoryState,
+          records.length,
+        );
+        const visibleRecords = records.slice(start, end);
+        pagination.hidden = false;
         if (!records.length) {
           document.querySelector("#inventory-empty").hidden = false;
           grid.replaceChildren();
-          return;
-        }
-        document.querySelector("#barcode-grid-wrap").hidden = false;
-        grid.innerHTML = records.map((record) => `<article class="barcode-card">
-          <label><input type="checkbox" data-barcode-select="${escapeProductHtml(record.uid)}"${productState.selected.has(`barcode:${record.uid}`) ? " checked" : ""} /> Select label</label>
-          <h3>${escapeProductHtml(record.name)}${record.variantName ? ` — ${escapeProductHtml(record.variantName)}` : ""}</h3>
-          <p>Product ID: ${escapeProductHtml(productId(record.product, record.key))} · SKU: ${escapeProductHtml(record.sku || "—")}</p>
-          <p>Barcode: <span data-barcode-value="${escapeProductHtml(record.uid)}">${escapeProductHtml(record.barcode || "Missing")}</span></p>
-          <div class="barcode-preview" data-barcode-preview="${escapeProductHtml(record.uid)}" aria-label="Code 128 barcode preview"></div>
-          <div class="barcode-card-actions">
-            ${isValidBarcode(record.barcode)
-              ? `<button class="category-secondary-button" type="button" data-barcode-action="download" data-uid="${escapeProductHtml(record.uid)}">Download PNG</button>`
-              : `<button class="category-primary-button" type="button" data-barcode-action="generate" data-uid="${escapeProductHtml(record.uid)}">Generate Barcode</button>`}
-          </div>
-        </article>`).join("");
-        for (const record of records) {
-          if (isValidBarcode(record.barcode)) void drawCode128(grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`), record.barcode, { width: 1.5, height: 32, fontSize: 10, margin: 4 });
-          else grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`).textContent = record.barcode ? "Invalid barcode — regenerate" : "No barcode saved";
+        } else {
+          document.querySelector("#barcode-grid-wrap").hidden = false;
+          grid.innerHTML = visibleRecords.map((record) => `<article class="barcode-card">
+            <label><input type="checkbox" data-barcode-select="${escapeProductHtml(record.uid)}"${productState.selected.has(`barcode:${record.uid}`) ? " checked" : ""} /> Select label</label>
+            <h3>${escapeProductHtml(record.name)}${record.variantName ? ` — ${escapeProductHtml(record.variantName)}` : ""}</h3>
+            <p>Product ID: ${escapeProductHtml(productId(record.product, record.key))} · SKU: ${escapeProductHtml(record.sku || "—")}</p>
+            <p>Barcode: <span data-barcode-value="${escapeProductHtml(record.uid)}">${escapeProductHtml(record.barcode || "Missing")}</span></p>
+            <div class="barcode-preview" data-barcode-preview="${escapeProductHtml(record.uid)}" aria-label="Code 128 barcode preview"></div>
+            <div class="barcode-card-actions">
+              ${isValidBarcode(record.barcode)
+                ? `<button class="category-secondary-button" type="button" data-barcode-action="download" data-uid="${escapeProductHtml(record.uid)}">Download PNG</button>`
+                : `<button class="category-primary-button" type="button" data-barcode-action="generate" data-uid="${escapeProductHtml(record.uid)}">Generate Barcode</button>`}
+            </div>
+          </article>`).join("");
+          for (const record of visibleRecords) {
+            if (isValidBarcode(record.barcode)) {
+              void drawCode128(
+                grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`),
+                record.barcode,
+                { width: 1.5, height: 32, fontSize: 10, margin: 4 },
+              );
+            } else {
+              grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`).textContent =
+                record.barcode ? "Invalid barcode — regenerate" : "No barcode saved";
+            }
+          }
         }
         const selectedCount = allBarcodeRecords().filter((record) => productState.selected.has(`barcode:${record.uid}`)).length;
         document.querySelector("#barcode-export-selected").disabled = selectedCount === 0;
@@ -5010,9 +5055,14 @@
       });
       for (const id of ["barcode-search", "barcode-master-filter", "barcode-category-filter", "barcode-status-filter"]) {
         const control = document.querySelector(`#${id}`);
-        control.addEventListener("input", renderBarcodeManager);
-        control.addEventListener("change", renderBarcodeManager);
+        const resetInventoryPage = () => {
+          inventoryState.page = 1;
+          renderBarcodeManager();
+        };
+        control.addEventListener("input", resetInventoryPage);
+        control.addEventListener("change", resetInventoryPage);
       }
+      bindPaginationControls("inventory", inventoryState, renderBarcodeManager);
       document.querySelector("#barcode-grid").addEventListener("change", (event) => {
         const checkbox = event.target.closest("input[data-barcode-select]");
         if (!checkbox) return;
