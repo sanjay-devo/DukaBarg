@@ -690,6 +690,8 @@
     </style>
     <style>
       .category-page[hidden],
+      .products-page[hidden],
+      .inventory-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -1216,6 +1218,440 @@
           animation: none;
         }
       }
+
+      .products-page,
+      .inventory-page {
+        margin-top: var(--space-7);
+      }
+
+      .products-heading-actions,
+      .products-toolbar,
+      .products-bulk-actions,
+      .products-pagination,
+      .barcode-card-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+
+      .products-heading-actions {
+        justify-content: flex-end;
+      }
+
+      .products-filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-4);
+        padding: var(--space-5);
+        border-bottom: 1px solid var(--color-border-muted);
+      }
+
+      .products-filters input,
+      .products-filters select,
+      .product-field input,
+      .product-field select,
+      .product-field textarea {
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .product-field textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      .products-toolbar {
+        justify-content: space-between;
+        padding: var(--space-4) var(--space-5);
+        border-bottom: 1px solid var(--color-border-muted);
+      }
+
+      .products-bulk-actions:empty {
+        display: none;
+      }
+
+      .products-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .products-table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .products-table th {
+        padding: var(--space-5);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .products-table td {
+        padding: var(--space-5);
+        border-top: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+        vertical-align: middle;
+      }
+
+      .products-table tbody tr:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .product-cell-name {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        min-width: 190px;
+      }
+
+      .product-thumb {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        object-fit: cover;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+      }
+
+      .product-status {
+        display: inline-flex;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-xl);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .product-status[data-active="true"] {
+        color: #176b38;
+        background: #e8f5ec;
+      }
+
+      .product-status[data-stock="low"] {
+        color: #8c321b;
+        background: #fff0eb;
+      }
+
+      .product-row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+
+      .product-row-actions button,
+      .products-pagination button {
+        min-height: 32px;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-xs);
+      }
+
+      .product-row-actions button:hover,
+      .products-pagination button:hover:not(:disabled) {
+        border-color: var(--color-border-strong);
+      }
+
+      .product-row-actions button:focus-visible,
+      .products-pagination button:focus-visible,
+      .products-page button:focus-visible,
+      .inventory-page button:focus-visible,
+      .product-field input:focus-visible,
+      .product-field select:focus-visible,
+      .product-field textarea:focus-visible,
+      .products-filters input:focus-visible,
+      .products-filters select:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .product-row-actions button:disabled,
+      .products-page button:disabled,
+      .inventory-page button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .products-feedback {
+        padding: var(--space-7);
+        color: var(--color-text-inverse);
+        text-align: center;
+      }
+
+      .products-feedback[data-kind="error"] {
+        color: #8c321b;
+      }
+
+      .product-skeleton {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .product-skeleton span {
+        display: block;
+        height: 18px;
+        background: linear-gradient(90deg, #f5f5f5 25%, #e5e5e5 50%, #f5f5f5 75%);
+        background-size: 200% 100%;
+        border-radius: var(--radius-sm);
+        animation: product-loading 1.2s ease-in-out infinite;
+      }
+
+      @keyframes product-loading {
+        to { background-position: -200% 0; }
+      }
+
+      .products-pagination {
+        justify-content: space-between;
+        padding: var(--space-5);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .product-dialog {
+        width: min(940px, calc(100vw - 24px));
+        max-height: min(92vh, 920px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 18px 60px rgb(0 0 0 / 24%);
+      }
+
+      .product-dialog::backdrop {
+        background: var(--color-backdrop);
+      }
+
+      .product-dialog-form,
+      .product-dialog-content {
+        padding: var(--space-7);
+      }
+
+      .product-dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+
+      .product-dialog-header h2 {
+        margin: 0;
+        font-size: var(--font-size-lg);
+      }
+
+      .product-dialog-header p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .product-dialog-close {
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        background: var(--color-surface-muted);
+        cursor: pointer;
+        font-size: var(--font-size-lg);
+      }
+
+      .product-form-section {
+        margin: var(--space-6) 0;
+        padding: var(--space-6);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .product-form-section h3 {
+        margin: 0 0 var(--space-5);
+        font-size: var(--font-size-md);
+      }
+
+      .product-category-warning {
+        margin: 0 0 var(--space-5);
+        color: #8c321b;
+        font-size: var(--font-size-sm);
+      }
+
+      .product-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
+      }
+
+      .product-field {
+        min-width: 0;
+      }
+
+      .product-field.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .product-field label {
+        display: block;
+        margin-bottom: var(--space-2);
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+      }
+
+      .product-field label .required {
+        color: var(--color-border-strong);
+      }
+
+      .product-field-hint {
+        display: block;
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .product-barcode-preview {
+        min-height: 88px;
+        display: grid;
+        place-items: center;
+        padding: var(--space-3);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+      }
+
+      .product-barcode-preview svg {
+        max-width: 100%;
+      }
+
+      .product-variant-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+        align-items: end;
+        gap: var(--space-3);
+        padding: var(--space-4) 0;
+        border-top: 1px solid var(--color-border-muted);
+      }
+
+      .product-dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+      }
+
+      .product-view-details {
+        display: grid;
+        grid-template-columns: minmax(130px, 0.6fr) minmax(0, 1.4fr);
+        gap: var(--space-3) var(--space-5);
+        margin: 0;
+      }
+
+      .product-view-details dt {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .product-view-details dd {
+        min-width: 0;
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .barcode-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-5);
+      }
+
+      .barcode-card {
+        min-width: 0;
+        padding: var(--space-5);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .barcode-card h3 {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        overflow-wrap: anywhere;
+      }
+
+      .barcode-card p {
+        margin: var(--space-2) 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        overflow-wrap: anywhere;
+      }
+
+      .barcode-preview {
+        min-height: 90px;
+        display: grid;
+        place-items: center;
+        margin: var(--space-4) 0;
+        overflow: hidden;
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+      }
+
+      .barcode-preview svg {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+      }
+
+      @media (max-width: 900px) {
+        .products-filters {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .barcode-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 600px) {
+        .products-filters,
+        .product-form-grid,
+        .barcode-grid {
+          grid-template-columns: 1fr;
+        }
+        .product-field.full-width {
+          grid-column: auto;
+        }
+        .product-dialog-form,
+        .product-dialog-content {
+          padding: var(--space-6);
+        }
+        .product-form-section {
+          padding: var(--space-5);
+        }
+        .product-variant-row {
+          grid-template-columns: 1fr;
+        }
+        .product-view-details {
+          grid-template-columns: 1fr;
+          gap: var(--space-2);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .product-skeleton span {
+          animation: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1564,9 +2000,143 @@
             </div>
             <p class="category-feedback" id="product-read-warning" role="status" hidden></p>
           </section>
+
+          <section class="products-page" id="products-page" aria-labelledby="products-section-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="products-section-title">Product management</h2>
+                <p>Manage product details, categories, stock, and barcodes.</p>
+              </div>
+              <div class="products-heading-actions">
+                <button class="category-secondary-button" id="product-import-button" type="button">Import CSV</button>
+                <button class="category-secondary-button" id="product-export-button" type="button">Export CSV</button>
+                <button class="category-primary-button" id="product-add-button" type="button">+ Add Product</button>
+                <input class="visually-hidden" id="product-import-file" type="file" accept=".csv,text/csv" />
+              </div>
+            </div>
+            <p class="products-feedback" id="products-category-error" data-kind="error" role="alert" hidden><span id="products-category-error-message"></span> <button class="category-secondary-button" id="products-category-retry" type="button">Retry categories</button></p>
+            <div class="category-table-card">
+              <div class="products-filters" aria-label="Product filters">
+                <input id="product-search" type="search" placeholder="Search name, ID, SKU, barcode" aria-label="Search products by name, product ID, SKU, or barcode" />
+                <select id="product-master-filter" aria-label="Filter by master category"><option value="">All master categories</option></select>
+                <select id="product-category-filter" aria-label="Filter by category"><option value="">All categories</option></select>
+                <select id="product-subcategory-filter" aria-label="Filter by subcategory"><option value="">All subcategories</option></select>
+                <select id="product-brand-filter" aria-label="Filter by brand"><option value="">All brands</option></select>
+                <select id="product-status-filter" aria-label="Filter by status">
+                  <option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option>
+                </select>
+                <select id="product-stock-filter" aria-label="Filter by stock">
+                  <option value="">All stock levels</option><option value="in-stock">In stock</option><option value="low-stock">Low stock</option><option value="out-of-stock">Out of stock</option>
+                </select>
+                <select id="product-sort" aria-label="Sort products">
+                  <option value="name-asc">Name (A–Z)</option><option value="name-desc">Name (Z–A)</option><option value="updated-desc">Recently updated</option><option value="price-asc">Selling price (low to high)</option><option value="price-desc">Selling price (high to low)</option><option value="stock-asc">Stock (low to high)</option><option value="stock-desc">Stock (high to low)</option>
+                </select>
+              </div>
+              <div class="products-toolbar">
+                <span id="products-selection-summary" aria-live="polite">0 selected</span>
+                <div class="products-bulk-actions" id="products-bulk-actions" aria-label="Bulk product actions"></div>
+              </div>
+              <div class="products-feedback" id="products-loading" aria-live="polite" hidden>
+                <div class="product-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="visually-hidden">Loading products</span>
+              </div>
+              <div class="products-feedback" id="products-error" data-kind="error" role="alert" hidden>
+                <span id="products-error-message"></span>
+                <button class="category-secondary-button" id="products-retry" type="button">Retry loading</button>
+              </div>
+              <div class="products-feedback" id="products-empty" hidden>No products match these filters. Change your search or add a product.</div>
+              <div class="products-table-wrap" id="products-table-wrap" hidden>
+                <table class="products-table">
+                  <thead><tr>
+                    <th scope="col"><input id="product-select-all" type="checkbox" aria-label="Select all products on this page" /></th>
+                    <th scope="col">Product</th><th scope="col">Product ID / SKU</th><th scope="col">Category</th><th scope="col">Price</th><th scope="col">Stock</th><th scope="col">Barcode</th><th scope="col">Status</th><th scope="col">Actions</th>
+                  </tr></thead>
+                  <tbody id="products-table-body"></tbody>
+                </table>
+              </div>
+              <div class="products-pagination" id="products-pagination" hidden>
+                <span id="products-page-summary"></span>
+                <div class="products-pagination"><button type="button" id="products-previous">Previous</button><button type="button" id="products-next">Next</button></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="inventory-page" id="inventory-page" aria-labelledby="inventory-section-title" hidden>
+            <div class="category-heading-row">
+              <div><h2 id="inventory-section-title">Inventory &amp; Barcode</h2><p>Find products and variants, preview saved Code 128 values, and print or download labels.</p></div>
+              <div class="products-heading-actions">
+                <button class="category-secondary-button" id="barcode-export-selected" type="button" disabled>Download selected PNGs</button>
+                <button class="category-secondary-button" id="barcode-print-selected" type="button" disabled>Print selected labels</button>
+              </div>
+            </div>
+            <div class="category-table-card">
+              <div class="products-filters" aria-label="Barcode filters">
+                <input id="barcode-search" type="search" placeholder="Search product, ID, SKU, barcode" aria-label="Search barcode records" />
+                <select id="barcode-master-filter" aria-label="Filter barcodes by master category"><option value="">All master categories</option></select>
+                <select id="barcode-category-filter" aria-label="Filter barcodes by category"><option value="">All categories</option></select>
+                <select id="barcode-status-filter" aria-label="Filter barcodes by product status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+              </div>
+              <div class="products-feedback" id="inventory-loading" aria-live="polite" hidden>
+                <div class="product-skeleton" aria-hidden="true"><span></span><span></span><span></span></div><span class="visually-hidden">Loading barcode records</span>
+              </div>
+              <div class="products-feedback" id="inventory-error" data-kind="error" role="alert" hidden><span id="inventory-error-message"></span><button class="category-secondary-button" id="inventory-retry" type="button">Retry loading</button></div>
+              <div class="products-feedback" id="inventory-empty" hidden>No matching products or variants. Products without a barcode can be generated after loading.</div>
+              <div class="products-table-wrap" id="barcode-grid-wrap" hidden><div class="barcode-grid" id="barcode-grid"></div></div>
+            </div>
+          </section>
         </section>
       </main>
     </div>
+
+    <dialog class="product-dialog" id="product-form-dialog" aria-labelledby="product-form-title">
+      <form class="product-dialog-form" id="product-form" novalidate>
+        <div class="product-dialog-header">
+          <div><h2 id="product-form-title">Add Product</h2><p>Fields marked * are required. Product ID, SKU, and barcode duplicates are allowed.</p></div>
+          <button class="product-dialog-close" type="button" data-product-close aria-label="Close product form">×</button>
+        </div>
+        <div id="product-form-error" class="products-feedback" data-kind="error" role="alert" hidden></div>
+        <section class="product-form-section"><h3>Product identity</h3><div class="product-form-grid">
+          <div class="product-field"><label for="product-id">Product ID <span class="required">*</span></label><input id="product-id" name="productId" required maxlength="120" /></div>
+          <div class="product-field"><label for="product-name">Product name <span class="required">*</span></label><input id="product-name" name="name" required maxlength="200" /></div>
+          <div class="product-field"><label for="product-sku">SKU</label><input id="product-sku" name="sku" maxlength="120" /></div>
+          <div class="product-field"><label for="product-brand">Brand</label><input id="product-brand" name="brand" maxlength="120" /></div>
+          <div class="product-field"><label for="product-barcode-value">Barcode value</label><input id="product-barcode-value" name="barcode" inputmode="numeric" pattern="[0-9]{13}" maxlength="13" aria-describedby="product-barcode-hint" /><span class="product-field-hint" id="product-barcode-hint">A unique 13-digit Code 128 value is generated automatically; enter a different 13-digit value to edit.</span></div>
+          <div class="product-field"><label>Code 128 preview</label><div class="product-barcode-preview" id="product-form-barcode-preview" aria-live="polite">Enter or generate a barcode value.</div></div>
+          <div class="product-field full-width"><label for="product-short-description">Short description</label><input id="product-short-description" maxlength="300" /></div>
+          <div class="product-field full-width"><label for="product-long-description">Long description</label><textarea id="product-long-description" rows="4"></textarea></div>
+          <div class="product-field full-width"><label for="product-main-image">Main image URL</label><input id="product-main-image" type="url" placeholder="https://…" /></div>
+          <div class="product-field full-width"><label for="product-additional-images">Additional image URLs</label><textarea id="product-additional-images" rows="2" placeholder="One URL per line"></textarea></div>
+        </div></section>
+        <section class="product-form-section"><h3>Categories</h3><p class="product-category-warning" id="product-category-warning" role="alert" hidden><span id="product-category-warning-message"></span> <button class="category-secondary-button" id="product-category-retry" type="button">Retry</button></p><div class="product-form-grid">
+          <div class="product-field"><label for="product-master-category">Master category</label><select id="product-master-category"><option value="">Select master category</option></select></div>
+          <div class="product-field"><label for="product-category">Category</label><select id="product-category" disabled><option value="">Select category</option></select></div>
+          <div class="product-field"><label for="product-subcategory">Subcategory</label><select id="product-subcategory" disabled><option value="">Select subcategory</option></select></div>
+          <div class="product-field"><label for="product-tags">Tags</label><input id="product-tags" placeholder="Separate tags with commas" /></div>
+        </div></section>
+        <section class="product-form-section"><h3>Pricing &amp; stock</h3><div class="product-form-grid">
+          <div class="product-field"><label for="product-mrp">MRP</label><input id="product-mrp" type="number" min="0" step="0.01" /></div>
+          <div class="product-field"><label for="product-selling-price">Selling price <span class="required">*</span></label><input id="product-selling-price" type="number" min="0" step="0.01" required /></div>
+          <div class="product-field"><label for="product-discounted-price">Discounted price</label><input id="product-discounted-price" type="number" min="0" step="0.01" /></div>
+          <div class="product-field"><label for="product-cost-price">Cost price</label><input id="product-cost-price" type="number" min="0" step="0.01" /></div>
+          <div class="product-field"><label for="product-stock">Stock quantity</label><input id="product-stock" type="number" min="0" step="1" value="0" /></div>
+          <div class="product-field"><label for="product-low-stock">Low-stock threshold</label><input id="product-low-stock" type="number" min="0" step="1" value="5" /></div>
+          <div class="product-field"><label for="product-unit">Unit</label><input id="product-unit" maxlength="40" placeholder="piece, kg, litre…" /></div>
+          <div class="product-field"><label for="product-weight">Weight</label><input id="product-weight" type="number" min="0" step="any" /></div>
+          <div class="product-field"><label for="product-status">Status</label><select id="product-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+        </div></section>
+        <section class="product-form-section"><h3>Product variants</h3><div id="product-variants"></div><button class="category-secondary-button" id="product-add-variant" type="button">Add variant</button></section>
+        <div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-primary-button" id="product-save-button" type="submit">Save Product</button></div>
+      </form>
+    </dialog>
+    <dialog class="product-dialog" id="product-view-dialog" aria-labelledby="product-view-title">
+      <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-view-title">Product details</h2></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close product details">×</button></div><dl class="product-view-details" id="product-view-details"></dl></div>
+    </dialog>
+    <dialog class="product-dialog" id="product-confirm-dialog" aria-labelledby="product-confirm-title">
+      <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-confirm-title">Confirm product action</h2><p id="product-confirm-message"></p></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close confirmation">×</button></div><div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-danger-button" id="product-confirm-action" type="button">Confirm</button></div></div>
+    </dialog>
+    <dialog class="product-dialog" id="product-import-dialog" aria-labelledby="product-import-title">
+      <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-import-title">Preview CSV import</h2><p id="product-import-summary"></p></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close import preview">×</button></div><div id="product-import-errors" role="alert"></div><div class="products-table-wrap"><table class="products-table"><thead><tr><th>Row</th><th>Product ID</th><th>Name</th><th>SKU</th><th>Barcode</th><th>Validation</th></tr></thead><tbody id="product-import-preview"></tbody></table></div><div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-primary-button" id="product-import-confirm" type="button">Import valid rows</button></div></div>
+    </dialog>
 
     <dialog class="category-dialog" id="category-form-dialog" aria-labelledby="category-form-title">
       <form class="category-dialog-form" id="category-form" novalidate>
@@ -1655,6 +2225,8 @@
       const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
       const welcomeTitle = document.querySelector("#welcome-title");
       const categoryPage = document.querySelector("#category-page");
+      const productsPage = document.querySelector("#products-page");
+      const inventoryPage = document.querySelector("#inventory-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -1700,6 +2272,8 @@
         const activeLink = currentLink || links[0];
         const pageName = activeLink.querySelector(".nav-text").textContent.trim();
         const isCategoriesPage = activeLink.hash === "#categories";
+        const isProductsPage = activeLink.hash === "#products";
+        const isInventoryPage = activeLink.hash === "#inventory";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -1707,7 +2281,9 @@
         breadcrumbCurrent.textContent = pageName;
         pageSubtitle.textContent = `Manage your store’s ${pageName.toLowerCase()} from here.`;
         categoryPage.hidden = !isCategoriesPage;
-        welcomeCard.hidden = isCategoriesPage;
+        productsPage.hidden = !isProductsPage;
+        inventoryPage.hidden = !isInventoryPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -1796,6 +2372,19 @@
         stopCategories: null,
         stopProducts: null,
       };
+      const productState = {
+        loaded: false,
+        error: null,
+        page: 1,
+        pageSize: 10,
+        selected: new Set(),
+        editKey: null,
+        pendingKey: null,
+        reservedBarcodes: new Set(),
+        pendingAction: null,
+        importRows: [],
+      };
+      let barcodeLibraryPromise = null;
       const categoryTableBody = document.querySelector("#category-table-body");
       const categoryLoading = document.querySelector("#category-loading");
       const categoryError = document.querySelector("#category-error");
@@ -2515,18 +3104,26 @@
         categoryState.categoriesError = null;
         categoryState.productsError = null;
         renderCategoryRows();
+        renderProducts();
+        renderBarcodeManager();
         categoryState.stopCategories = onValue(
           ref(database, "categories"),
           (snapshot) => {
             categoryState.categories = normalizeCategories(snapshot.val());
             categoryState.categoriesLoaded = true;
             categoryState.categoriesError = null;
+            updateProductFilters();
             renderCategoryRows();
+            renderProducts();
+            renderBarcodeManager();
           },
           (error) => {
             categoryState.categoriesError = reportFirebaseError("Reading categories", error);
             categoryState.categoriesLoaded = false;
+            updateProductFilters();
             renderCategoryRows();
+            renderProducts();
+            renderBarcodeManager();
           },
         );
         categoryState.stopProducts = onValue(
@@ -2537,6 +3134,8 @@
             categoryState.productsReadable = true;
             categoryState.productsError = null;
             renderCategoryRows();
+            renderProducts();
+            renderBarcodeManager();
           },
           (error) => {
             categoryState.products = {};
@@ -2544,6 +3143,8 @@
             categoryState.productsReadable = false;
             categoryState.productsError = reportFirebaseError("Reading products", error);
             renderCategoryRows();
+            renderProducts();
+            renderBarcodeManager();
           },
         );
       }
@@ -2642,6 +3243,1408 @@
         categoryState.page += 1;
         renderCategoryRows();
       });
+
+      function productName(product) {
+        return String(product?.name ?? product?.productName ?? product?.title ?? "");
+      }
+
+      function productId(product, key) {
+        return String(product?.productId ?? product?.product_id ?? product?.id ?? key);
+      }
+
+      function productBarcode(product) {
+        return String(product?.barcode ?? product?.barcodeValue ?? product?.barcode_value ?? "");
+      }
+
+      function isValidBarcode(value) {
+        return /^\d{13}$/.test(String(value || ""));
+      }
+
+      function generateUniqueBarcode(excludedProductKey = null) {
+        if (!categoryState.productsLoaded || !globalThis.crypto?.getRandomValues) {
+          throw new Error("Product data or secure random generation is unavailable. Retry after products load.");
+        }
+        const used = new Set(productState.reservedBarcodes);
+        const formBarcode = document.querySelector("#product-barcode-value")?.value.trim();
+        if (isValidBarcode(formBarcode)) used.add(formBarcode);
+        document.querySelectorAll("[data-variant-barcode]").forEach((input) => {
+          if (isValidBarcode(input.value.trim())) used.add(input.value.trim());
+        });
+        for (const [key, product] of Object.entries(categoryState.products)) {
+          if (key === excludedProductKey) continue;
+          if (productBarcode(product)) used.add(productBarcode(product));
+          productVariants(product).forEach((variant) => {
+            if (variant.barcode) used.add(variant.barcode);
+          });
+        }
+        const random = new Uint32Array(2);
+        for (let attempt = 0; attempt < 100; attempt += 1) {
+          crypto.getRandomValues(random);
+          const value = String(
+            Number(((BigInt(random[0]) << 32n) | BigInt(random[1])) % 9000000000000n + 1000000000000n),
+          );
+          if (!used.has(value)) {
+            productState.reservedBarcodes.add(value);
+            return value;
+          }
+        }
+        throw new Error("Could not generate a unique barcode. Retry.");
+      }
+
+      function productSku(product) {
+        return String(product?.sku ?? product?.SKU ?? "");
+      }
+
+      function productStock(product) {
+        const value = Number(product?.stockQuantity ?? product?.stock ?? product?.quantity ?? 0);
+        return Number.isFinite(value) ? value : 0;
+      }
+
+      function productStatus(product) {
+        const status = product?.status;
+        if (typeof status === "boolean") return status;
+        if (typeof status === "string") return !["inactive", "disabled", "archived", "false"].includes(status.toLowerCase());
+        if (typeof product?.active === "boolean") return product.active;
+        if (typeof product?.isActive === "boolean") return product.isActive;
+        return true;
+      }
+
+      function productVariants(product) {
+        const variants = product?.variants;
+        if (Array.isArray(variants)) {
+          return variants.map((variant, index) => ({
+            id: String(variant?.id ?? variant?.key ?? index),
+            name: String(variant?.name ?? variant?.title ?? ""),
+            sku: String(variant?.sku ?? ""),
+            barcode: String(variant?.barcode ?? variant?.barcodeValue ?? ""),
+          }));
+        }
+        if (variants && typeof variants === "object") {
+          return Object.entries(variants).map(([id, variant]) => ({
+            id,
+            name: String(variant?.name ?? variant?.title ?? ""),
+            sku: String(variant?.sku ?? ""),
+            barcode: String(variant?.barcode ?? variant?.barcodeValue ?? ""),
+          }));
+        }
+        return [];
+      }
+
+      function productCategory(categoryId) {
+        return categoryState.categories.find((category) => category.id === valueAsId(categoryId)) || null;
+      }
+
+      function productMaster(product) {
+        const direct = productCategory(product?.masterCategoryId ?? product?.master_category_id);
+        if (direct?.level === "master") return direct;
+        const category = productCategory(product?.categoryId ?? product?.category_id);
+        return category ? masterForCategory(category) : null;
+      }
+
+      function productCategoryLabel(product) {
+        const subcategory = productCategory(product?.subcategoryId ?? product?.subcategory_id);
+        const category = productCategory(product?.categoryId ?? product?.category_id);
+        const master = productMaster(product);
+        const names = [master?.name, category?.name, subcategory?.name].filter(Boolean);
+        return names.length ? names.join(" / ") : String(product?.categoryName ?? "—");
+      }
+
+      function escapeProductHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        })[character]);
+      }
+
+      function productOptionHtml(items, selectedId = "", firstLabel = "Select") {
+        return [`<option value="">${escapeProductHtml(firstLabel)}</option>`, ...items.map((item) =>
+          `<option value="${escapeProductHtml(item.id)}"${item.id === selectedId ? " selected" : ""}>${escapeProductHtml(item.name)}</option>`,
+        )].join("");
+      }
+
+      function categoriesAt(level, parentId = "") {
+        return categoryState.categories
+          .filter((entry) => entry.level === level && (!parentId || entry.parentId === parentId))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+      }
+
+      function setCategoryFilterOptions(masterSelect, categorySelect, masterLabel, categoryLabel) {
+        const oldMaster = masterSelect.value;
+        const oldCategory = categorySelect.value;
+        masterSelect.innerHTML = productOptionHtml(categoriesAt("master"), oldMaster, masterLabel);
+        const masterExists = categoriesAt("master").some((entry) => entry.id === oldMaster);
+        if (masterExists) masterSelect.value = oldMaster;
+        const categories = masterSelect.value ? categoriesAt("category", masterSelect.value) : categoriesAt("category");
+        categorySelect.innerHTML = productOptionHtml(categories, oldCategory, categoryLabel);
+        categorySelect.disabled = !masterSelect.value;
+        if (!categories.some((entry) => entry.id === oldCategory)) categorySelect.value = "";
+      }
+
+      function updateProductFormCategories(resetChildren = false) {
+        const master = document.querySelector("#product-master-category");
+        const category = document.querySelector("#product-category");
+        const subcategory = document.querySelector("#product-subcategory");
+        const masterId = master.value;
+        const selectedCategory = resetChildren ? "" : category.value;
+        category.innerHTML = productOptionHtml(masterId ? categoriesAt("category", masterId) : [], selectedCategory, "Select category");
+        category.disabled = !masterId;
+        if (!categoriesAt("category", masterId).some((entry) => entry.id === selectedCategory)) category.value = "";
+        const selectedSubcategory = resetChildren ? "" : subcategory.value;
+        const categoryId = category.value;
+        subcategory.innerHTML = productOptionHtml(categoryId ? categoriesAt("subcategory", categoryId) : [], selectedSubcategory, "Select subcategory");
+        subcategory.disabled = !categoryId;
+        if (!categoriesAt("subcategory", categoryId).some((entry) => entry.id === selectedSubcategory)) subcategory.value = "";
+      }
+
+      function updateProductFilters() {
+        const master = document.querySelector("#product-master-filter");
+        const category = document.querySelector("#product-category-filter");
+        const subcategory = document.querySelector("#product-subcategory-filter");
+        setCategoryFilterOptions(master, category, "All master categories", "All categories");
+        const selectedSubcategory = subcategory.value;
+        const children = category.value ? categoriesAt("subcategory", category.value) : categoriesAt("subcategory");
+        subcategory.innerHTML = productOptionHtml(children, selectedSubcategory, "All subcategories");
+        if (!children.some((entry) => entry.id === selectedSubcategory)) subcategory.value = "";
+        const masterForm = document.querySelector("#product-master-category");
+        const selectedMaster = masterForm.value;
+        const masters = categoriesAt("master");
+        masterForm.innerHTML = productOptionHtml(masters, selectedMaster, "Select master category");
+        if (!masters.some((entry) => entry.id === selectedMaster)) masterForm.value = "";
+        updateProductFormCategories(false);
+        document.querySelector("#barcode-master-filter").innerHTML =
+          productOptionHtml(categoriesAt("master"), document.querySelector("#barcode-master-filter").value, "All master categories");
+        const barcodeCategory = document.querySelector("#barcode-category-filter");
+        const barcodeMaster = document.querySelector("#barcode-master-filter");
+        const barcodeCategories = barcodeMaster.value ? categoriesAt("category", barcodeMaster.value) : categoriesAt("category");
+        barcodeCategory.innerHTML = productOptionHtml(barcodeCategories, barcodeCategory.value, "All categories");
+        if (!barcodeCategories.some((entry) => entry.id === barcodeCategory.value)) barcodeCategory.value = "";
+        const categoryWarning = document.querySelector("#product-category-warning");
+        categoryWarning.hidden = !categoryState.categoriesError;
+        document.querySelector("#product-category-warning-message").textContent =
+          categoryState.categoriesError ? `${categoryState.categoriesError} ` : "";
+        const pageCategoryError = document.querySelector("#products-category-error");
+        pageCategoryError.hidden = !categoryState.categoriesError;
+        document.querySelector("#products-category-error-message").textContent =
+          categoryState.categoriesError ? `${categoryState.categoriesError} ` : "";
+      }
+
+      async function barcodeLibrary() {
+        if (!barcodeLibraryPromise) {
+          barcodeLibraryPromise = import("https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/+esm")
+            .then((module) => module.default || module)
+            .catch((error) => {
+              barcodeLibraryPromise = null;
+              throw error;
+            });
+        }
+        return barcodeLibraryPromise;
+      }
+
+      async function drawCode128(target, value, options = {}) {
+        target.replaceChildren();
+        if (!value) {
+          target.textContent = "Barcode value is missing.";
+          return false;
+        }
+        try {
+          const JsBarcode = await barcodeLibrary();
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          JsBarcode(svg, value, {
+            format: "CODE128",
+            displayValue: true,
+            font: "Poppins",
+            fontSize: 12,
+            margin: 4,
+            height: 48,
+            ...options,
+          });
+          target.replaceChildren(svg);
+          return true;
+        } catch (error) {
+          barcodeLibraryPromise = null;
+          console.error("Code 128 barcode rendering failed.", error);
+          target.textContent = "Could not render this Code 128 value. Check the value and retry.";
+          return false;
+        }
+      }
+
+      function syncFormBarcodePreview() {
+        void drawCode128(document.querySelector("#product-form-barcode-preview"), document.querySelector("#product-barcode-value").value.trim());
+      }
+
+      function filteredProducts() {
+        const query = document.querySelector("#product-search").value.trim().toLocaleLowerCase();
+        const masterId = document.querySelector("#product-master-filter").value;
+        const categoryId = document.querySelector("#product-category-filter").value;
+        const subcategoryId = document.querySelector("#product-subcategory-filter").value;
+        const brand = document.querySelector("#product-brand-filter").value;
+        const status = document.querySelector("#product-status-filter").value;
+        const stock = document.querySelector("#product-stock-filter").value;
+        const list = Object.entries(categoryState.products).filter(([key, product]) => {
+          const haystack = [productName(product), productId(product, key), productSku(product), productBarcode(product)]
+            .join(" ").toLocaleLowerCase();
+          const isActive = productStatus(product);
+          const quantity = productStock(product);
+          const threshold = Number(product.lowStockThreshold ?? product.low_stock_threshold ?? 5);
+          const productMasterCategory = productMaster(product);
+          return (!query || haystack.includes(query)) &&
+            (!masterId || productMasterCategory?.id === masterId) &&
+            (!categoryId || valueAsId(product.categoryId ?? product.category_id) === categoryId) &&
+            (!subcategoryId || valueAsId(product.subcategoryId ?? product.subcategory_id) === subcategoryId) &&
+            (!brand || String(product.brand ?? "") === brand) &&
+            (!status || isActive === (status === "active")) &&
+            (!stock || (stock === "in-stock" ? quantity > 0 && quantity > threshold : stock === "low-stock" ? quantity > 0 && quantity <= threshold : quantity <= 0));
+        });
+        const sort = document.querySelector("#product-sort").value;
+        const updatedAt = (product) => {
+          const raw = product.updatedAt ?? product.updated_at ?? 0;
+          const parsed = Number(raw);
+          if (Number.isFinite(parsed) && parsed > 0) return parsed < 1000000000000 ? parsed * 1000 : parsed;
+          const date = Date.parse(String(raw));
+          return Number.isFinite(date) ? date : 0;
+        };
+        const comparators = {
+          "name-asc": (a, b) => productName(a[1]).localeCompare(productName(b[1])),
+          "name-desc": (a, b) => productName(b[1]).localeCompare(productName(a[1])),
+          "updated-desc": (a, b) => updatedAt(b[1]) - updatedAt(a[1]),
+          "price-asc": (a, b) => Number(a[1].sellingPrice ?? a[1].price ?? 0) - Number(b[1].sellingPrice ?? b[1].price ?? 0),
+          "price-desc": (a, b) => Number(b[1].sellingPrice ?? b[1].price ?? 0) - Number(a[1].sellingPrice ?? a[1].price ?? 0),
+          "stock-asc": (a, b) => productStock(a[1]) - productStock(b[1]),
+          "stock-desc": (a, b) => productStock(b[1]) - productStock(a[1]),
+        };
+        return list.sort(comparators[sort] || comparators["name-asc"]);
+      }
+
+      function renderProductFilterOptions() {
+        const select = document.querySelector("#product-brand-filter");
+        const selected = select.value;
+        const brands = [...new Set(Object.values(categoryState.products).map((product) => String(product.brand ?? "").trim()).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+        select.innerHTML = `<option value="">All brands</option>${brands.map((brand) => `<option value="${escapeProductHtml(brand)}">${escapeProductHtml(brand)}</option>`).join("")}`;
+        if (brands.includes(selected)) select.value = selected;
+      }
+
+      function renderProducts() {
+        const loading = !categoryState.productsLoaded && !categoryState.productsError;
+        const error = categoryState.productsError;
+        const loadingElement = document.querySelector("#products-loading");
+        const errorElement = document.querySelector("#products-error");
+        const tableWrap = document.querySelector("#products-table-wrap");
+        const empty = document.querySelector("#products-empty");
+        const pagination = document.querySelector("#products-pagination");
+        const tbody = document.querySelector("#products-table-body");
+        loadingElement.hidden = !loading;
+        errorElement.hidden = !error;
+        document.querySelector("#products-error-message").textContent = error || "";
+        tableWrap.hidden = true;
+        empty.hidden = true;
+        pagination.hidden = true;
+        if (loading || error) {
+          tbody.replaceChildren();
+          return;
+        }
+        updateProductFilters();
+        renderProductFilterOptions();
+        const products = filteredProducts();
+        const pageCount = Math.max(1, Math.ceil(products.length / productState.pageSize));
+        productState.page = Math.min(productState.page, pageCount);
+        const start = (productState.page - 1) * productState.pageSize;
+        const visible = products.slice(start, start + productState.pageSize);
+        document.querySelector("#products-selection-summary").textContent =
+          `${[...productState.selected].filter((key) => Boolean(categoryState.products[key])).length} selected`;
+        const bulk = document.querySelector("#products-bulk-actions");
+        bulk.innerHTML = productState.selected.size
+          ? `<button class="category-secondary-button" type="button" data-bulk="activate">Activate</button><button class="category-secondary-button" type="button" data-bulk="deactivate">Deactivate</button><button class="category-secondary-button" type="button" data-bulk="export">Export selected</button><button class="category-danger-button" type="button" data-bulk="delete">Delete selected</button>`
+          : "";
+        if (!visible.length) {
+          empty.hidden = false;
+          tbody.replaceChildren();
+          return;
+        }
+        tableWrap.hidden = false;
+        tbody.innerHTML = visible.map(([key, product]) => {
+          const name = productName(product) || "Unnamed product";
+          const image = String(product.mainImageUrl ?? product.imageUrl ?? product.image ?? "");
+          const stock = productStock(product);
+          const threshold = Number(product.lowStockThreshold ?? product.low_stock_threshold ?? 5);
+          const barcode = productBarcode(product);
+          const selected = productState.selected.has(key);
+          return `<tr>
+            <td><input type="checkbox" data-select-product="${escapeProductHtml(key)}" aria-label="Select ${escapeProductHtml(name)}"${selected ? " checked" : ""} /></td>
+            <td><div class="product-cell-name">${image ? `<img class="product-thumb" src="${escapeProductHtml(image)}" alt="" loading="lazy" />` : `<span class="product-thumb" aria-hidden="true"></span>`}<span>${escapeProductHtml(name)}</span></div></td>
+            <td>${escapeProductHtml(productId(product, key))}<br /><span>${escapeProductHtml(productSku(product) || "No SKU")}</span></td>
+            <td>${escapeProductHtml(productCategoryLabel(product))}</td>
+            <td>${escapeProductHtml(String(product.sellingPrice ?? product.price ?? "—"))}</td>
+            <td><span class="product-status" data-stock="${stock <= 0 ? "low" : stock <= threshold ? "low" : "ok"}">${stock}</span></td>
+            <td>${escapeProductHtml(barcode || "Missing")}</td>
+            <td><span class="product-status" data-active="${productStatus(product)}">${productStatus(product) ? "Active" : "Inactive"}</span></td>
+            <td><div class="product-row-actions">
+              <button type="button" data-product-action="view" data-key="${escapeProductHtml(key)}">View</button>
+              <button type="button" data-product-action="edit" data-key="${escapeProductHtml(key)}">Edit</button>
+              <button type="button" data-product-action="duplicate" data-key="${escapeProductHtml(key)}">Duplicate</button>
+              <button type="button" data-product-action="${isValidBarcode(barcode) ? "download" : "generate"}" data-key="${escapeProductHtml(key)}">${isValidBarcode(barcode) ? "Barcode" : "Generate barcode"}</button>
+              <button type="button" data-product-action="toggle" data-key="${escapeProductHtml(key)}">${productStatus(product) ? "Deactivate" : "Activate"}</button>
+              <button type="button" data-product-action="delete" data-key="${escapeProductHtml(key)}">Delete</button>
+            </div></td>
+          </tr>`;
+        }).join("");
+        pagination.hidden = false;
+        document.querySelector("#products-page-summary").textContent =
+          `${products.length ? start + 1 : 0}–${Math.min(start + productState.pageSize, products.length)} of ${products.length}`;
+        document.querySelector("#products-previous").disabled = productState.page <= 1;
+        document.querySelector("#products-next").disabled = productState.page >= pageCount;
+        const pageKeys = visible.map(([key]) => key);
+        const selectAll = document.querySelector("#product-select-all");
+        selectAll.checked = pageKeys.length > 0 && pageKeys.every((key) => productState.selected.has(key));
+        selectAll.indeterminate = pageKeys.some((key) => productState.selected.has(key)) && !selectAll.checked;
+      }
+
+      function addVariantEditor(variant = {}) {
+        const container = document.querySelector("#product-variants");
+        const id = String(variant.id || `variant-${crypto.randomUUID()}`);
+        const row = document.createElement("div");
+        row.className = "product-variant-row";
+        row.dataset.variantId = id;
+        row.innerHTML = `<div class="product-field"><label>Variant name</label><input data-variant-name maxlength="120" /></div>
+          <div class="product-field"><label>Variant SKU</label><input data-variant-sku maxlength="120" /></div>
+          <div class="product-field"><label>Variant barcode</label><input data-variant-barcode inputmode="numeric" pattern="[0-9]{13}" maxlength="13" /></div>
+          <button class="category-secondary-button" type="button" data-remove-variant aria-label="Remove variant">Remove</button>`;
+        row.querySelector("[data-variant-name]").value = variant.name || "";
+        row.querySelector("[data-variant-sku]").value = variant.sku || "";
+        row.querySelector("[data-variant-barcode]").value = variant.barcode || generateUniqueBarcode(productState.editKey);
+        container.append(row);
+      }
+
+      function fillProductForm(product, key) {
+        const form = document.querySelector("#product-form");
+        form.reset();
+        document.querySelector("#product-form-error").hidden = true;
+        document.querySelector("#product-variants").replaceChildren();
+        const editing = Boolean(product);
+        productState.editKey = editing ? key : null;
+        productState.pendingKey = editing ? key : push(ref(database, "products")).key;
+        productState.reservedBarcodes = new Set();
+        productVariants(product || {}).forEach((variant) => {
+          if (variant.barcode) productState.reservedBarcodes.add(variant.barcode);
+        });
+        document.querySelector("#product-form-title").textContent = editing ? "Edit Product" : "Add Product";
+        document.querySelector("#product-save-button").textContent = editing ? "Save Changes" : "Save Product";
+        document.querySelector("#product-id").value = editing ? productId(product, key) : "";
+        document.querySelector("#product-name").value = editing ? productName(product) : "";
+        document.querySelector("#product-sku").value = editing ? productSku(product) : "";
+        document.querySelector("#product-brand").value = editing ? String(product.brand ?? "") : "";
+        const currentBarcode = editing ? productBarcode(product) : "";
+        const formBarcode = isValidBarcode(currentBarcode) ? currentBarcode : generateUniqueBarcode(key);
+        document.querySelector("#product-barcode-value").value = formBarcode;
+        productState.reservedBarcodes.add(formBarcode);
+        document.querySelector("#product-short-description").value = editing ? String(product.shortDescription ?? product.short_description ?? "") : "";
+        document.querySelector("#product-long-description").value = editing ? String(product.longDescription ?? product.long_description ?? product.description ?? "") : "";
+        document.querySelector("#product-main-image").value = editing ? String(product.mainImageUrl ?? product.imageUrl ?? product.image ?? "") : "";
+        document.querySelector("#product-additional-images").value = editing ? (Array.isArray(product.additionalImageUrls ?? product.images) ? (product.additionalImageUrls ?? product.images).join("\n") : "") : "";
+        document.querySelector("#product-mrp").value = editing ? String(product.mrp ?? "") : "";
+        document.querySelector("#product-selling-price").value = editing ? String(product.sellingPrice ?? product.price ?? "") : "";
+        document.querySelector("#product-discounted-price").value = editing ? String(product.discountedPrice ?? product.discounted_price ?? "") : "";
+        document.querySelector("#product-cost-price").value = editing ? String(product.costPrice ?? product.cost_price ?? "") : "";
+        document.querySelector("#product-stock").value = editing ? String(productStock(product)) : "0";
+        document.querySelector("#product-low-stock").value = editing ? String(product.lowStockThreshold ?? product.low_stock_threshold ?? 5) : "5";
+        document.querySelector("#product-unit").value = editing ? String(product.unit ?? "") : "";
+        document.querySelector("#product-weight").value = editing ? String(product.weight ?? "") : "";
+        document.querySelector("#product-status").value = editing ? (productStatus(product) ? "active" : "inactive") : "active";
+        document.querySelector("#product-tags").value = editing ? (Array.isArray(product.tags) ? product.tags.join(", ") : String(product.tags ?? "")) : "";
+        const master = productMaster(product);
+        document.querySelector("#product-master-category").value = master?.id || "";
+        updateProductFormCategories(true);
+        document.querySelector("#product-category").value = editing ? valueAsId(product.categoryId ?? product.category_id) : "";
+        updateProductFormCategories(false);
+        document.querySelector("#product-subcategory").value = editing ? valueAsId(product.subcategoryId ?? product.subcategory_id) : "";
+        updateProductFormCategories(false);
+        if (editing) {
+          productVariants(product).forEach((variant) => addVariantEditor({
+            ...variant,
+            barcode: /^\d{13}$/.test(variant.barcode) ? variant.barcode : generateUniqueBarcode(key),
+          }));
+        }
+        syncFormBarcodePreview();
+        document.querySelector("#product-form-dialog").showModal();
+        document.querySelector("#product-id").focus();
+      }
+
+      function openProductForm(product = null, key = null) {
+        if (!categoryState.categoriesLoaded || categoryState.categoriesError || !categoryState.productsLoaded) {
+          showCategoryToast(categoryState.categoriesError || categoryState.productsError || "Categories and products are still loading. Retry in a moment before editing products.", "error");
+          return;
+        }
+        fillProductForm(product, key);
+      }
+
+      function fieldNumber(id, label, { integer = false, required = false } = {}) {
+        const input = document.querySelector(`#${id}`);
+        const raw = input.value.trim();
+        if (!raw && !required) return null;
+        const value = Number(raw);
+        if (!raw || !Number.isFinite(value) || value < 0 || (integer && !Number.isInteger(value))) {
+          throw new Error(`${label} must be ${integer ? "a non-negative whole number" : "a non-negative number"}${required ? " and is required" : ""}.`);
+        }
+        return value;
+      }
+
+      function readProductForm(key) {
+        const id = document.querySelector("#product-id").value.trim();
+        const name = document.querySelector("#product-name").value.trim();
+        if (!id) throw new Error("Enter a Product ID.");
+        if (!name) throw new Error("Enter a product name.");
+        const barcode = document.querySelector("#product-barcode-value").value.trim();
+        const categoryId = document.querySelector("#product-category").value;
+        const subcategoryId = document.querySelector("#product-subcategory").value;
+        const master = productCategory(document.querySelector("#product-master-category").value);
+        const category = productCategory(categoryId);
+        const subcategory = productCategory(subcategoryId);
+        if (categoryId && (!category || category.level !== "category" || category.parentId !== master?.id)) {
+          throw new Error("The selected category no longer belongs to this master category. Select it again.");
+        }
+        if (subcategoryId && (!subcategory || subcategory.level !== "subcategory" || subcategory.parentId !== category?.id)) {
+          throw new Error("The selected subcategory no longer belongs to this category. Select it again.");
+        }
+        if (barcode && /[\u0000-\u001f\u007f]/.test(barcode)) throw new Error("Barcode values cannot contain control characters.");
+        const imageUrls = [
+          document.querySelector("#product-main-image").value.trim(),
+          ...document.querySelector("#product-additional-images").value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean),
+        ].filter(Boolean);
+        for (const imageUrl of imageUrls) {
+          let parsedUrl;
+          try { parsedUrl = new URL(imageUrl); } catch { throw new Error("Image URLs must be valid absolute URLs."); }
+          if (!["http:", "https:"].includes(parsedUrl.protocol)) throw new Error("Image URLs must use HTTP or HTTPS.");
+        }
+        const sellingPrice = fieldNumber("product-selling-price", "Selling price", { required: true });
+        const existingProduct = productState.editKey ? categoryState.products[productState.editKey] : null;
+        const oldVariants = existingProduct?.variants;
+        const variants = Array.from(document.querySelectorAll(".product-variant-row")).map((row, index) => {
+          const variantId = row.dataset.variantId || `variant-${index + 1}`;
+          const oldVariant = Array.isArray(oldVariants)
+            ? oldVariants.find((variant, oldIndex) => String(variant?.id ?? variant?.key ?? oldIndex) === variantId)
+            : oldVariants && typeof oldVariants === "object" ? oldVariants[variantId] : null;
+          return {
+            ...(oldVariant && typeof oldVariant === "object" ? oldVariant : {}),
+            id: variantId,
+            name: row.querySelector("[data-variant-name]").value.trim(),
+            sku: row.querySelector("[data-variant-sku]").value.trim(),
+            barcode: row.querySelector("[data-variant-barcode]").value.trim() || generateUniqueBarcode(key),
+          };
+        });
+        const savedVariants = oldVariants && !Array.isArray(oldVariants) && typeof oldVariants === "object"
+          ? Object.fromEntries(variants.map((variant) => [variant.id, variant]))
+          : variants;
+        const baseBarcode = barcode || generateUniqueBarcode(key);
+        const barcodeValues = [baseBarcode, ...variants.map((variant) => variant.barcode)];
+        if (barcodeValues.some((value) => !/^\d{13}$/.test(value))) {
+          throw new Error("Product and variant barcodes must contain exactly 13 digits.");
+        }
+        if (new Set(barcodeValues).size !== barcodeValues.length) {
+          throw new Error("Each product and variant must have a different barcode.");
+        }
+        const alreadyUsed = new Set(
+          allBarcodeRecords()
+            .filter((record) => record.key !== key)
+            .map((record) => record.barcode)
+            .filter(Boolean),
+        );
+        if (barcodeValues.some((value) => alreadyUsed.has(value))) {
+          throw new Error("This barcode is already assigned to another product. Generate or enter a unique 13-digit barcode.");
+        }
+        const fields = {
+          productId: id,
+          name,
+          sku: document.querySelector("#product-sku").value.trim(),
+          barcode: baseBarcode,
+          brand: document.querySelector("#product-brand").value.trim(),
+          shortDescription: document.querySelector("#product-short-description").value.trim(),
+          longDescription: document.querySelector("#product-long-description").value.trim(),
+          mainImageUrl: document.querySelector("#product-main-image").value.trim(),
+          additionalImageUrls: document.querySelector("#product-additional-images").value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean),
+          masterCategoryId: master?.id || "",
+          masterCategoryName: master?.name || "",
+          categoryId: category?.id || "",
+          categoryName: category?.name || "",
+          subcategoryId: subcategory?.id || "",
+          subcategoryName: subcategory?.name || "",
+          mrp: fieldNumber("product-mrp", "MRP"),
+          sellingPrice,
+          discountedPrice: fieldNumber("product-discounted-price", "Discounted price"),
+          costPrice: fieldNumber("product-cost-price", "Cost price"),
+          stockQuantity: fieldNumber("product-stock", "Stock quantity", { integer: true }) ?? 0,
+          lowStockThreshold: fieldNumber("product-low-stock", "Low-stock threshold", { integer: true }) ?? 5,
+          unit: document.querySelector("#product-unit").value.trim(),
+          weight: fieldNumber("product-weight", "Weight"),
+          status: document.querySelector("#product-status").value,
+          isActive: document.querySelector("#product-status").value === "active",
+          tags: document.querySelector("#product-tags").value.split(",").map((tag) => tag.trim()).filter(Boolean),
+          variants: savedVariants,
+          updatedAt: Date.now(),
+        };
+        if (!fields.masterCategoryId) {
+          delete fields.masterCategoryId;
+          delete fields.masterCategoryName;
+        }
+        if (!fields.categoryId) {
+          delete fields.categoryId;
+          delete fields.categoryName;
+        }
+        if (!fields.subcategoryId) {
+          delete fields.subcategoryId;
+          delete fields.subcategoryName;
+        }
+        if (!fields.mrp && document.querySelector("#product-mrp").value.trim() === "") delete fields.mrp;
+        if (fields.discountedPrice == null) delete fields.discountedPrice;
+        if (fields.costPrice == null) delete fields.costPrice;
+        if (fields.weight == null) delete fields.weight;
+        return fields;
+      }
+
+      async function saveProduct(event) {
+        event.preventDefault();
+        const saveButton = document.querySelector("#product-save-button");
+        const error = document.querySelector("#product-form-error");
+        error.hidden = true;
+        let fields;
+        try {
+          fields = readProductForm(productState.pendingKey);
+        } catch (validationError) {
+          error.textContent = validationError.message;
+          error.hidden = false;
+          return;
+        }
+        saveButton.disabled = true;
+        saveButton.setAttribute("aria-busy", "true");
+        saveButton.textContent = "Saving…";
+        try {
+          const key = productState.editKey || productState.pendingKey;
+          if (!key) throw new Error("Could not allocate a Firebase record key. Close and reopen the form, then retry.");
+          if (productState.editKey) {
+            await update(ref(database, `products/${key}`), fields);
+            showCategoryToast("Product updated.");
+          } else {
+            await set(ref(database, `products/${key}`), { ...fields, createdAt: Date.now() });
+            showCategoryToast("Product created.");
+          }
+          document.querySelector("#product-form-dialog").close();
+        } catch (errorValue) {
+          error.textContent = errorValue?.code
+            ? reportFirebaseError("Saving product", errorValue)
+            : errorValue.message || "Saving product failed. Retry.";
+          error.hidden = false;
+        } finally {
+          saveButton.disabled = false;
+          saveButton.removeAttribute("aria-busy");
+          saveButton.textContent = productState.editKey ? "Save Changes" : "Save Product";
+        }
+      }
+
+      function csvCell(value) {
+        const text = value == null ? "" : String(value);
+        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function productCsvRows(entries) {
+        const headers = [
+          "productId", "name", "sku", "barcode", "brand", "shortDescription", "longDescription",
+          "mainImageUrl", "additionalImageUrls", "masterCategoryId", "categoryId", "subcategoryId",
+          "mrp", "sellingPrice", "discountedPrice", "costPrice", "stockQuantity",
+          "lowStockThreshold", "unit", "weight", "status", "tags", "variants",
+        ];
+        const lines = [headers.map(csvCell).join(",")];
+        for (const [, product] of entries) {
+          const record = {
+            productId: productId(product, ""),
+            name: productName(product),
+            sku: productSku(product),
+            barcode: productBarcode(product),
+            brand: product.brand ?? "",
+            shortDescription: product.shortDescription ?? "",
+            longDescription: product.longDescription ?? product.description ?? "",
+            mainImageUrl: product.mainImageUrl ?? product.imageUrl ?? "",
+            additionalImageUrls: Array.isArray(product.additionalImageUrls ?? product.images)
+              ? (product.additionalImageUrls ?? product.images).join("|")
+              : String(product.additionalImageUrls ?? product.images ?? ""),
+            masterCategoryId: product.masterCategoryId ?? "",
+            categoryId: product.categoryId ?? "",
+            subcategoryId: product.subcategoryId ?? "",
+            mrp: product.mrp ?? "",
+            sellingPrice: product.sellingPrice ?? product.price ?? "",
+            discountedPrice: product.discountedPrice ?? "",
+            costPrice: product.costPrice ?? "",
+            stockQuantity: productStock(product),
+            lowStockThreshold: product.lowStockThreshold ?? 5,
+            unit: product.unit ?? "",
+            weight: product.weight ?? "",
+            status: productStatus(product) ? "active" : "inactive",
+            tags: Array.isArray(product.tags) ? product.tags.join("|") : product.tags ?? "",
+            variants: JSON.stringify(productVariants(product)),
+          };
+          lines.push(headers.map((header) => csvCell(record[header])).join(","));
+        }
+        return lines.join("\r\n");
+      }
+
+      function exportProducts(entries) {
+        if (!entries.length) {
+          showCategoryToast("There are no products to export.", "error");
+          return;
+        }
+        downloadBlob(new Blob(["\uFEFF", productCsvRows(entries)], { type: "text/csv;charset=utf-8" }), "dukabarg-products.csv");
+        showCategoryToast(`Exported ${entries.length} product${entries.length === 1 ? "" : "s"}.`);
+      }
+
+      function parseCsv(text) {
+        const rows = [];
+        let row = [];
+        let cell = "";
+        let quoted = false;
+        for (let index = 0; index < text.length; index += 1) {
+          const character = text[index];
+          if (quoted) {
+            if (character === '"' && text[index + 1] === '"') {
+              cell += '"';
+              index += 1;
+            } else if (character === '"') {
+              quoted = false;
+            } else {
+              cell += character;
+            }
+          } else if (character === '"' && cell === "") {
+            quoted = true;
+          } else if (character === ",") {
+            row.push(cell);
+            cell = "";
+          } else if (character === "\n" || character === "\r") {
+            if (character === "\r" && text[index + 1] === "\n") index += 1;
+            row.push(cell);
+            if (row.some((value) => value.trim())) rows.push(row);
+            row = [];
+            cell = "";
+          } else {
+            cell += character;
+          }
+        }
+        if (quoted) throw new Error("The CSV contains an unclosed quoted field.");
+        if (cell !== "" || row.length) {
+          row.push(cell);
+          if (row.some((value) => value.trim())) rows.push(row);
+        }
+        return rows;
+      }
+
+      function csvImportPreview(text) {
+        const rows = parseCsv(text);
+        if (rows.length < 2) throw new Error("CSV must include a header and at least one product row.");
+        const headers = rows[0].map((header) => header.trim().replace(/^\uFEFF/, "").toLowerCase());
+        const indexOf = (...names) => names.map((name) => headers.indexOf(name.toLowerCase())).find((index) => index >= 0) ?? -1;
+        const columns = {
+          id: indexOf("productid", "product_id", "id"),
+          name: indexOf("name", "productname", "product_name"),
+          sellingPrice: indexOf("sellingprice", "selling_price", "price"),
+          stock: indexOf("stockquantity", "stock_quantity", "stock"),
+          threshold: indexOf("lowstockthreshold", "low_stock_threshold"),
+          mrp: indexOf("mrp"),
+          discountedPrice: indexOf("discountedprice", "discounted_price"),
+          costPrice: indexOf("costprice", "cost_price"),
+          weight: indexOf("weight"),
+          categoryId: indexOf("categoryid", "category_id"),
+          masterCategoryId: indexOf("mastercategoryid", "master_category_id"),
+          subcategoryId: indexOf("subcategoryid", "subcategory_id"),
+        };
+        if (columns.id < 0 || columns.name < 0 || columns.sellingPrice < 0) {
+          throw new Error("CSV headers must include Product ID, Name, and Selling Price.");
+        }
+        const optionalIndex = Object.fromEntries(
+          ["sku", "barcode", "brand", "shortdescription", "longdescription", "mainimageurl", "additionalimageurls", "unit", "status", "tags", "variants"]
+            .map((name) => [name, indexOf(name, name.replace(/[a-z]/, (c) => c.toUpperCase()))]),
+        );
+        const read = (values, index) => index < 0 ? "" : String(values[index] ?? "").trim();
+        const knownBarcodes = new Set(
+          allBarcodeRecords()
+            .map((record) => record.barcode)
+            .filter((barcode) => isValidBarcode(barcode)),
+        );
+        return rows.slice(1).map((values, offset) => {
+          const rowNumber = offset + 2;
+          const errors = [];
+          if (values.length !== headers.length) errors.push("Column count does not match the header.");
+          const productIdValue = read(values, columns.id);
+          const name = read(values, columns.name);
+          if (!productIdValue) errors.push("Product ID is required.");
+          if (!name) errors.push("Product name is required.");
+          const numeric = {};
+          for (const [field, label, integer] of [
+            ["sellingPrice", "Selling price", false], ["stock", "Stock quantity", true],
+            ["threshold", "Low-stock threshold", true], ["mrp", "MRP", false],
+            ["discountedPrice", "Discounted price", false], ["costPrice", "Cost price", false],
+            ["weight", "Weight", false],
+          ]) {
+            const value = read(values, columns[field]);
+            if (!value) {
+              if (field === "sellingPrice") errors.push(`${label} is required.`);
+              continue;
+            }
+            const number = Number(value);
+            if (!Number.isFinite(number) || number < 0 || (integer && !Number.isInteger(number))) errors.push(`${label} must be a valid non-negative ${integer ? "whole number" : "number"}.`);
+            else numeric[field] = number;
+          }
+          const masterId = read(values, columns.masterCategoryId);
+          const categoryId = read(values, columns.categoryId);
+          const subcategoryId = read(values, columns.subcategoryId);
+          const rowBarcode = read(values, optionalIndex.barcode);
+          if (rowBarcode && /[\u0000-\u001f\u007f]/.test(rowBarcode)) errors.push("Barcode value contains unsupported control characters.");
+          if (rowBarcode && !isValidBarcode(rowBarcode)) errors.push("Barcode must contain exactly 13 digits.");
+          if (rowBarcode && knownBarcodes.has(rowBarcode)) errors.push("Barcode is already assigned to another product.");
+          if (isValidBarcode(rowBarcode)) knownBarcodes.add(rowBarcode);
+          for (const url of [read(values, optionalIndex.mainimageurl), ...read(values, optionalIndex.additionalimageurls).split("|")].map((item) => item.trim()).filter(Boolean)) {
+            let parsedUrl;
+            try { parsedUrl = new URL(url); } catch { errors.push("Image URL must be an absolute HTTP or HTTPS URL."); break; }
+            if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+              errors.push("Image URL must use HTTP or HTTPS.");
+              break;
+            }
+          }
+          let master = masterId ? productCategory(masterId) : null;
+          const category = categoryId ? productCategory(categoryId) : null;
+          const subcategory = subcategoryId ? productCategory(subcategoryId) : null;
+          if (!master && category) master = masterForCategory(category);
+          if (masterId && master?.level !== "master") errors.push("Master category ID is not valid.");
+          if (categoryId && (!category || category.level !== "category" || (master && category.parentId !== master.id))) errors.push("Category ID does not match its master category.");
+          if (subcategoryId && (!category || !subcategory || subcategory.level !== "subcategory" || subcategory.parentId !== category.id)) errors.push("Subcategory ID does not match its category.");
+          const rowStatus = read(values, optionalIndex.status).toLowerCase();
+          if (rowStatus && !["active", "inactive"].includes(rowStatus)) errors.push("Status must be active or inactive.");
+          let variants = [];
+          const variantText = read(values, optionalIndex.variants);
+          if (variantText) {
+            try {
+              const parsed = JSON.parse(variantText);
+              if (!Array.isArray(parsed) || parsed.some((variant) => !variant || typeof variant !== "object")) throw new Error();
+              variants = parsed;
+              for (const variant of variants) {
+                const variantBarcode = String(variant.barcode ?? variant.barcodeValue ?? "");
+                if (variantBarcode && !isValidBarcode(variantBarcode)) errors.push("Variant barcode must contain exactly 13 digits.");
+                if (variantBarcode && knownBarcodes.has(variantBarcode)) errors.push("Variant barcode is already assigned to another product or variant.");
+                if (isValidBarcode(variantBarcode)) knownBarcodes.add(variantBarcode);
+              }
+            } catch {
+              if (!errors.some((message) => message.startsWith("Variant barcode") || message.startsWith("Variant barcode is"))) {
+                errors.push("Variants must be a JSON array of variant objects.");
+              }
+            }
+          }
+          return {
+            rowNumber,
+            errors,
+            product: {
+              productId: productIdValue,
+              name,
+              sku: read(values, optionalIndex.sku),
+              barcode: rowBarcode,
+              brand: read(values, optionalIndex.brand),
+              shortDescription: read(values, optionalIndex.shortdescription),
+              longDescription: read(values, optionalIndex.longdescription),
+              mainImageUrl: read(values, optionalIndex.mainimageurl),
+              additionalImageUrls: read(values, optionalIndex.additionalimageurls).split("|").map((url) => url.trim()).filter(Boolean),
+              masterCategoryId: master?.id || "",
+              masterCategoryName: master?.name || "",
+              categoryId: category?.id || "",
+              categoryName: category?.name || "",
+              subcategoryId: subcategory?.id || "",
+              subcategoryName: subcategory?.name || "",
+              sellingPrice: numeric.sellingPrice,
+              stockQuantity: numeric.stock ?? 0,
+              lowStockThreshold: numeric.threshold ?? 5,
+              ...(numeric.mrp == null ? {} : { mrp: numeric.mrp }),
+              ...(numeric.discountedPrice == null ? {} : { discountedPrice: numeric.discountedPrice }),
+              ...(numeric.costPrice == null ? {} : { costPrice: numeric.costPrice }),
+              ...(numeric.weight == null ? {} : { weight: numeric.weight }),
+              unit: read(values, optionalIndex.unit),
+              status: rowStatus === "inactive" ? "inactive" : "active",
+              isActive: rowStatus !== "inactive",
+              tags: read(values, optionalIndex.tags).split("|").map((tag) => tag.trim()).filter(Boolean),
+              variants,
+            },
+          };
+        });
+      }
+
+      function showImportPreview(rows) {
+        productState.importRows = rows;
+        const validCount = rows.filter((row) => !row.errors.length).length;
+        document.querySelector("#product-import-summary").textContent =
+          `${validCount} valid row${validCount === 1 ? "" : "s"} of ${rows.length}; invalid rows will not be imported. Duplicate product IDs and SKUs are allowed; barcodes must be unique 13-digit values.`;
+        document.querySelector("#product-import-errors").textContent =
+          rows.some((row) => row.errors.length) ? "Rows with errors are excluded from import; review each row below." : "All rows passed validation.";
+        document.querySelector("#product-import-preview").innerHTML = rows.map((row) =>
+          `<tr><td>${row.rowNumber}</td><td>${escapeProductHtml(row.product.productId)}</td><td>${escapeProductHtml(row.product.name)}</td><td>${escapeProductHtml(row.product.sku)}</td><td>${escapeProductHtml(row.product.barcode)}</td><td>${escapeProductHtml(row.errors.join(" ")) || "Ready"}</td></tr>`,
+        ).join("");
+        const confirmButton = document.querySelector("#product-import-confirm");
+        confirmButton.disabled = validCount === 0;
+        confirmButton.textContent = `Import ${validCount} valid row${validCount === 1 ? "" : "s"}`;
+        document.querySelector("#product-import-dialog").showModal();
+      }
+
+      async function importProducts() {
+        const rows = productState.importRows.filter((row) => row.errors.length === 0);
+        if (!rows.length) return;
+        productState.reservedBarcodes = new Set(
+          rows.flatMap((row) => [
+            row.product.barcode,
+            ...row.product.variants.map((variant) => String(variant.barcode ?? variant.barcodeValue ?? "")),
+          ]).filter((barcode) => isValidBarcode(barcode)),
+        );
+        const patch = {};
+        for (const row of rows) {
+          const key = push(ref(database, "products")).key;
+          if (!key) throw new Error("Could not allocate a Firebase record key for an imported row.");
+          patch[key] = {
+            ...row.product,
+            barcode: row.product.barcode || generateUniqueBarcode(),
+            variants: row.product.variants.map((variant, index) => ({
+              ...variant,
+              id: String(variant.id ?? `variant-${index + 1}`),
+              sku: String(variant.sku ?? ""),
+              barcode: /^\d{13}$/.test(String(variant.barcode || ""))
+                ? String(variant.barcode)
+                : generateUniqueBarcode(),
+            })),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+        }
+        const button = document.querySelector("#product-import-confirm");
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        try {
+          await update(ref(database, "products"), patch);
+          document.querySelector("#product-import-dialog").close();
+          showCategoryToast(`Imported ${rows.length} product${rows.length === 1 ? "" : "s"}.`);
+        } catch (error) {
+          showCategoryToast(reportFirebaseError("Importing products", error), "error");
+        } finally {
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+        }
+      }
+
+      async function barcodePngBlob(value) {
+        const JsBarcode = await barcodeLibrary();
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        JsBarcode(svg, value, {
+          format: "CODE128",
+          displayValue: true,
+          font: "Poppins",
+          fontSize: 10,
+          width: 1.5,
+          margin: 4,
+          height: 32,
+        });
+        const svgText = new XMLSerializer().serializeToString(svg);
+        const image = new Image();
+        const svgUrl = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml;charset=utf-8" }));
+        try {
+          await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = () => reject(new Error("The Code 128 barcode image could not be decoded."));
+            image.src = svgUrl;
+          });
+          const canvas = document.createElement("canvas");
+          canvas.width = image.naturalWidth + 8;
+          canvas.height = image.naturalHeight + 8;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("This browser cannot create a PNG canvas.");
+          context.fillStyle = "#ffffff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 4, 4);
+          return await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG encoding failed.")), "image/png"));
+        } finally {
+          URL.revokeObjectURL(svgUrl);
+        }
+      }
+
+      function safeFilename(value) {
+        return String(value).replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "barcode";
+      }
+
+      async function downloadBarcode(value) {
+        if (!/^\d{13}$/.test(value)) throw new Error("Only valid 13-digit barcode values can be downloaded.");
+        const blob = await barcodePngBlob(value);
+        downloadBlob(blob, `${safeFilename(value)}.png`);
+      }
+
+      function allBarcodeRecords() {
+        const records = [];
+        for (const [key, product] of Object.entries(categoryState.products)) {
+          records.push({
+            uid: key,
+            key,
+            product,
+            name: productName(product) || "Unnamed product",
+            sku: productSku(product),
+            barcode: productBarcode(product),
+            variantIndex: -1,
+            variantName: "",
+          });
+          productVariants(product).forEach((variant, index) => records.push({
+            uid: `${key}::variant::${variant.id}`,
+            key,
+            product,
+            name: productName(product) || "Unnamed product",
+            sku: variant.sku,
+            barcode: variant.barcode,
+            variantIndex: index,
+            variantName: variant.name || `Variant ${index + 1}`,
+          }));
+        }
+        return records;
+      }
+
+      function barcodeRecords() {
+        const records = allBarcodeRecords();
+        const query = document.querySelector("#barcode-search").value.trim().toLocaleLowerCase();
+        const masterId = document.querySelector("#barcode-master-filter").value;
+        const categoryId = document.querySelector("#barcode-category-filter").value;
+        const status = document.querySelector("#barcode-status-filter").value;
+        return records.filter((record) => {
+          const master = productMaster(record.product);
+          return (!query || [record.name, productId(record.product, record.key), record.sku, record.barcode, record.variantName].join(" ").toLocaleLowerCase().includes(query)) &&
+            (!masterId || master?.id === masterId) &&
+            (!categoryId || valueAsId(record.product.categoryId ?? record.product.category_id) === categoryId) &&
+            (!status || productStatus(record.product) === (status === "active"));
+        });
+      }
+
+      function renderBarcodeManager() {
+        const loading = !categoryState.productsLoaded && !categoryState.productsError;
+        const error = categoryState.productsError;
+        document.querySelector("#inventory-loading").hidden = !loading;
+        document.querySelector("#inventory-error").hidden = !error;
+        document.querySelector("#inventory-error-message").textContent = error || "";
+        document.querySelector("#barcode-grid-wrap").hidden = true;
+        document.querySelector("#inventory-empty").hidden = true;
+        if (loading || error) return;
+        updateProductFilters();
+        const records = barcodeRecords();
+        const grid = document.querySelector("#barcode-grid");
+        if (!records.length) {
+          document.querySelector("#inventory-empty").hidden = false;
+          grid.replaceChildren();
+          return;
+        }
+        document.querySelector("#barcode-grid-wrap").hidden = false;
+        grid.innerHTML = records.map((record) => `<article class="barcode-card">
+          <label><input type="checkbox" data-barcode-select="${escapeProductHtml(record.uid)}"${productState.selected.has(`barcode:${record.uid}`) ? " checked" : ""} /> Select label</label>
+          <h3>${escapeProductHtml(record.name)}${record.variantName ? ` — ${escapeProductHtml(record.variantName)}` : ""}</h3>
+          <p>Product ID: ${escapeProductHtml(productId(record.product, record.key))} · SKU: ${escapeProductHtml(record.sku || "—")}</p>
+          <p>Barcode: <span data-barcode-value="${escapeProductHtml(record.uid)}">${escapeProductHtml(record.barcode || "Missing")}</span></p>
+          <div class="barcode-preview" data-barcode-preview="${escapeProductHtml(record.uid)}" aria-label="Code 128 barcode preview"></div>
+          <div class="barcode-card-actions">
+            ${isValidBarcode(record.barcode)
+              ? `<button class="category-secondary-button" type="button" data-barcode-action="download" data-uid="${escapeProductHtml(record.uid)}">Download PNG</button>`
+              : `<button class="category-primary-button" type="button" data-barcode-action="generate" data-uid="${escapeProductHtml(record.uid)}">Generate Barcode</button>`}
+          </div>
+        </article>`).join("");
+        for (const record of records) {
+          if (isValidBarcode(record.barcode)) void drawCode128(grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`), record.barcode, { width: 1.5, height: 32, fontSize: 10, margin: 4 });
+          else grid.querySelector(`[data-barcode-preview="${CSS.escape(record.uid)}"]`).textContent = record.barcode ? "Invalid barcode — regenerate" : "No barcode saved";
+        }
+        const selectedCount = allBarcodeRecords().filter((record) => productState.selected.has(`barcode:${record.uid}`)).length;
+        document.querySelector("#barcode-export-selected").disabled = selectedCount === 0;
+        document.querySelector("#barcode-print-selected").disabled = selectedCount === 0;
+      }
+
+      function recordForBarcodeUid(uid) {
+        return allBarcodeRecords().find((record) => record.uid === uid) || null;
+      }
+
+      async function generateBarcodeForRecord(record, download = false) {
+        const currentValue = record.variantIndex < 0
+          ? productBarcode(record.product)
+          : productVariants(record.product)[record.variantIndex]?.barcode;
+        const value = isValidBarcode(currentValue) ? currentValue : generateUniqueBarcode();
+        try {
+          if (record.variantIndex < 0) {
+            await update(ref(database, `products/${record.key}`), { barcode: value, updatedAt: Date.now() });
+          } else {
+            const rawVariants = record.product.variants;
+            const variants = Array.isArray(rawVariants)
+              ? rawVariants.map((variant, index) => index === record.variantIndex ? { ...variant, id: variant.id ?? record.variantIndex, barcode: value } : variant)
+              : Object.fromEntries(Object.entries(rawVariants || {}).map(([id, variant], index) => index === record.variantIndex ? [id, { ...variant, barcode: value }] : [id, variant]));
+            await update(ref(database, `products/${record.key}`), { variants, updatedAt: Date.now() });
+          }
+          if (download) await downloadBarcode(value);
+          else showCategoryToast("Barcode generated and saved.");
+          return value;
+        } catch (error) {
+          showCategoryToast(error?.code ? reportFirebaseError("Generating barcode", error) : error.message || "Barcode generation failed.", "error");
+          return false;
+        }
+      }
+
+      async function performProductAction(action, key) {
+        const product = categoryState.products[key];
+        if (!product) {
+          showCategoryToast("This product is no longer available. The list has been refreshed.", "error");
+          return;
+        }
+        if (action === "view") {
+          const master = productMaster(product);
+          const category = productCategory(product.categoryId ?? product.category_id);
+          const subcategory = productCategory(product.subcategoryId ?? product.subcategory_id);
+          const details = [
+            ["Product ID", productId(product, key)], ["Name", productName(product)], ["SKU", productSku(product)],
+            ["Barcode", productBarcode(product) || "Missing"], ["Brand", product.brand ?? "—"],
+            ["Category", [master?.name, category?.name, subcategory?.name].filter(Boolean).join(" / ") || "—"],
+            ["MRP", product.mrp ?? "—"], ["Selling price", product.sellingPrice ?? product.price ?? "—"],
+            ["Discounted price", product.discountedPrice ?? "—"], ["Cost price", product.costPrice ?? "—"],
+            ["Stock", productStock(product)], ["Low-stock threshold", product.lowStockThreshold ?? 5],
+            ["Unit", product.unit ?? "—"], ["Weight", product.weight ?? "—"],
+            ["Status", productStatus(product) ? "Active" : "Inactive"],
+            ["Variants", productVariants(product).map((variant) => `${variant.name || "Variant"} (SKU: ${variant.sku || "—"}, barcode: ${variant.barcode || "—"})`).join("; ") || "—"],
+            ["Short description", product.shortDescription ?? "—"], ["Description", product.longDescription ?? product.description ?? "—"],
+            ["Tags", Array.isArray(product.tags) ? product.tags.join(", ") : product.tags ?? "—"],
+          ];
+          const list = document.querySelector("#product-view-details");
+          list.replaceChildren();
+          for (const [label, value] of details) {
+            const term = document.createElement("dt");
+            const description = document.createElement("dd");
+            term.textContent = label;
+            description.textContent = String(value);
+            list.append(term, description);
+          }
+          document.querySelector("#product-view-dialog").showModal();
+          return;
+        }
+        if (action === "edit") {
+          openProductForm(product, key);
+          return;
+        }
+        if (action === "duplicate") {
+          const newKey = push(ref(database, "products")).key;
+          if (!newKey) {
+            showCategoryToast("Could not allocate a new product record. Retry.", "error");
+            return;
+          }
+          const duplicatedVariants = Array.isArray(product.variants)
+            ? product.variants.map((variant, index) => ({
+                ...variant,
+                id: `variant-${crypto.randomUUID()}`,
+                barcode: generateUniqueBarcode(),
+              }))
+            : product.variants && typeof product.variants === "object"
+              ? Object.fromEntries(Object.entries(product.variants).map(([variantKey, variant], index) => [
+                  variantKey,
+                  { ...variant, barcode: generateUniqueBarcode() },
+                ]))
+              : [];
+          try {
+            await set(ref(database, `products/${newKey}`), {
+              ...product,
+              barcode: generateUniqueBarcode(),
+              variants: duplicatedVariants,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            });
+            showCategoryToast("Product duplicated. Product ID and SKU values may be duplicates.");
+          } catch (error) {
+            showCategoryToast(reportFirebaseError("Duplicating product", error), "error");
+          }
+          return;
+        }
+        if (action === "toggle") {
+          const active = !productStatus(product);
+          try {
+            await update(ref(database, `products/${key}`), {
+              status: active ? "active" : "inactive",
+              isActive: active,
+              updatedAt: Date.now(),
+            });
+            showCategoryToast(`Product ${active ? "activated" : "deactivated"}.`);
+          } catch (error) {
+            showCategoryToast(reportFirebaseError("Updating product status", error), "error");
+          }
+          return;
+        }
+        if (action === "generate" || action === "download") {
+          let barcode = productBarcode(product);
+          if (!isValidBarcode(barcode)) {
+            const record = { key, product, variantIndex: -1, name: productName(product), variantName: "" };
+            barcode = generateUniqueBarcode();
+            try {
+              await update(ref(database, `products/${key}`), { barcode, updatedAt: Date.now() });
+            } catch (error) {
+              showCategoryToast(reportFirebaseError("Generating barcode", error), "error");
+              return;
+            }
+          }
+          if (action === "download") {
+            try {
+              await downloadBarcode(barcode);
+              showCategoryToast("Barcode PNG downloaded.");
+            } catch (error) {
+              showCategoryToast(error.message || "Barcode download failed.", "error");
+            }
+          } else showCategoryToast("Barcode generated and saved.");
+          return;
+        }
+        if (action === "delete") {
+          productState.pendingAction = { type: "delete", keys: [key] };
+          document.querySelector("#product-confirm-title").textContent = "Delete product";
+          document.querySelector("#product-confirm-message").textContent = `Delete “${productName(product)}” (Firebase record ${key})? This cannot be undone.`;
+          document.querySelector("#product-confirm-action").textContent = "Delete";
+          document.querySelector("#product-confirm-dialog").showModal();
+        }
+      }
+
+      async function executeConfirmedProductAction() {
+        const pending = productState.pendingAction;
+        const button = document.querySelector("#product-confirm-action");
+        if (!pending) return;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        try {
+          if (pending.type === "delete") {
+            await update(ref(database, "products"), Object.fromEntries(pending.keys.map((key) => [key, null])));
+            pending.keys.forEach((key) => {
+              productState.selected.delete(key);
+              for (const selection of productState.selected) {
+                if (selection === `barcode:${key}` || selection.startsWith(`barcode:${key}::variant::`)) {
+                  productState.selected.delete(selection);
+                }
+              }
+            });
+            showCategoryToast(`Deleted ${pending.keys.length} product${pending.keys.length === 1 ? "" : "s"}.`);
+          }
+          document.querySelector("#product-confirm-dialog").close();
+        } catch (error) {
+          showCategoryToast(reportFirebaseError("Deleting product", error), "error");
+        } finally {
+          productState.pendingAction = null;
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+        }
+      }
+
+      async function performBulkStatus(active) {
+        const keys = [...productState.selected].filter((key) => categoryState.products[key]);
+        if (!keys.length) return;
+        const updates = {};
+        for (const key of keys) {
+          updates[`${key}/status`] = active ? "active" : "inactive";
+          updates[`${key}/isActive`] = active;
+          updates[`${key}/updatedAt`] = Date.now();
+        }
+        try {
+          await update(ref(database, "products"), updates);
+          showCategoryToast(`${keys.length} product${keys.length === 1 ? "" : "s"} ${active ? "activated" : "deactivated"}.`);
+        } catch (error) {
+          showCategoryToast(reportFirebaseError("Updating selected products", error), "error");
+        }
+      }
+
+      async function exportSelectedBarcodes() {
+        const records = allBarcodeRecords().filter((record) => productState.selected.has(`barcode:${record.uid}`));
+        try {
+          for (const record of records) {
+            let value = record.barcode;
+            if (!isValidBarcode(value)) {
+              const saved = await generateBarcodeForRecord(record);
+              if (!saved) throw new Error(`Could not save barcode for ${record.name}; download was cancelled.`);
+              value = saved;
+            }
+            await downloadBarcode(value);
+          }
+          if (records.length) showCategoryToast(`Downloaded ${records.length} barcode PNG${records.length === 1 ? "" : "s"}.`);
+        } catch (error) {
+          showCategoryToast(error.message || "Barcode PNG download failed.", "error");
+        }
+      }
+
+      async function printSelectedBarcodes() {
+        const records = allBarcodeRecords().filter((record) => productState.selected.has(`barcode:${record.uid}`));
+        if (!records.length) return;
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+          showCategoryToast("Allow pop-ups to print barcode labels.", "error");
+          return;
+        }
+        try {
+          for (const record of records) {
+            if (!isValidBarcode(record.barcode)) {
+              record.barcode = await generateBarcodeForRecord(record);
+              if (!record.barcode) throw new Error(`Could not save barcode for ${record.name}; printing was cancelled.`);
+            }
+          }
+          const JsBarcode = await barcodeLibrary();
+          const labels = records.map((record) => {
+            const value = record.barcode;
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            JsBarcode(svg, value, { format: "CODE128", displayValue: true, fontSize: 12, margin: 6, height: 50 });
+            return `<article><strong>${escapeProductHtml(record.name)}${record.variantName ? ` — ${escapeProductHtml(record.variantName)}` : ""}</strong>${new XMLSerializer().serializeToString(svg)}</article>`;
+          }).join("");
+          printWindow.document.write(`<!doctype html><html><head><title>Barcode labels</title><style>body{font:14px sans-serif;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}article{border:1px solid #aaa;padding:12px;text-align:center;break-inside:avoid}svg{display:block;max-width:100%;height:auto;margin:8px auto}@media print{body{gap:8px}}</style></head><body>${labels}<\/body></html>`);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          printWindow.close();
+          showCategoryToast(error.message || "Printing labels failed.", "error");
+        }
+      }
+
+      document.querySelector("#products-retry").addEventListener("click", startCategoryListeners);
+      document.querySelector("#products-category-retry").addEventListener("click", startCategoryListeners);
+      document.querySelector("#inventory-retry").addEventListener("click", startCategoryListeners);
+      document.querySelector("#product-add-button").addEventListener("click", () => openProductForm());
+      document.querySelector("#product-form").addEventListener("submit", saveProduct);
+      document.querySelector("#product-barcode-value").addEventListener("input", syncFormBarcodePreview);
+      document.querySelector("#product-add-variant").addEventListener("click", () => {
+        const index = document.querySelectorAll(".product-variant-row").length + 1;
+        addVariantEditor({ id: `variant-${crypto.randomUUID()}`, barcode: generateUniqueBarcode(productState.editKey) });
+      });
+      document.querySelector("#product-variants").addEventListener("click", (event) => {
+        const removeButton = event.target.closest("[data-remove-variant]");
+        if (removeButton) removeButton.closest(".product-variant-row").remove();
+      });
+      document.querySelector("#product-master-category").addEventListener("change", () => updateProductFormCategories(true));
+      document.querySelector("#product-category").addEventListener("change", () => updateProductFormCategories(true));
+      document.querySelector("#product-category-retry").addEventListener("click", startCategoryListeners);
+      for (const dialog of [
+        document.querySelector("#product-form-dialog"),
+        document.querySelector("#product-view-dialog"),
+        document.querySelector("#product-confirm-dialog"),
+        document.querySelector("#product-import-dialog"),
+      ]) {
+        dialog.querySelectorAll("[data-product-close]").forEach((button) => button.addEventListener("click", () => dialog.close()));
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) dialog.close();
+        });
+      }
+      document.querySelector("#product-confirm-action").addEventListener("click", executeConfirmedProductAction);
+      document.querySelector("#products-table-body").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-product-action]");
+        if (button && !button.disabled) void performProductAction(button.dataset.productAction, button.dataset.key);
+      });
+      document.querySelector("#products-table-body").addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-select-product]");
+        if (!checkbox) return;
+        if (checkbox.checked) productState.selected.add(checkbox.dataset.selectProduct);
+        else productState.selected.delete(checkbox.dataset.selectProduct);
+        renderProducts();
+        renderBarcodeManager();
+      });
+      document.querySelector("#product-select-all").addEventListener("change", (event) => {
+        const visible = filteredProducts().slice((productState.page - 1) * productState.pageSize, productState.page * productState.pageSize);
+        for (const [key] of visible) {
+          if (event.target.checked) productState.selected.add(key);
+          else productState.selected.delete(key);
+        }
+        renderProducts();
+        renderBarcodeManager();
+      });
+      document.querySelector("#products-bulk-actions").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-bulk]");
+        if (!button) return;
+        if (button.dataset.bulk === "activate") void performBulkStatus(true);
+        else if (button.dataset.bulk === "deactivate") void performBulkStatus(false);
+        else if (button.dataset.bulk === "export") exportProducts([...productState.selected].filter((key) => categoryState.products[key]).map((key) => [key, categoryState.products[key]]));
+        else if (button.dataset.bulk === "delete") {
+          const keys = [...productState.selected].filter((key) => categoryState.products[key]);
+          if (!keys.length) return;
+          productState.pendingAction = { type: "delete", keys };
+          document.querySelector("#product-confirm-title").textContent = "Delete selected products";
+          document.querySelector("#product-confirm-message").textContent = `Delete ${keys.length} selected product${keys.length === 1 ? "" : "s"}? This cannot be undone.`;
+          document.querySelector("#product-confirm-action").textContent = "Delete selected";
+          document.querySelector("#product-confirm-dialog").showModal();
+        }
+      });
+      for (const id of [
+        "product-search", "product-master-filter", "product-category-filter", "product-subcategory-filter",
+        "product-brand-filter", "product-status-filter", "product-stock-filter", "product-sort",
+      ]) {
+        const control = document.querySelector(`#${id}`);
+        control.addEventListener("input", () => { productState.page = 1; renderProducts(); });
+        control.addEventListener("change", () => { productState.page = 1; renderProducts(); });
+      }
+      document.querySelector("#products-previous").addEventListener("click", () => {
+        productState.page = Math.max(1, productState.page - 1);
+        renderProducts();
+      });
+      document.querySelector("#products-next").addEventListener("click", () => {
+        productState.page += 1;
+        renderProducts();
+      });
+      document.querySelector("#product-export-button").addEventListener("click", () => {
+        const selected = [...productState.selected].filter((key) => categoryState.products[key]);
+        const entries = selected.length
+          ? selected.map((key) => [key, categoryState.products[key]])
+          : filteredProducts();
+        exportProducts(entries);
+      });
+      document.querySelector("#product-import-button").addEventListener("click", () => document.querySelector("#product-import-file").click());
+      document.querySelector("#product-import-file").addEventListener("change", async (event) => {
+        const [file] = event.target.files;
+        if (!file) return;
+        try {
+          showImportPreview(csvImportPreview(await file.text()));
+        } catch (error) {
+          showCategoryToast(error.message || "Could not read this CSV file.", "error");
+        } finally {
+          event.target.value = "";
+        }
+      });
+      document.querySelector("#product-import-confirm").addEventListener("click", () => {
+        void importProducts().catch((error) => showCategoryToast(error.message || "CSV import failed.", "error"));
+      });
+      for (const id of ["barcode-search", "barcode-master-filter", "barcode-category-filter", "barcode-status-filter"]) {
+        const control = document.querySelector(`#${id}`);
+        control.addEventListener("input", renderBarcodeManager);
+        control.addEventListener("change", renderBarcodeManager);
+      }
+      document.querySelector("#barcode-grid").addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-barcode-select]");
+        if (!checkbox) return;
+        const selectionKey = `barcode:${checkbox.dataset.barcodeSelect}`;
+        if (checkbox.checked) productState.selected.add(selectionKey);
+        else productState.selected.delete(selectionKey);
+        renderBarcodeManager();
+      });
+      document.querySelector("#barcode-grid").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-barcode-action]");
+        if (!button) return;
+        const record = recordForBarcodeUid(button.dataset.uid);
+        if (!record) {
+          showCategoryToast("This product or variant is no longer available. Retry after the list refreshes.", "error");
+          return;
+        }
+        if (button.dataset.barcodeAction === "generate") void generateBarcodeForRecord(record);
+        else {
+          const downloadRecord = async () => {
+            let value = record.barcode;
+            if (!isValidBarcode(record.barcode)) {
+              const saved = await generateBarcodeForRecord(record);
+              if (!saved) throw new Error("Could not save this barcode. The PNG was not downloaded.");
+              value = saved;
+            }
+            await downloadBarcode(value);
+          };
+          void downloadRecord().then(() => showCategoryToast("Barcode PNG downloaded.")).catch((error) => showCategoryToast(error.message || "Barcode download failed.", "error"));
+        }
+      });
+      document.querySelector("#barcode-export-selected").addEventListener("click", () => void exportSelectedBarcodes());
+      document.querySelector("#barcode-print-selected").addEventListener("click", () => void printSelectedBarcodes());
 
       function showGateError(message, error) {
         if (error) {
