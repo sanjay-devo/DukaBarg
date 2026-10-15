@@ -38,6 +38,21 @@
     "products": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "orders": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$recordKey": {
+        "orderStatus": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isString() && ((data.val() === 'PLACED' && (newData.val() === 'CONFIRMED' || newData.val() === 'CANCELLED')) || (data.val() === 'CONFIRMED' && (newData.val() === 'PROCESSING' || newData.val() === 'CANCELLED')) || (data.val() === 'PROCESSING' && (newData.val() === 'READY_TO_SHIP' || newData.val() === 'CANCELLED')) || (data.val() === 'READY_TO_SHIP' && newData.val() === 'OUT_FOR_DELIVERY') || (data.val() === 'OUT_FOR_DELIVERY' && newData.val() === 'DELIVERED'))"
+        },
+        "$orderId": {
+          "orderStatus": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isString() && ((data.val() === 'PLACED' && (newData.val() === 'CONFIRMED' || newData.val() === 'CANCELLED')) || (data.val() === 'CONFIRMED' && (newData.val() === 'PROCESSING' || newData.val() === 'CANCELLED')) || (data.val() === 'PROCESSING' && (newData.val() === 'READY_TO_SHIP' || newData.val() === 'CANCELLED')) || (data.val() === 'READY_TO_SHIP' && newData.val() === 'OUT_FOR_DELIVERY') || (data.val() === 'OUT_FOR_DELIVERY' && newData.val() === 'DELIVERED'))"
+          }
+        }
+      }
     }
   }
 }

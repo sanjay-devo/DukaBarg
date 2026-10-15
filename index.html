@@ -708,6 +708,7 @@
       .products-page[hidden],
       .inventory-page[hidden],
       .customers-page[hidden],
+      .orders-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -1289,6 +1290,418 @@
       @media (prefers-reduced-motion: reduce) {
         .category-skeleton span {
           animation: none;
+        }
+      }
+
+      .orders-page {
+        margin-top: var(--space-7);
+      }
+
+      .orders-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .orders-stat-value {
+        overflow-wrap: anywhere;
+        font-size: var(--font-size-xl);
+      }
+
+      .orders-toolbar {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.7fr) repeat(4, minmax(130px, 1fr));
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+      }
+
+      .orders-toolbar input,
+      .orders-toolbar select {
+        width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-date-range {
+        display: grid;
+        grid-column: span 2;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+      }
+
+      .orders-date-range-label {
+        grid-column: 1 / -1;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        font-weight: 500;
+      }
+
+      .orders-filter-actions {
+        display: flex;
+        justify-content: flex-end;
+        grid-column: 1 / -1;
+      }
+
+      .orders-toolbar input:focus-visible,
+      .orders-toolbar select:focus-visible,
+      .orders-table input[type="checkbox"]:focus-visible,
+      .orders-status-form select:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .orders-selection {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-feedback {
+        padding: var(--space-7);
+        color: var(--color-text-inverse);
+        text-align: center;
+      }
+
+      .orders-feedback[hidden] {
+        display: none;
+      }
+
+      .orders-feedback .category-secondary-button[hidden] {
+        display: none;
+      }
+
+      .orders-feedback[data-kind="error"] {
+        color: #8c321b;
+      }
+
+      .orders-feedback .category-secondary-button {
+        margin-left: var(--space-3);
+      }
+
+      .orders-table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .orders-table-wrap[hidden] {
+        display: none;
+      }
+
+      .orders-page .category-pagination[hidden] {
+        display: none;
+      }
+
+      .orders-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .orders-table th {
+        padding: var(--space-5) var(--space-6);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .orders-table td {
+        padding: var(--space-5) var(--space-6);
+        border-top: 1px solid var(--color-border-muted);
+        vertical-align: middle;
+      }
+
+      .orders-table tbody tr:hover {
+        background: #fafafa;
+      }
+
+      .orders-primary-text,
+      .orders-secondary-text {
+        display: block;
+        max-width: 220px;
+        overflow-wrap: anywhere;
+      }
+
+      .orders-primary-text {
+        font-weight: 600;
+      }
+
+      .orders-secondary-text {
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-id-button {
+        padding: 0;
+        color: var(--color-text-primary);
+        background: none;
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: var(--color-border-muted);
+        text-underline-offset: 3px;
+        overflow-wrap: anywhere;
+      }
+
+      .orders-id-button:hover {
+        text-decoration-color: var(--color-border-strong);
+      }
+
+      .orders-id-button:focus-visible,
+      .orders-action-trigger:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .orders-status-badge {
+        display: inline-flex;
+        padding: var(--space-2) var(--space-3);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .orders-status-badge[data-tone="amber"] { color: #76510a; background: #fff4d6; }
+      .orders-status-badge[data-tone="blue"] { color: #14528a; background: #e7f2ff; }
+      .orders-status-badge[data-tone="purple"] { color: #633a89; background: #f2eaff; }
+      .orders-status-badge[data-tone="indigo"] { color: #3f4388; background: #eceeff; }
+      .orders-status-badge[data-tone="green"] { color: #176b38; background: #e8f5ec; }
+      .orders-status-badge[data-tone="red"] { color: #8c321b; background: #fff0eb; }
+
+      .orders-status-badge + .orders-status-badge {
+        margin-top: var(--space-2);
+      }
+
+      .orders-action-trigger {
+        width: 36px;
+        height: 36px;
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-size-xl);
+        line-height: 1;
+      }
+
+      .orders-action-trigger:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .orders-action-menu {
+        position: fixed;
+        z-index: 12;
+        width: min(200px, calc(100vw - 16px));
+        padding: var(--space-2);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+      }
+
+      .orders-action-menu[hidden] {
+        display: none;
+      }
+
+      .orders-action-menu button {
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-sm);
+        text-align: left;
+      }
+
+      .orders-action-menu button:hover,
+      .orders-action-menu button:focus-visible {
+        background: var(--color-surface-raised);
+      }
+
+      .orders-action-menu button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: -2px;
+      }
+
+      .orders-dialog {
+        width: min(760px, calc(100vw - 24px));
+        max-height: min(92vh, 900px);
+        padding: 0;
+        overflow: auto;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .orders-dialog::backdrop {
+        background: var(--color-backdrop);
+      }
+
+      .orders-dialog-content {
+        padding: var(--space-7);
+      }
+
+      .orders-dialog-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+
+      .orders-dialog-heading h2 {
+        margin: 0;
+        font-size: var(--font-size-lg);
+      }
+
+      .orders-dialog-heading p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-detail-section {
+        margin-top: var(--space-6);
+      }
+
+      .orders-detail-section h3 {
+        margin: 0 0 var(--space-4);
+        font-size: var(--font-size-md);
+      }
+
+      .orders-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4);
+        margin: 0;
+      }
+
+      .orders-detail-item {
+        min-width: 0;
+        padding: var(--space-4);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+      }
+
+      .orders-detail-item dt {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-detail-item dd {
+        margin: var(--space-2) 0 0;
+        overflow-wrap: anywhere;
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-detail-table-wrap {
+        overflow-x: auto;
+      }
+
+      .orders-detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--font-size-sm);
+        text-align: left;
+      }
+
+      .orders-detail-table th,
+      .orders-detail-table td {
+        padding: var(--space-4);
+        border-bottom: 1px solid var(--color-border-muted);
+        vertical-align: top;
+      }
+
+      .orders-detail-table th {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-total-list {
+        display: grid;
+        gap: var(--space-3);
+        max-width: 340px;
+        margin: var(--space-5) 0 0 auto;
+      }
+
+      .orders-total-row {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-5);
+      }
+
+      .orders-total-row strong {
+        text-align: right;
+      }
+
+      .orders-status-form select {
+        width: 100%;
+        min-height: 42px;
+        margin-top: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+      }
+
+      @media (max-width: 900px) {
+        .orders-toolbar {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .orders-search-field,
+        .orders-date-range {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .orders-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 480px) {
+        .orders-toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .orders-search-field,
+        .orders-date-range,
+        .orders-filter-actions {
+          grid-column: auto;
+        }
+
+        .orders-date-range,
+        .orders-detail-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .orders-dialog-content {
+          padding: var(--space-6);
         }
       }
 
@@ -2655,6 +3068,96 @@
             </div>
           </section>
 
+          <section class="orders-page" id="orders-page" aria-labelledby="orders-section-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="orders-section-title">Orders</h2>
+                <p>Review order details, payment information, and fulfillment status.</p>
+              </div>
+            </div>
+
+            <div class="category-stats orders-stats" aria-label="Order summary">
+              <article class="category-stat"><span class="category-stat-label">Total Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-total">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Pending Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-pending">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Confirmed Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-confirmed">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Processing Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-processing">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Shipped Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-shipped">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Delivered Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-delivered">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Cancelled / Failed</span><strong class="category-stat-value orders-stat-value" id="orders-stat-cancelled">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Total Order Value</span><strong class="category-stat-value orders-stat-value" id="orders-stat-value">—</strong><span class="customer-stat-note" id="orders-stat-value-note">Based on stored final totals</span></article>
+            </div>
+
+            <div class="category-table-card">
+              <div class="orders-toolbar" aria-label="Order filters">
+                <label class="orders-search-field visually-hidden" for="orders-search">Search orders by ID, customer name, mobile number, or email</label>
+                <input class="orders-search-field" id="orders-search" type="search" placeholder="Search order ID, customer name, mobile, or email" aria-label="Search orders by ID, customer name, mobile number, or email" />
+                <select id="orders-status-filter" aria-label="Filter by order status">
+                  <option value="">All order statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled / Failed</option><option value="other">Other stored status</option>
+                </select>
+                <select id="orders-payment-filter" aria-label="Filter by payment status">
+                  <option value="">All payment statuses</option>
+                </select>
+                <select id="orders-method-filter" aria-label="Filter by payment method">
+                  <option value="">All payment methods</option>
+                </select>
+                <select id="orders-sort" aria-label="Sort orders by date">
+                  <option value="newest">Newest</option><option value="oldest">Oldest</option>
+                </select>
+                <div class="orders-date-range" role="group" aria-label="Filter by order date range">
+                  <span class="orders-date-range-label">Date range</span>
+                  <label class="visually-hidden" for="orders-date-from">From date</label>
+                  <input id="orders-date-from" type="date" aria-label="Order date from" />
+                  <label class="visually-hidden" for="orders-date-to">To date</label>
+                  <input id="orders-date-to" type="date" aria-label="Order date to" />
+                </div>
+                <div class="orders-filter-actions">
+                  <button class="category-secondary-button" id="orders-clear-filters" type="button">Clear Filters</button>
+                </div>
+              </div>
+
+              <div class="orders-selection" id="orders-selection-summary" aria-live="polite">0 selected</div>
+              <div class="orders-feedback" id="orders-loading" aria-live="polite">
+                <div class="category-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="visually-hidden">Loading orders from Firebase</span>
+              </div>
+              <div class="orders-feedback" id="orders-error" data-kind="error" role="alert" hidden>
+                <span id="orders-error-message"></span>
+                <button class="category-secondary-button" id="orders-retry" type="button">Retry</button>
+              </div>
+              <div class="orders-feedback" id="orders-users-warning" role="status" hidden>
+                <span id="orders-users-warning-message"></span>
+                <button class="category-secondary-button" id="orders-users-retry" type="button">Retry customer lookup</button>
+              </div>
+              <div class="orders-feedback" id="orders-empty" hidden>No orders match your filters.</div>
+              <div class="orders-table-wrap" id="orders-table-wrap" hidden>
+                <table class="orders-table">
+                  <thead><tr>
+                    <th scope="col"><span class="visually-hidden">Select</span></th>
+                    <th scope="col">Order ID</th><th scope="col">Customer</th><th scope="col">Date</th><th scope="col">Items</th><th scope="col">Total</th><th scope="col">Payment</th><th scope="col">Order Status</th><th scope="col">Actions</th>
+                  </tr></thead>
+                  <tbody id="orders-table-body"></tbody>
+                </table>
+              </div>
+              <div class="category-pagination" id="orders-pagination" hidden>
+                <div class="pagination-summary">
+                  <span id="orders-page-summary"></span>
+                  <label class="pagination-size" for="orders-page-size">Rows per page
+                    <select id="orders-page-size" aria-label="Order rows per page"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+                  </label>
+                </div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="orders-previous">Previous</button>
+                  <div class="pagination-pages" id="orders-page-buttons" aria-label="Order pages"></div>
+                  <label class="pagination-page-input" for="orders-page-input">Page
+                    <input id="orders-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to order page" />
+                    <span>of <span id="orders-page-count">1</span></span>
+                  </label>
+                  <button type="button" id="orders-next">Next</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section class="category-page" id="category-page" aria-labelledby="category-section-title" hidden>
             <div class="category-heading-row">
               <div>
@@ -2900,6 +3403,32 @@
       </main>
     </div>
 
+    <dialog class="orders-dialog" id="orders-details-dialog" aria-labelledby="orders-details-title">
+      <div class="orders-dialog-content">
+        <div class="orders-dialog-heading">
+          <div><h2 id="orders-details-title">Order details</h2><p id="orders-details-subtitle"></p></div>
+          <button class="category-dialog-close" type="button" data-orders-dialog-close aria-label="Close order details">×</button>
+        </div>
+        <div id="orders-details-content"></div>
+        <div class="category-dialog-actions"><button class="category-secondary-button" type="button" data-orders-dialog-close>Close</button></div>
+      </div>
+    </dialog>
+    <dialog class="orders-dialog" id="orders-status-dialog" aria-labelledby="orders-status-title">
+      <form class="orders-dialog-content orders-status-form" id="orders-status-form" novalidate>
+        <div class="orders-dialog-heading">
+          <div><h2 id="orders-status-title">Update order status</h2><p id="orders-status-description"></p></div>
+          <button class="category-dialog-close" type="button" data-orders-status-close aria-label="Close status update">×</button>
+        </div>
+        <label for="orders-next-status">New status</label>
+        <select id="orders-next-status" required></select>
+        <p id="orders-status-error" role="alert" hidden></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-orders-status-close>Close</button>
+          <button class="category-primary-button" id="orders-status-save" type="submit">Update Status</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog class="customer-dialog" id="customer-view-dialog" aria-labelledby="customer-view-title">
       <div class="customer-dialog-content">
         <div class="customer-dialog-heading">
@@ -3105,6 +3634,7 @@
       const productsPage = document.querySelector("#products-page");
       const inventoryPage = document.querySelector("#inventory-page");
       const customersPage = document.querySelector("#customers-page");
+      const ordersPage = document.querySelector("#orders-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -3153,6 +3683,7 @@
         const isProductsPage = activeLink.hash === "#products";
         const isInventoryPage = activeLink.hash === "#inventory";
         const isCustomersPage = activeLink.hash === "#customers";
+        const isOrdersPage = activeLink.hash === "#orders";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -3161,7 +3692,8 @@
         productsPage.hidden = !isProductsPage;
         inventoryPage.hidden = !isInventoryPage;
         customersPage.hidden = !isCustomersPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage;
+        ordersPage.hidden = !isOrdersPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -3217,6 +3749,7 @@
         push,
         ref,
         remove,
+        runTransaction,
         set,
         update,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
@@ -3312,6 +3845,24 @@
         saving: false,
         searchTimer: null,
       };
+      const orderState = {
+        orders: [],
+        malformedCount: 0,
+        users: Object.create(null),
+        loaded: false,
+        error: null,
+        usersLoaded: false,
+        usersError: null,
+        stopOrders: null,
+        stopUsers: null,
+        generation: 0,
+        page: 1,
+        pageSize: 10,
+        selected: new Set(),
+        saving: false,
+        searchTimer: null,
+        activeOrder: null,
+      };
       let barcodeLibraryPromise = null;
       const categoryTableBody = document.querySelector("#category-table-body");
       const categoryLoading = document.querySelector("#category-loading");
@@ -3348,6 +3899,17 @@
       const customerOrderDetailsDialog = document.querySelector("#customer-order-details-dialog");
       const customerEditDialog = document.querySelector("#customer-edit-dialog");
       const customerEditForm = document.querySelector("#customer-edit-form");
+      const ordersTableBody = document.querySelector("#orders-table-body");
+      const ordersDetailsDialog = document.querySelector("#orders-details-dialog");
+      const ordersStatusDialog = document.querySelector("#orders-status-dialog");
+      const ordersActionMenu = document.createElement("div");
+      ordersActionMenu.className = "orders-action-menu";
+      ordersActionMenu.id = "orders-action-menu";
+      ordersActionMenu.setAttribute("role", "menu");
+      ordersActionMenu.setAttribute("aria-label", "Order actions");
+      ordersActionMenu.hidden = true;
+      document.body.append(ordersActionMenu);
+      let activeOrderMenuTrigger = null;
       const customerActionMenu = document.createElement("div");
       customerActionMenu.className = "customer-action-menu";
       customerActionMenu.id = "customer-action-menu";
@@ -4180,7 +4742,7 @@
           const code = String(error?.code || "").toLowerCase();
           let message;
           if (code.includes("permission_denied") || code.includes("permission-denied")) {
-            message = `Firebase denied the read at ${orderPath}. database.rules.json has no orders read grant (the root read rule is false); ask an administrator to add an authorized order-read rule. No order metrics were calculated.`;
+            message = `Firebase denied the read at ${orderPath}. Deploy database.rules.json and confirm this signed-in account has the admin role. No order metrics were calculated.`;
           } else if (code.includes("network") || code.includes("unavailable") || navigator.onLine === false) {
             message = `Could not load orders from ${orderPath} because the network is unavailable. Check your connection and retry by reopening customer details.`;
           } else if (code.includes("timeout")) {
@@ -4387,10 +4949,639 @@
         }
       }
 
+      const orderStatusTransitions = {
+        PLACED: ["CONFIRMED", "CANCELLED"],
+        CONFIRMED: ["PROCESSING", "CANCELLED"],
+        PROCESSING: ["READY_TO_SHIP", "CANCELLED"],
+        READY_TO_SHIP: ["OUT_FOR_DELIVERY"],
+        OUT_FOR_DELIVERY: ["DELIVERED"],
+      };
+
+      function orderFieldNumber(raw, fields) {
+        for (const field of fields) {
+          const value = raw?.[field];
+          if (typeof value === "number" && Number.isFinite(value)) return value;
+          if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) return Number(value);
+        }
+        return null;
+      }
+
+      function orderFieldText(raw, fields) {
+        for (const field of fields) {
+          const value = raw?.[field];
+          if (typeof value === "string" && value.trim()) return value.trim();
+          if (typeof value === "number" && Number.isFinite(value)) return String(value);
+        }
+        return "";
+      }
+
+      function createOrderRecord(id, uid, raw, path) {
+        const storedItems = raw.items ?? raw.orderItems;
+        const itemEntries = Array.isArray(storedItems)
+          ? storedItems.map((item) => ["", item])
+          : storedItems && typeof storedItems === "object" ? Object.entries(storedItems) : [];
+        const items = itemEntries
+          .filter(([, item]) => item && typeof item === "object" && !Array.isArray(item))
+          .map(([itemKey, item]) => {
+            const quantity = orderFieldNumber(item, ["quantity", "qty", "count"]);
+            const unitPrice = orderFieldNumber(item, ["unitPrice", "price", "sellingPrice", "itemPrice"]);
+            const subtotal = orderFieldNumber(item, ["subtotal", "subTotal", "totalPrice", "lineTotal", "total"]);
+            return {
+              name: orderFieldText(item, ["productName", "name", "title"]),
+              productId: orderFieldText(item, ["productId", "productID", "productKey", "id"]) || itemKey,
+              quantity,
+              unitPrice,
+              subtotal: subtotal ?? (quantity !== null && unitPrice !== null ? quantity * unitPrice : null),
+            };
+          });
+        return {
+          id,
+          uid,
+          path,
+          key: encodeURIComponent(path),
+          raw,
+          items,
+          timestamp: normalizeOrderTimestamp(raw.placedAt) || normalizeOrderTimestamp(raw.transactionTime) ||
+            normalizeOrderTimestamp(raw.createdAt) || normalizeOrderTimestamp(raw.orderDate) || normalizeOrderTimestamp(raw.date),
+          orderStatus: typeof raw.orderStatus === "string" ? raw.orderStatus.trim() : "",
+          paymentStatus: typeof raw.paymentStatus === "string" ? raw.paymentStatus.trim() : "",
+          paymentMethod: orderFieldText(raw, ["paymentMethod", "paymentMode", "method"]),
+          amount: orderFieldNumber(raw, ["grandTotal", "finalTotal", "totalAmount"]),
+          itemCount: items.length && items.every((item) => item.quantity !== null)
+            ? items.reduce((sum, item) => sum + item.quantity, 0)
+            : null,
+        };
+      }
+
+      function parseOrdersPageData(value) {
+        if (value == null) return { orders: [], malformedCount: 0 };
+        if (typeof value !== "object" || Array.isArray(value)) throw new Error("Firebase returned an unexpected orders data structure.");
+        const orders = [];
+        let malformedCount = 0;
+        const isOrder = (raw) => raw && typeof raw === "object" && !Array.isArray(raw) &&
+          ["grandTotal", "finalTotal", "totalAmount", "orderStatus", "paymentStatus", "transactionTime", "placedAt", "orderDate", "createdAt", "items", "orderItems", "userId", "customerUid"]
+            .some((field) => Object.prototype.hasOwnProperty.call(raw, field));
+        for (const [pathUid, records] of Object.entries(value)) {
+          if (!records || typeof records !== "object" || Array.isArray(records)) {
+            if (records !== null && records !== undefined) malformedCount += 1;
+            continue;
+          }
+          if (isOrder(records)) {
+            orders.push(createOrderRecord(pathUid, orderFieldText(records, ["userId", "uid", "customerUid"]), records, `orders/${pathUid}`));
+            continue;
+          }
+          for (const [id, raw] of Object.entries(records)) {
+            if (!isOrder(raw) || (raw.userId != null && String(raw.userId) !== pathUid)) {
+              if (raw !== null && raw !== undefined) malformedCount += 1;
+              continue;
+            }
+            orders.push(createOrderRecord(id, pathUid, raw, `orders/${pathUid}/${id}`));
+          }
+        }
+        return { orders, malformedCount };
+      }
+
+      function getOrderCustomer(order) {
+        const profile = orderState.users[order.uid] || {};
+        const raw = order.raw;
+        return {
+          profile,
+          name: orderFieldText(profile, ["fullName", "name", "customerName"]) || orderFieldText(raw, ["customerName", "fullName", "name", "userName"]),
+          mobile: customerPhone(profile) || customerPhone(raw),
+          email: orderFieldText(profile, ["email"]) || orderFieldText(raw, ["customerEmail", "email", "userEmail"]),
+        };
+      }
+
+      function orderStatusCategory(order) {
+        const status = order.orderStatus.toUpperCase().replace(/[\s-]+/g, "_");
+        if (["PLACED", "PENDING"].includes(status)) return "pending";
+        if (status === "CONFIRMED") return "confirmed";
+        if (status === "PROCESSING") return "processing";
+        if (["READY_TO_SHIP", "OUT_FOR_DELIVERY", "SHIPPED", "IN_TRANSIT"].includes(status)) return "shipped";
+        if (["DELIVERED", "COMPLETED"].includes(status)) return "delivered";
+        if (["CANCELLED", "CANCELED", "FAILED"].includes(status)) return "cancelled";
+        return "other";
+      }
+
+      function orderStatusLabel(order) {
+        const category = orderStatusCategory(order);
+        return ({
+          pending: "Pending", confirmed: "Confirmed", processing: "Processing", shipped: "Shipped",
+          delivered: "Delivered", cancelled: order.orderStatus.toUpperCase() === "FAILED" ? "Failed" : "Cancelled",
+        })[category] || order.orderStatus || "Not provided";
+      }
+
+      function orderStatusTone(order) {
+        return ({ pending: "amber", confirmed: "blue", processing: "purple", shipped: "indigo", delivered: "green", cancelled: "red" })[orderStatusCategory(order)] || "";
+      }
+
+      function getFilteredOrders() {
+        const search = document.querySelector("#orders-search").value.trim().toLocaleLowerCase();
+        const phone = /^[+\d\s().-]+$/.test(search) ? normalizeCustomerPhone(search) : "";
+        const category = document.querySelector("#orders-status-filter").value;
+        const payment = document.querySelector("#orders-payment-filter").value;
+        const method = document.querySelector("#orders-method-filter").value;
+        const from = document.querySelector("#orders-date-from").value;
+        const to = document.querySelector("#orders-date-to").value;
+        const sort = document.querySelector("#orders-sort").value;
+        const results = orderState.orders.filter((order) => {
+          const customer = getOrderCustomer(order);
+          if (search && !order.id.toLocaleLowerCase().includes(search) &&
+            !customer.name.toLocaleLowerCase().includes(search) &&
+            !customer.email.toLocaleLowerCase().includes(search) &&
+            !(phone && normalizeCustomerPhone(customer.mobile).includes(phone))) return false;
+          if (category && orderStatusCategory(order) !== category) return false;
+          if (payment && order.paymentStatus !== payment) return false;
+          if (method && order.paymentMethod !== method) return false;
+          const key = order.timestamp ? orderDateKey(order.timestamp) : "";
+          if (from && (!key || key < from)) return false;
+          if (to && (!key || key > to)) return false;
+          return true;
+        });
+        results.sort((a, b) => {
+          const at = a.timestamp?.getTime();
+          const bt = b.timestamp?.getTime();
+          if (at === undefined && bt !== undefined) return 1;
+          if (bt === undefined && at !== undefined) return -1;
+          return at !== undefined && bt !== undefined && at !== bt
+            ? (sort === "oldest" ? at - bt : bt - at)
+            : a.id.localeCompare(b.id);
+        });
+        return results;
+      }
+
+      function orderDateKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function renderOrdersFilters() {
+        const payment = document.querySelector("#orders-payment-filter");
+        const method = document.querySelector("#orders-method-filter");
+        const selectedPayment = payment.value;
+        const selectedMethod = method.value;
+        const payments = [...new Set(orderState.orders.map((order) => order.paymentStatus).filter(Boolean))].sort();
+        const methods = [...new Set(orderState.orders.map((order) => order.paymentMethod).filter(Boolean))].sort();
+        payment.replaceChildren(new Option("All payment statuses", ""), ...payments.map((item) => new Option(item, item)));
+        method.replaceChildren(new Option("All payment methods", ""), ...methods.map((item) => new Option(item, item)));
+        payment.value = payments.includes(selectedPayment) ? selectedPayment : "";
+        method.value = methods.includes(selectedMethod) ? selectedMethod : "";
+      }
+
+      function renderOrderStats() {
+        if (!orderState.loaded || orderState.error) {
+          for (const id of ["orders-stat-total", "orders-stat-pending", "orders-stat-confirmed", "orders-stat-processing", "orders-stat-shipped", "orders-stat-delivered", "orders-stat-cancelled", "orders-stat-value"]) {
+            document.querySelector(`#${id}`).textContent = "—";
+          }
+          document.querySelector("#orders-stat-value-note").textContent = orderState.error ? "Order value unavailable" : "Loading orders…";
+          return;
+        }
+        const counts = { pending: 0, confirmed: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+        let totalValue = 0;
+        let amountCount = 0;
+        for (const order of orderState.orders) {
+          const category = orderStatusCategory(order);
+          if (Object.prototype.hasOwnProperty.call(counts, category)) counts[category] += 1;
+          if (order.amount !== null) { totalValue += order.amount; amountCount += 1; }
+        }
+        document.querySelector("#orders-stat-total").textContent = orderState.orders.length.toLocaleString("en-IN");
+        for (const category of Object.keys(counts)) {
+          const id = category === "cancelled" ? "orders-stat-cancelled" : `orders-stat-${category}`;
+          document.querySelector(`#${id}`).textContent = counts[category].toLocaleString("en-IN");
+        }
+        document.querySelector("#orders-stat-value").textContent = orderState.orders.length && amountCount === 0
+          ? "Not available"
+          : formatCustomerCurrency(totalValue);
+        document.querySelector("#orders-stat-value-note").textContent = amountCount === orderState.orders.length
+          ? "Sum of stored final totals"
+          : `${amountCount} of ${orderState.orders.length} orders have a stored final total`;
+      }
+
+      function renderOrdersTable() {
+        const loading = document.querySelector("#orders-loading");
+        const error = document.querySelector("#orders-error");
+        const warning = document.querySelector("#orders-users-warning");
+        const empty = document.querySelector("#orders-empty");
+        const table = document.querySelector("#orders-table-wrap");
+        const pagination = document.querySelector("#orders-pagination");
+        loading.hidden = orderState.loaded || Boolean(orderState.error);
+        error.hidden = !orderState.error;
+        document.querySelector("#orders-error-message").textContent = orderState.error || "";
+        const warningMessages = [];
+        if (orderState.usersError) warningMessages.push(`Customer profiles could not be loaded. Order-stored customer fields are shown where available. ${orderState.usersError}`);
+        if (orderState.malformedCount) warningMessages.push(`${orderState.malformedCount} malformed order record${orderState.malformedCount === 1 ? " was" : "s were"} omitted because the stored record format was not recognized.`);
+        warning.hidden = Boolean(orderState.error) || warningMessages.length === 0;
+        document.querySelector("#orders-users-warning-message").textContent = warningMessages.join(" ");
+        document.querySelector("#orders-users-retry").hidden = !orderState.usersError;
+        table.hidden = !orderState.loaded || Boolean(orderState.error);
+        if (orderState.error) {
+          ordersTableBody.replaceChildren();
+          empty.hidden = true;
+          pagination.hidden = true;
+          return;
+        }
+        if (!orderState.loaded) return;
+        renderOrderStats();
+        const filtered = getFilteredOrders();
+        const pageCount = Math.max(1, Math.ceil(filtered.length / orderState.pageSize));
+        orderState.page = Math.min(orderState.page, pageCount);
+        const visible = filtered.slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize);
+        ordersTableBody.replaceChildren();
+        for (const order of visible) {
+          const customer = getOrderCustomer(order);
+          const paymentTone = ["COMPLETED", "PAID", "SUCCESS", "SUCCEEDED"].includes(order.paymentStatus.toUpperCase())
+            ? "green" : ["FAILED", "CANCELLED", "CANCELED"].includes(order.paymentStatus.toUpperCase())
+              ? "red" : ["PENDING", "INITIATED", "PROCESSING"].includes(order.paymentStatus.toUpperCase()) ? "amber" : "";
+          const row = document.createElement("tr");
+          row.innerHTML = `<td><input type="checkbox" data-order-select="${escapeCustomerText(order.key)}" aria-label="Select order ${escapeCustomerText(order.id)}"${orderState.selected.has(order.key) ? " checked" : ""} /></td>
+            <td><button class="orders-id-button" type="button" data-order-action="view" data-order-key="${escapeCustomerText(order.key)}">${escapeCustomerText(order.id)}</button></td>
+            <td><span class="orders-primary-text">${escapeCustomerText(customer.name || "Not provided")}</span><span class="orders-secondary-text">${escapeCustomerText(customer.mobile || "Not provided")}</span></td>
+            <td>${escapeCustomerText(order.timestamp ? formatCustomerDate(order.timestamp, true) : "Not provided")}</td>
+            <td>${order.itemCount === null ? (order.items.length ? `${order.items.length} lines` : "Not provided") : order.itemCount}</td>
+            <td>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</td>
+            <td><span class="orders-primary-text">${escapeCustomerText(order.paymentMethod || "Not provided")}</span><span class="orders-status-badge"${paymentTone ? ` data-tone="${paymentTone}"` : ""}>${escapeCustomerText(order.paymentStatus || "Not provided")}</span></td>
+            <td><span class="orders-status-badge"${orderStatusTone(order) ? ` data-tone="${orderStatusTone(order)}"` : ""}>${escapeCustomerText(orderStatusLabel(order))}</span></td>
+            <td><button class="orders-action-trigger" type="button" aria-label="Actions for order ${escapeCustomerText(order.id)}" aria-haspopup="menu" aria-expanded="false" data-order-menu="${escapeCustomerText(order.key)}">⋮</button></td>`;
+          ordersTableBody.append(row);
+        }
+        empty.hidden = filtered.length !== 0;
+        empty.textContent = orderState.orders.length
+          ? "No orders match your filters. Change your search or clear the filters."
+          : "No orders were found in the Realtime Database.";
+        table.hidden = filtered.length === 0;
+        pagination.hidden = filtered.length === 0;
+        const start = filtered.length ? (orderState.page - 1) * orderState.pageSize + 1 : 0;
+        const end = Math.min(filtered.length, orderState.page * orderState.pageSize);
+        document.querySelector("#orders-page-summary").textContent = `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${filtered.length.toLocaleString("en-IN")} orders`;
+        document.querySelector("#orders-page-count").textContent = String(pageCount);
+        const pageInput = document.querySelector("#orders-page-input");
+        pageInput.max = String(pageCount);
+        pageInput.value = String(orderState.page);
+        document.querySelector("#orders-previous").disabled = orderState.page <= 1;
+        document.querySelector("#orders-next").disabled = orderState.page >= pageCount;
+        const pages = document.querySelector("#orders-page-buttons");
+        pages.replaceChildren();
+        const firstPage = Math.max(1, Math.min(orderState.page - 3, pageCount - 6));
+        for (let page = firstPage; page <= Math.min(pageCount, firstPage + 6); page += 1) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to order page ${page}`);
+          if (page === orderState.page) button.setAttribute("aria-current", "page");
+          button.addEventListener("click", () => { orderState.page = page; renderOrdersTable(); });
+          pages.append(button);
+        }
+        document.querySelector("#orders-selection-summary").textContent = `${orderState.selected.size.toLocaleString("en-IN")} selected`;
+      }
+
+      function renderOrders() {
+        renderOrderStats();
+        renderOrdersTable();
+      }
+
+      function startOrdersListeners() {
+        if (orderState.stopOrders || orderState.stopUsers) return;
+        const generation = ++orderState.generation;
+        orderState.loaded = false;
+        orderState.error = null;
+        orderState.usersLoaded = false;
+        orderState.usersError = null;
+        orderState.orders = [];
+        orderState.malformedCount = 0;
+        orderState.users = Object.create(null);
+        renderOrders();
+        const ordersTimeout = window.setTimeout(() => {
+          if (generation === orderState.generation && !orderState.loaded && !orderState.error) {
+            orderState.error = "Loading orders from Firebase timed out. Check your connection and retry.";
+            renderOrders();
+          }
+        }, 15000);
+        const usersTimeout = window.setTimeout(() => {
+          if (generation === orderState.generation && !orderState.usersLoaded && !orderState.usersError) {
+            orderState.usersError = "Customer profile lookup timed out.";
+            renderOrders();
+          }
+        }, 15000);
+        orderState.stopOrders = onValue(ref(database, "orders"), (snapshot) => {
+          if (generation !== orderState.generation) return;
+          window.clearTimeout(ordersTimeout);
+          try {
+            const parsed = parseOrdersPageData(snapshot.val());
+            orderState.orders = parsed.orders;
+            orderState.malformedCount = parsed.malformedCount;
+            const keys = new Set(orderState.orders.map((order) => order.key));
+            for (const key of orderState.selected) if (!keys.has(key)) orderState.selected.delete(key);
+            orderState.loaded = true;
+            orderState.error = null;
+            renderOrdersFilters();
+          } catch (error) {
+            orderState.error = error instanceof Error ? error.message : "Firebase returned invalid order data.";
+            orderState.loaded = false;
+            reportFirebaseError("Parsing orders", error);
+          }
+          renderOrders();
+        }, (error) => {
+          if (generation !== orderState.generation) return;
+          window.clearTimeout(ordersTimeout);
+          const code = String(error?.code || "").toLowerCase();
+          orderState.error = code.includes("permission")
+            ? "Firebase denied access to orders. Confirm this account has the admin role and that Realtime Database rules grant admin order reads."
+            : code.includes("network") || code.includes("unavailable") || navigator.onLine === false
+              ? "Could not connect to Firebase to load orders. Check your connection and retry."
+              : "Could not load orders from the Realtime Database. Retry or check database permissions.";
+          orderState.loaded = false;
+          reportFirebaseError("Loading orders", error);
+          renderOrders();
+        });
+        orderState.stopUsers = onValue(ref(database, "users"), (snapshot) => {
+          if (generation !== orderState.generation) return;
+          window.clearTimeout(usersTimeout);
+          const value = snapshot.val();
+          orderState.users = value && typeof value === "object" && !Array.isArray(value) ? value : Object.create(null);
+          orderState.usersLoaded = true;
+          orderState.usersError = null;
+          renderOrders();
+        }, (error) => {
+          if (generation !== orderState.generation) return;
+          window.clearTimeout(usersTimeout);
+          orderState.usersLoaded = true;
+          orderState.usersError = reportFirebaseError("Loading customer profiles for orders", error);
+          renderOrders();
+        });
+      }
+
+      function retryOrdersLoad() {
+        orderState.stopOrders?.();
+        orderState.stopUsers?.();
+        orderState.stopOrders = null;
+        orderState.stopUsers = null;
+        orderState.generation += 1;
+        orderState.loaded = false;
+        orderState.error = null;
+        orderState.usersLoaded = false;
+        orderState.usersError = null;
+        startOrdersListeners();
+      }
+
+      function getOrderByKey(key) {
+        return orderState.orders.find((order) => order.key === key) || null;
+      }
+
+      function displayOrderValue(value) {
+        if (value === null || value === undefined || value === "") return "Not provided";
+        if (typeof value !== "object") return String(value);
+        if (Array.isArray(value)) return value.map(displayOrderValue).join(", ");
+        const parts = ["addressLine1", "line1", "streetAddress", "address", "addressLine2", "line2", "street", "locality", "area", "city", "state", "stateName", "pinCode", "pincode", "postalCode", "zipCode", "zip"]
+          .map((key) => value[key]).filter((item) => typeof item === "string" || typeof item === "number").map(String);
+        return parts.length ? parts.join(", ") : "Not provided";
+      }
+
+      function orderDetailItem(label, value) {
+        return `<div class="orders-detail-item"><dt>${escapeCustomerText(label)}</dt><dd>${escapeCustomerText(displayOrderValue(value))}</dd></div>`;
+      }
+
+      function openOrderDetails(order) {
+        const customer = getOrderCustomer(order);
+        const source = order.raw;
+        const fields = [
+          ["Order ID", order.id],
+          ["Order date", order.timestamp ? formatCustomerDate(order.timestamp, true) : null],
+          ["Customer name", customer.name],
+          ["Mobile number", customer.mobile],
+          ["Email", customer.email],
+          ["Firebase UID", order.uid],
+          ["Delivery address", source.deliveryAddress ?? source.shippingAddress ?? source.address],
+          ["Order status", order.orderStatus],
+          ["Payment method", order.paymentMethod],
+          ["Payment status", order.paymentStatus],
+          ["Transaction / reference ID", orderFieldText(source, ["transactionId", "referenceId", "transactionReference", "paymentId", "transaction_id"])],
+        ];
+        const products = order.items.length
+          ? `<div class="orders-detail-table-wrap"><table class="orders-detail-table"><thead><tr><th>Product</th><th>Product ID</th><th>Quantity</th><th>Unit price</th><th>Subtotal</th></tr></thead><tbody>${order.items.map((item) => `<tr><td>${escapeCustomerText(item.name || "Not provided")}</td><td>${escapeCustomerText(item.productId || "Not provided")}</td><td>${escapeCustomerText(item.quantity ?? "Not provided")}</td><td>${escapeCustomerText(item.unitPrice === null ? "Not provided" : formatCustomerCurrency(item.unitPrice))}</td><td>${escapeCustomerText(item.subtotal === null ? "Not provided" : formatCustomerCurrency(item.subtotal))}</td></tr>`).join("")}</tbody></table></div>`
+          : "<p>No product items are stored on this order.</p>";
+        const totals = [
+          ["Items subtotal", orderFieldNumber(source, ["itemsSubtotal", "itemSubtotal", "subtotal"])],
+          ["Delivery fee", orderFieldNumber(source, ["deliveryFee", "shippingFee", "deliveryCharge", "deliveryCharges"])],
+          ["Discount", orderFieldNumber(source, ["discount", "discountAmount", "couponDiscount"])],
+          ["Final total", order.amount],
+        ].filter(([, value]) => value !== null);
+        const timestampKeys = Object.keys(source).filter((key) => /At$/.test(key) && source[key] !== undefined && source[key] !== null && source[key] !== "");
+        const timestamps = timestampKeys
+          .map((key) => orderDetailItem(key.replace(/At$/, "").replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase()), formatCustomerDate(source[key], true)));
+        document.querySelector("#orders-details-title").textContent = `Order ${order.id}`;
+        document.querySelector("#orders-details-subtitle").textContent = order.timestamp ? formatCustomerDate(order.timestamp, true) : "Order date not provided";
+        document.querySelector("#orders-details-content").innerHTML =
+          `<section class="orders-detail-section"><h3>Order and customer</h3><dl class="orders-detail-grid">${fields.map(([label, value]) => orderDetailItem(label, value)).join("")}</dl></section>
+          <section class="orders-detail-section"><h3>Products</h3>${products}</section>
+          <section class="orders-detail-section"><h3>Totals</h3>${totals.length ? `<div class="orders-total-list">${totals.map(([label, value]) => `<div class="orders-total-row"><span>${escapeCustomerText(label)}</span><strong>${escapeCustomerText(formatCustomerCurrency(value))}</strong></div>`).join("")}</div>` : "<p>No order totals are stored on this record.</p>"}</section>
+          ${timestamps.length ? `<section class="orders-detail-section"><h3>Status timestamps</h3><dl class="orders-detail-grid">${timestamps.join("")}</dl></section>` : ""}
+          ${source.customerInstructions || source.instructions || source.notes ? `<section class="orders-detail-section"><h3>Customer instructions</h3><p>${escapeCustomerText(displayOrderValue(source.customerInstructions ?? source.instructions ?? source.notes))}</p></section>` : ""}`;
+        ordersDetailsDialog.showModal();
+      }
+
+      function openOrderCustomer(order) {
+        const customer = getOrderCustomer(order);
+        const profile = customer.profile && typeof customer.profile === "object" ? customer.profile : {};
+        const raw = { ...profile };
+        if (!raw.fullName && customer.name) raw.fullName = customer.name;
+        if (!customerPhone(raw) && customer.mobile) raw.mobile = customer.mobile;
+        if (!raw.email && customer.email) raw.email = customer.email;
+        openCustomerDetails({
+          uid: order.uid,
+          id: order.uid,
+          raw,
+          name: customer.name,
+          email: customer.email,
+          mobile: customer.mobile,
+          registeredAt: normalizeCustomerDate(profile.createdAt),
+          status: customerStatus(profile),
+          photo: customerPhoto(profile),
+        });
+      }
+
+      function orderMenuItem(label, action, order) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("role", "menuitem");
+        button.dataset.orderAction = action;
+        button.dataset.orderKey = order.key;
+        button.textContent = label;
+        return button;
+      }
+
+      function showOrderMenu(trigger, order) {
+        if (activeOrderMenuTrigger === trigger && !ordersActionMenu.hidden) {
+          ordersActionMenu.hidden = true;
+          trigger.setAttribute("aria-expanded", "false");
+          activeOrderMenuTrigger = null;
+          return;
+        }
+        activeOrderMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeOrderMenuTrigger = trigger;
+        trigger.setAttribute("aria-expanded", "true");
+        ordersActionMenu.replaceChildren(orderMenuItem("View Order", "view", order));
+        if (order.path && (orderStatusTransitions[order.orderStatus.toUpperCase()] || []).length) {
+          ordersActionMenu.append(orderMenuItem("Update Order Status", "status", order));
+        }
+        if (order.uid) ordersActionMenu.append(orderMenuItem("View Customer", "customer", order));
+        ordersActionMenu.hidden = false;
+        const rect = trigger.getBoundingClientRect();
+        const width = ordersActionMenu.offsetWidth;
+        const height = ordersActionMenu.offsetHeight;
+        ordersActionMenu.style.left = `${Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8))}px`;
+        ordersActionMenu.style.top = `${Math.max(8, Math.min(rect.bottom, window.innerHeight - height - 8))}px`;
+        ordersActionMenu.querySelector("button")?.focus();
+      }
+
+      function openOrderStatusDialog(order) {
+        const transitions = orderStatusTransitions[order.orderStatus.toUpperCase()] || [];
+        if (!transitions.length) return;
+        orderState.activeOrder = order;
+        document.querySelector("#orders-status-title").textContent = `Update order ${order.id}`;
+        document.querySelector("#orders-status-description").textContent = `Current status: ${order.orderStatus}`;
+        const select = document.querySelector("#orders-next-status");
+        const labels = { CONFIRMED: "Confirmed", PROCESSING: "Processing", READY_TO_SHIP: "Ready to ship", OUT_FOR_DELIVERY: "Out for delivery", DELIVERED: "Delivered", CANCELLED: "Cancelled" };
+        select.replaceChildren(...transitions.map((status) => new Option(labels[status] || status, status)));
+        document.querySelector("#orders-status-error").hidden = true;
+        ordersStatusDialog.showModal();
+      }
+
+      async function saveOrderStatus(event) {
+        event.preventDefault();
+        const order = orderState.activeOrder;
+        const error = document.querySelector("#orders-status-error");
+        const button = document.querySelector("#orders-status-save");
+        if (!order || orderState.saving) return;
+        const status = document.querySelector("#orders-next-status").value;
+        if (!(orderStatusTransitions[order.orderStatus.toUpperCase()] || []).includes(status)) {
+          error.textContent = "That status transition is not available for this order.";
+          error.hidden = false;
+          return;
+        }
+        if (!order.path) {
+          error.textContent = "This order has no verified Firebase path, so its status cannot be safely updated.";
+          error.hidden = false;
+          return;
+        }
+        orderState.saving = true;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        try {
+          if (status === "CANCELLED" && !window.confirm(`Cancel order ${order.id}? This cannot be undone from this dashboard.`)) return;
+          const result = await runTransaction(
+            ref(database, `${order.path}/orderStatus`),
+            (current) => current === order.orderStatus ? status : undefined,
+          );
+          if (!result.committed) throw new Error("The order status changed in Firebase. Reload the order list before trying again.");
+          order.raw.orderStatus = status;
+          order.orderStatus = status;
+          renderOrders();
+          ordersStatusDialog.close();
+          showCategoryToast(`Order ${order.id} status updated to ${orderStatusLabel(order)}.`);
+        } catch (saveError) {
+          error.textContent = saveError?.code
+            ? reportFirebaseError("Updating order status", saveError)
+            : saveError.message || "Could not update order status. Retry.";
+          error.hidden = false;
+        } finally {
+          orderState.saving = false;
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+        }
+      }
+
+      document.querySelector("#orders-search").addEventListener("input", () => {
+        window.clearTimeout(orderState.searchTimer);
+        orderState.searchTimer = window.setTimeout(() => { orderState.page = 1; renderOrdersTable(); }, 180);
+      });
+      for (const selector of ["#orders-status-filter", "#orders-payment-filter", "#orders-method-filter", "#orders-sort", "#orders-date-from", "#orders-date-to"]) {
+        document.querySelector(selector).addEventListener("change", () => { orderState.page = 1; renderOrdersTable(); });
+      }
+      document.querySelector("#orders-clear-filters").addEventListener("click", () => {
+        for (const selector of ["#orders-search", "#orders-date-from", "#orders-date-to"]) document.querySelector(selector).value = "";
+        for (const selector of ["#orders-status-filter", "#orders-payment-filter", "#orders-method-filter"]) document.querySelector(selector).value = "";
+        document.querySelector("#orders-sort").value = "newest";
+        orderState.page = 1;
+        renderOrdersTable();
+      });
+      document.querySelector("#orders-retry").addEventListener("click", retryOrdersLoad);
+      document.querySelector("#orders-users-retry").addEventListener("click", retryOrdersLoad);
+      document.querySelector("#orders-page-size").addEventListener("change", (event) => {
+        orderState.pageSize = Number(event.currentTarget.value);
+        orderState.page = 1;
+        renderOrdersTable();
+      });
+      document.querySelector("#orders-previous").addEventListener("click", () => { orderState.page -= 1; renderOrdersTable(); });
+      document.querySelector("#orders-next").addEventListener("click", () => { orderState.page += 1; renderOrdersTable(); });
+      document.querySelector("#orders-page-input").addEventListener("change", (event) => {
+        const pages = Math.max(1, Math.ceil(getFilteredOrders().length / orderState.pageSize));
+        const entered = Number(event.currentTarget.value);
+        orderState.page = Number.isFinite(entered) ? Math.max(1, Math.min(pages, Math.floor(entered))) : 1;
+        renderOrdersTable();
+      });
+      ordersTableBody.addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-order-menu]");
+        if (trigger) {
+          const order = getOrderByKey(trigger.dataset.orderMenu);
+          if (order) showOrderMenu(trigger, order);
+          return;
+        }
+        const action = event.target.closest("[data-order-action]");
+        if (action?.dataset.orderAction === "view") {
+          const order = getOrderByKey(action.dataset.orderKey);
+          if (order) openOrderDetails(order);
+        }
+      });
+      ordersTableBody.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("[data-order-select]");
+        if (!checkbox) return;
+        if (checkbox.checked) orderState.selected.add(checkbox.dataset.orderSelect);
+        else orderState.selected.delete(checkbox.dataset.orderSelect);
+        document.querySelector("#orders-selection-summary").textContent = `${orderState.selected.size.toLocaleString("en-IN")} selected`;
+      });
+      ordersActionMenu.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-order-action]");
+        if (!action) return;
+        const order = getOrderByKey(action.dataset.orderKey);
+        ordersActionMenu.hidden = true;
+        activeOrderMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeOrderMenuTrigger = null;
+        if (!order) return;
+        if (action.dataset.orderAction === "view") openOrderDetails(order);
+        if (action.dataset.orderAction === "status") openOrderStatusDialog(order);
+        if (action.dataset.orderAction === "customer") openOrderCustomer(order);
+      });
+      document.addEventListener("click", (event) => {
+        if (!ordersActionMenu.hidden && !ordersActionMenu.contains(event.target) && !event.target.closest("[data-order-menu]")) {
+          ordersActionMenu.hidden = true;
+          activeOrderMenuTrigger?.setAttribute("aria-expanded", "false");
+          activeOrderMenuTrigger = null;
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !ordersActionMenu.hidden) {
+          ordersActionMenu.hidden = true;
+          activeOrderMenuTrigger?.setAttribute("aria-expanded", "false");
+          activeOrderMenuTrigger?.focus();
+          activeOrderMenuTrigger = null;
+        }
+      });
+      document.querySelector("#orders-status-form").addEventListener("submit", saveOrderStatus);
+      document.querySelectorAll("[data-orders-dialog-close]").forEach((button) => button.addEventListener("click", () => ordersDetailsDialog.close()));
+      document.querySelectorAll("[data-orders-status-close]").forEach((button) => button.addEventListener("click", () => {
+        if (!orderState.saving) ordersStatusDialog.close();
+      }));
+      ordersDetailsDialog.addEventListener("click", (event) => { if (event.target === ordersDetailsDialog) ordersDetailsDialog.close(); });
+      ordersStatusDialog.addEventListener("click", (event) => {
+        if (event.target === ordersStatusDialog && !orderState.saving) ordersStatusDialog.close();
+      });
+
       window.addEventListener("hashchange", () => {
         if (window.location.hash === "#customers" && document.body.classList.contains("is-admin-authorized")) {
           startCustomerListener();
           startCustomerOrdersListener();
+        }
+        if (window.location.hash === "#orders" && document.body.classList.contains("is-admin-authorized")) {
+          startOrdersListeners();
         }
       });
 
@@ -7649,6 +8840,9 @@
             if (window.location.hash === "#customers") {
               startCustomerListener();
               startCustomerOrdersListener();
+            }
+            if (window.location.hash === "#orders") {
+              startOrdersListeners();
             }
           } catch (error) {
             if (auth.currentUser?.uid !== user.uid) {
