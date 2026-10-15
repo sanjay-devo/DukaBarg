@@ -107,9 +107,31 @@
       .auth-gate-card {
         width: min(100%, 440px);
         padding: var(--space-8);
+        text-align: center;
         background: var(--color-surface-raised);
         border: var(--space-1) solid var(--color-border-muted);
         border-radius: var(--radius-lg);
+      }
+
+      .auth-gate-spinner {
+        width: 32px;
+        height: 32px;
+        margin: 0 auto var(--space-6);
+        border: 3px solid var(--color-border-muted);
+        border-top-color: var(--color-border-strong);
+        border-radius: 50%;
+        animation: auth-gate-spin 800ms linear infinite;
+      }
+
+      .auth-gate[data-state="error"] .auth-gate-spinner,
+      .auth-gate[data-state="success"] .auth-gate-spinner {
+        display: none;
+      }
+
+      @keyframes auth-gate-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .auth-gate-card h1 {
@@ -152,6 +174,12 @@
       .auth-gate-actions a:hover,
       .auth-gate-actions button:hover {
         border-color: var(--color-border-strong);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .auth-gate-spinner {
+          animation: none;
+        }
       }
 
       .sidebar {
@@ -1655,10 +1683,13 @@
     </style>
   </head>
   <body>
-    <section class="auth-gate" id="auth-gate" role="status" aria-live="polite">
+    <section class="auth-gate" id="auth-gate" role="region" aria-labelledby="auth-gate-title">
       <div class="auth-gate-card">
-        <h1 id="auth-gate-title">Verifying admin access</h1>
-        <p id="auth-gate-message">Please wait while we verify your account.</p>
+        <div class="auth-gate-spinner" aria-hidden="true"></div>
+        <h1 id="auth-gate-title">Verifying admin access…</h1>
+        <p id="auth-gate-message" role="status" aria-live="polite">
+          Please wait while we verify your account.
+        </p>
         <div class="auth-gate-actions" id="auth-gate-actions" hidden>
           <a href="./login.html">Return to sign in</a>
         </div>
@@ -2352,6 +2383,20 @@
         messagingSenderId: "719695900144",
         appId: "1:719695900144:web:6f209f60d5b71ccb010135",
       };
+
+      function withAuthTimeout(operation, activity) {
+        let timeoutId;
+        return Promise.race([
+          operation,
+          new Promise((resolve, reject) => {
+            timeoutId = window.setTimeout(() => {
+              const error = new Error(`${activity} timed out.`);
+              error.code = "verification/timeout";
+              reject(error);
+            }, 15000);
+          }),
+        ]).finally(() => window.clearTimeout(timeoutId));
+      }
 
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -4646,7 +4691,7 @@
       document.querySelector("#barcode-export-selected").addEventListener("click", () => void exportSelectedBarcodes());
       document.querySelector("#barcode-print-selected").addEventListener("click", () => void printSelectedBarcodes());
 
-      function showGateError(message, error) {
+      function showGateError(title, message, error) {
         if (error) {
           const code = error.code || "unknown";
           const detail = error.message || String(error);
@@ -4658,14 +4703,52 @@
             message = `${message} Firebase error (${code}): ${detail}`;
           }
         }
-        gateTitle.textContent = "We couldn’t verify access";
+        authGate.dataset.state = "error";
+        gateTitle.textContent = title;
         gateMessage.textContent = message;
         gateActions.hidden = false;
       }
 
+      function showUnauthenticatedState() {
+        showGateError(
+          "Sign in required",
+          "You’re not signed in. Return to the sign-in page to continue.",
+        );
+      }
+
+      function verificationErrorState(error) {
+        const code = String(error?.code || "").toLowerCase();
+        if (code === "verification/timeout") {
+          return {
+            title: "Verification timed out",
+            message: "The database did not respond in time. Check your connection and retry.",
+          };
+        }
+        if (code.includes("permission_denied") || code.includes("permission-denied")) {
+          return {
+            title: "Database permission denied",
+            message: "Firebase denied access to your user profile. Check the Realtime Database rules and retry.",
+          };
+        }
+        if (
+          code.includes("network") ||
+          code.includes("unavailable") ||
+          navigator.onLine === false
+        ) {
+          return {
+            title: "Connection problem",
+            message: "A network failure interrupted verification. Check your connection and retry.",
+          };
+        }
+        return {
+          title: "We couldn’t verify access",
+          message: "Firebase could not verify your account. Retry, or return to sign in.",
+        };
+      }
+
       function checkAdminAccess(user) {
         if (!user) {
-          window.location.replace("./login.html");
+          showUnauthenticatedState();
           return Promise.resolve();
         }
         const existingCheck = pendingChecks.get(user.uid);
@@ -4673,23 +4756,34 @@
           return existingCheck;
         }
 
-        gateTitle.textContent = "Verifying admin access";
+        authGate.dataset.state = "loading";
+        gateTitle.textContent = "Verifying admin access…";
         gateMessage.textContent = "Please wait while we verify your account.";
         gateActions.hidden = true;
         const check = (async () => {
           try {
-            const profile = await get(ref(database, `users/${user.uid}`));
-            if (!profile.exists() || typeof profile.child("role").val() !== "string") {
-              window.location.replace("./login.html?profile=missing");
+            const profile = await withAuthTimeout(
+              get(ref(database, `users/${user.uid}`)),
+              "Admin verification",
+            );
+
+            if (auth.currentUser?.uid !== user.uid) {
               return;
             }
-            if (profile.child("role").val() !== "admin") {
-              window.location.replace("./login.html?access=denied");
+            if (!profile.exists() || profile.child("role").val() !== "admin") {
+              showGateError(
+                "Admin access required",
+                "This account does not have admin access. Return to sign in or retry after an administrator updates your role.",
+              );
               return;
             }
 
+            authGate.dataset.state = "success";
+            gateTitle.textContent = "Access verified!";
+            gateMessage.textContent = "Opening your dashboard…";
+            await new Promise((resolve) => window.setTimeout(resolve, 650));
+
             if (auth.currentUser?.uid !== user.uid) {
-              window.location.replace("./login.html");
               return;
             }
 
@@ -4699,12 +4793,16 @@
               startCategoryListeners();
             }
           } catch (error) {
-            showGateError(
-              "Firebase could not verify your user profile. Check your connection and the Realtime Database security rules, then retry.",
-              error,
-            );
+            if (auth.currentUser?.uid !== user.uid) {
+              return;
+            }
+            const state = verificationErrorState(error);
+            showGateError(state.title, state.message, error);
           } finally {
-            if (!document.body.classList.contains("is-admin-authorized")) {
+            if (
+              auth.currentUser?.uid === user.uid &&
+              !document.body.classList.contains("is-admin-authorized")
+            ) {
               gateActions.hidden = false;
             }
           }
@@ -4730,7 +4828,7 @@
         logoutLabel.textContent = "Logging out…";
 
         try {
-          await authReady;
+          await withAuthTimeout(authReady, "Authentication initialization");
           await signOut(auth);
           window.location.replace("./login.html");
         } catch (error) {
@@ -4766,6 +4864,7 @@
           },
           (error) => {
             showGateError(
+              "Sign-in session unavailable",
               "We couldn’t restore your sign-in session. Retry, or return to sign in.",
               error,
             );
@@ -4774,10 +4873,11 @@
         return Promise.resolve();
       }
 
-      void authReady
+      void withAuthTimeout(authReady, "Authentication initialization")
         .then(startAuthListener)
         .catch((error) => {
           showGateError(
+            "Sign-in session unavailable",
             "We couldn’t restore your sign-in session. Retry, or return to sign in.",
             error,
           );

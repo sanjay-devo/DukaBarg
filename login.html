@@ -335,7 +335,7 @@
         ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
       let isBusy = false;
       let popupInProgress = false;
-      let processedUid = null;
+      const pendingVerifications = new Map();
 
       function setBusy(busy, message = "") {
         isBusy = busy;
@@ -374,16 +374,42 @@
           case "PERMISSION_DENIED":
           case "permission_denied":
             return "Firebase denied access to the user profile. Check that the Realtime Database security rules are published.";
+          case "verification/timeout":
+            return "Verification timed out. Check your connection and try again.";
           default:
             return "We couldn’t complete sign-in. Please try again. If the problem continues, contact your administrator.";
         }
       }
 
-      async function verifyProfile(user) {
-        if (processedUid === user.uid) {
-          return;
+      function withVerificationTimeout(operation, activity = "Profile verification") {
+        let timeoutId;
+        return Promise.race([
+          operation,
+          new Promise((resolve, reject) => {
+            timeoutId = window.setTimeout(() => {
+              const error = new Error(`${activity} timed out.`);
+              error.code = "verification/timeout";
+              reject(error);
+            }, 15000);
+          }),
+        ]).finally(() => window.clearTimeout(timeoutId));
+      }
+
+      function verifyProfile(user) {
+        const existingVerification = pendingVerifications.get(user.uid);
+        if (existingVerification) {
+          return existingVerification;
         }
-        processedUid = user.uid;
+        const verification = verifyProfileOnce(user).finally(() => {
+          if (pendingVerifications.get(user.uid) === verification) {
+            pendingVerifications.delete(user.uid);
+          }
+        });
+        pendingVerifications.set(user.uid, verification);
+        return verification;
+      }
+
+      async function verifyProfileOnce(user) {
         setBusy(true, "Checking your access…");
         status.removeAttribute("data-kind");
         status.textContent = "";
@@ -393,7 +419,7 @@
 
         try {
           const profileRef = ref(database, `users/${user.uid}`);
-          const snapshot = await get(profileRef);
+          const snapshot = await withVerificationTimeout(get(profileRef));
           if (!snapshot.exists()) {
             operation = "creating the user profile";
             const profile = {
@@ -404,10 +430,12 @@
               role: "user",
               createdAt: Date.now(),
             };
-            const result = await runTransaction(
-              profileRef,
-              (existingProfile) => existingProfile ?? profile,
-              { applyLocally: false },
+            const result = await withVerificationTimeout(
+              runTransaction(
+                profileRef,
+                (existingProfile) => existingProfile ?? profile,
+                { applyLocally: false },
+              ),
             );
             if (!result.committed || !result.snapshot.exists()) {
               throw new Error("The user profile could not be created.");
@@ -415,9 +443,17 @@
           }
 
           operation = "verifying the user profile";
-          const currentProfile = (await get(profileRef)).val();
+          const currentProfile = (await withVerificationTimeout(get(profileRef))).val();
           if (!currentProfile || typeof currentProfile.role !== "string") {
             throw new Error("The user profile is incomplete.");
+          }
+          if (auth.currentUser?.uid !== user.uid) {
+            if (auth.currentUser) {
+              void verifyProfile(auth.currentUser);
+            } else {
+              setBusy(false);
+            }
+            return;
           }
           if (currentProfile.role !== "admin") {
             setBusy(false);
@@ -428,11 +464,18 @@
 
           window.location.replace("./index.html");
         } catch (error) {
+          if (auth.currentUser?.uid !== user.uid) {
+          if (auth.currentUser) {
+            void verifyProfile(auth.currentUser);
+          } else {
+            setBusy(false);
+          }
+          return;
+          }
           console.error(
             `Unable to complete ${operation} (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
             error,
           );
-          processedUid = null;
           signOutLink.hidden = false;
           displayError(
             error?.message === "The user profile is incomplete."
@@ -453,7 +496,7 @@
         deniedNotice.hidden = true;
 
         try {
-          await authReady;
+          await withVerificationTimeout(authReady, "Authentication initialization");
           const credential = await signInWithPopup(auth, provider);
           await verifyProfile(credential.user);
         } catch (error) {
@@ -461,7 +504,6 @@
             `Google sign-in failed (Firebase code: ${error?.code || "unknown"}): ${error?.message || String(error)}`,
             error,
           );
-          processedUid = null;
           displayError(messageForError(error));
         } finally {
           popupInProgress = false;
@@ -473,7 +515,6 @@
         setBusy(true, "Signing out…");
         try {
           await signOut(auth);
-          processedUid = null;
           deniedNotice.hidden = true;
           signOutLink.hidden = true;
           status.removeAttribute("data-kind");
@@ -492,7 +533,7 @@
         deniedNotice.hidden = false;
       }
 
-      authReady
+      withVerificationTimeout(authReady, "Authentication initialization")
         .then(() =>
           onAuthStateChanged(auth, (user) => {
             if (user && !popupInProgress) {
