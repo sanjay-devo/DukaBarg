@@ -1154,13 +1154,18 @@
       }
 
       .category-dialog-close {
-        min-height: 34px;
-        padding: 0 var(--space-3);
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: grid;
+        place-items: center;
         color: var(--color-text-inverse);
         background: transparent;
         border: 1px solid var(--color-border-muted);
         border-radius: var(--radius-sm);
         cursor: pointer;
+        font-size: 1.6rem;
+        line-height: 1;
       }
 
       .category-form-fields {
@@ -2384,7 +2389,7 @@
             <h2 id="category-form-title">Add Category</h2>
             <p id="category-form-description">Choose a level and add a descriptive name.</p>
           </div>
-          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
         </div>
         <div class="category-form-fields">
           <div class="category-field">
@@ -2428,7 +2433,7 @@
       <div class="category-dialog-form">
         <div class="category-dialog-heading">
           <div><h2 id="category-view-title">Category details</h2></div>
-          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
         </div>
         <dl class="category-view-details" id="category-view-details"></dl>
         <div class="category-dialog-actions">
@@ -2441,12 +2446,27 @@
       <div class="category-dialog-form">
         <div class="category-dialog-heading">
           <div><h2 id="category-confirm-title">Delete category?</h2></div>
-          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">Close</button>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
         </div>
         <p id="category-confirm-message"></p>
         <div class="category-dialog-actions">
           <button class="category-secondary-button" type="button" data-close-dialog>Cancel</button>
           <button class="category-danger-button" id="category-confirm-delete" type="button">Delete</button>
+        </div>
+      </div>
+    </dialog>
+    <dialog class="category-dialog" id="logout-confirm-dialog" aria-labelledby="logout-confirm-title" aria-describedby="logout-confirm-message">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div>
+            <h2 id="logout-confirm-title">Log out of your admin account?</h2>
+            <p id="logout-confirm-message">You’ll need to sign in again to access the dashboard.</p>
+          </div>
+          <button class="category-dialog-close" type="button" data-logout-cancel aria-label="Close logout confirmation">×</button>
+        </div>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-logout-cancel>Cancel</button>
+          <button class="category-danger-button" id="logout-confirm-button" type="button">Log out</button>
         </div>
       </div>
     </dialog>
@@ -2615,6 +2635,8 @@
         productsReadable: false,
         categoriesError: null,
         productsError: null,
+        categoriesReadyPromise: null,
+        resolveCategoriesReady: null,
         level: "all",
         page: 1,
         pageSize: 10,
@@ -2633,6 +2655,7 @@
         pendingKey: null,
         reservedBarcodes: new Set(),
         pendingAction: null,
+        openingForm: false,
         importRows: [],
       };
       const inventoryState = {
@@ -2674,6 +2697,8 @@
       const logoutButton = document.querySelector("#logout-button");
       const logoutLabel = document.querySelector("#logout-label");
       const logoutStatus = document.querySelector("#logout-status");
+      const logoutConfirmDialog = document.querySelector("#logout-confirm-dialog");
+      const logoutConfirmButton = document.querySelector("#logout-confirm-button");
       const isDevelopment =
         window.location.protocol === "file:" ||
         ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
@@ -2730,8 +2755,6 @@
           raw.parent_id,
           raw.parentCategory,
           raw.parent,
-          raw.masterCategoryId,
-          raw.master_category_id,
         ];
         for (const candidate of candidates) {
           const id = valueAsId(candidate);
@@ -2779,7 +2802,7 @@
           if (seen.has(id)) {
             return "category";
           }
-          const parentId = rawParentId(raw);
+          const parentId = rawParentId(raw) || valueAsId(raw.masterCategoryId ?? raw.master_category_id);
           if (!parentId) {
             levelCache.set(id, "master");
             return "master";
@@ -2794,7 +2817,10 @@
 
         return Object.entries(rawById).map(([id, raw]) => {
           const level = resolveLevel(id);
-          const parentId = level === "master" ? "" : rawParentId(raw);
+          const parentId = level === "master"
+            ? ""
+            : rawParentId(raw) ||
+              (level === "category" ? valueAsId(raw.masterCategoryId ?? raw.master_category_id) : "");
           const name = String(raw.name ?? raw.categoryName ?? raw.title ?? raw.label ?? `Unnamed ${level}`);
           const statusValue = raw.status;
           const active =
@@ -2821,22 +2847,14 @@
       }
 
       function masterForCategory(category, categories = categoryState.categories) {
-        if (category.level === "master") {
-          return category;
+        const visited = new Set();
+        let current = category;
+        while (current && current.level !== "master") {
+          if (visited.has(current.id)) return null;
+          visited.add(current.id);
+          current = categories.find((entry) => entry.id === current.parentId) || null;
         }
-        if (category.masterCategoryId) {
-          const explicitMaster = categories.find(
-            (entry) => entry.id === category.masterCategoryId && entry.level === "master",
-          );
-          if (explicitMaster) {
-            return explicitMaster;
-          }
-        }
-        const parent = categories.find((entry) => entry.id === category.parentId);
-        if (!parent) {
-          return null;
-        }
-        return parent.level === "master" ? parent : masterForCategory(parent, categories);
+        return current?.level === "master" ? current : null;
       }
 
       function parentForCategory(category) {
@@ -2868,7 +2886,16 @@
       }
 
       function productCount(categoryId, products = categoryState.products) {
-        return Object.values(products).filter((product) => productCategoryId(product) === categoryId).length;
+        return Object.values(products).filter((product) => {
+          const path = productCategoryPath(product);
+          const directReferences = [
+            product?.masterCategoryId ?? product?.master_category_id,
+            product?.categoryId ?? product?.category_id,
+            product?.subcategoryId ?? product?.subcategory_id,
+          ];
+          return directReferences.some((reference) => valueAsId(reference) === categoryId) ||
+            [path.master, path.category, path.subcategory].some((category) => category?.id === categoryId);
+        }).length;
       }
 
       function childrenOf(categoryId, categories = categoryState.categories) {
@@ -3431,6 +3458,10 @@
         categoryState.productsReadable = false;
         categoryState.categoriesError = null;
         categoryState.productsError = null;
+        categoryState.resolveCategoriesReady?.();
+        categoryState.categoriesReadyPromise = new Promise((resolve) => {
+          categoryState.resolveCategoriesReady = resolve;
+        });
         renderCategoryRows();
         renderProducts();
         renderBarcodeManager();
@@ -3444,6 +3475,7 @@
             renderCategoryRows();
             renderProducts();
             renderBarcodeManager();
+            categoryState.resolveCategoriesReady?.();
           },
           (error) => {
             categoryState.categoriesError = reportFirebaseError("Reading categories", error);
@@ -3452,6 +3484,7 @@
             renderCategoryRows();
             renderProducts();
             renderBarcodeManager();
+            categoryState.resolveCategoriesReady?.();
           },
         );
         categoryState.stopProducts = onValue(
@@ -3655,17 +3688,103 @@
         return categoryState.categories.find((category) => category.id === valueAsId(categoryId)) || null;
       }
 
+      function resolveProductCategory(value, name, level, parentId = null) {
+        const id = valueAsId(value);
+        const byId = id ? productCategory(id) : null;
+        if (byId) {
+          return byId.level === level && (parentId === null || byId.parentId === parentId)
+            ? byId
+            : null;
+        }
+        const candidates = [id || name, !id ? value?.name : ""]
+          .map((candidate) => String(candidate ?? "").trim().toLocaleLowerCase())
+          .filter(Boolean);
+        for (const candidate of candidates) {
+          const matches = categoryState.categories.filter((category) =>
+            category.level === level &&
+            (parentId === null || category.parentId === parentId) &&
+            category.name.trim().toLocaleLowerCase() === candidate,
+          );
+          if (matches.length === 1) {
+            return matches[0];
+          }
+        }
+        return null;
+      }
+
+      function productCategoryPath(product) {
+        const savedMaster = resolveProductCategory(
+          product?.masterCategoryId ?? product?.master_category_id,
+          product?.masterCategoryName ?? product?.master_category_name,
+          "master",
+        );
+        const categoryValue = product?.categoryId ?? product?.category_id;
+        const savedCategoryById = productCategory(categoryValue);
+        const savedCategory = savedCategoryById
+          ? savedCategoryById.level === "category" ? savedCategoryById : null
+          : resolveProductCategory(
+              categoryValue,
+              product?.categoryName ?? product?.category_name,
+              "category",
+              savedMaster?.id ?? null,
+            );
+        const subcategoryValue = product?.subcategoryId ?? product?.subcategory_id;
+        const savedSubcategoryById = productCategory(subcategoryValue);
+        const savedSubcategory = resolveProductCategory(
+          subcategoryValue,
+          product?.subcategoryName ?? product?.subcategory_name,
+          "subcategory",
+          savedSubcategoryById
+            ? null
+            : savedCategory?.id ?? null,
+        );
+        const categoryCandidate = savedCategory ||
+          (savedSubcategory ? productCategory(savedSubcategory.parentId) : null);
+        const hierarchyMaster = categoryCandidate ? masterForCategory(categoryCandidate) : null;
+        const hierarchyMatchesSavedMaster = !savedMaster || !hierarchyMaster || savedMaster.id === hierarchyMaster.id;
+        const category = categoryCandidate?.level === "category" &&
+          hierarchyMaster &&
+          hierarchyMatchesSavedMaster
+          ? categoryCandidate
+          : null;
+        const subcategory = category && savedSubcategory?.parentId === category.id
+          ? savedSubcategory
+          : null;
+        return {
+          master: savedMaster || hierarchyMaster,
+          category,
+          subcategory,
+        };
+      }
+
+      async function waitForCategories() {
+        if (!categoryState.categoriesReadyPromise) {
+          startCategoryListeners();
+        }
+        while (!categoryState.categoriesLoaded && !categoryState.categoriesError) {
+          let timeoutId;
+          try {
+            await Promise.race([
+              categoryState.categoriesReadyPromise,
+              new Promise((_, reject) => {
+                timeoutId = window.setTimeout(() => reject(new Error("Loading categories timed out. Retry before editing products.")), 15000);
+              }),
+            ]);
+          } finally {
+            window.clearTimeout(timeoutId);
+          }
+        }
+        if (categoryState.categoriesError) {
+          throw new Error(categoryState.categoriesError);
+        }
+      }
+
       function productMaster(product) {
-        const direct = productCategory(product?.masterCategoryId ?? product?.master_category_id);
-        if (direct?.level === "master") return direct;
-        const category = productCategory(product?.categoryId ?? product?.category_id);
-        return category ? masterForCategory(category) : null;
+        return productCategoryPath(product).master;
       }
 
       function productCategoryLabel(product) {
-        const subcategory = productCategory(product?.subcategoryId ?? product?.subcategory_id);
-        const category = productCategory(product?.categoryId ?? product?.category_id);
-        const master = productMaster(product);
+        const { master, category, subcategory } = productCategoryPath(product);
         const names = [master?.name, category?.name, subcategory?.name].filter(Boolean);
         return names.length ? names.join(" / ") : String(product?.categoryName ?? "—");
       }
@@ -3694,26 +3813,40 @@
         masterSelect.innerHTML = productOptionHtml(categoriesAt("master"), oldMaster, masterLabel);
         const masterExists = categoriesAt("master").some((entry) => entry.id === oldMaster);
         if (masterExists) masterSelect.value = oldMaster;
-        const categories = masterSelect.value ? categoriesAt("category", masterSelect.value) : categoriesAt("category");
+        const categories = masterSelect.value ? categoriesAt("category", masterSelect.value) : [];
         categorySelect.innerHTML = productOptionHtml(categories, oldCategory, categoryLabel);
         categorySelect.disabled = !masterSelect.value;
         if (!categories.some((entry) => entry.id === oldCategory)) categorySelect.value = "";
       }
 
-      function updateProductFormCategories(resetChildren = false) {
+      function updateProductFormCategories({ clearCategory = false, clearSubcategory = false } = {}) {
         const master = document.querySelector("#product-master-category");
         const category = document.querySelector("#product-category");
         const subcategory = document.querySelector("#product-subcategory");
         const masterId = master.value;
-        const selectedCategory = resetChildren ? "" : category.value;
-        category.innerHTML = productOptionHtml(masterId ? categoriesAt("category", masterId) : [], selectedCategory, "Select category");
+        if (clearCategory) category.value = "";
+        if (clearSubcategory || clearCategory) subcategory.value = "";
+        const currentCategoryId = category.value;
+        const categories = masterId ? categoriesAt("category", masterId) : [];
+        const selectedCategoryId = categories.some((entry) => entry.id === currentCategoryId)
+          ? currentCategoryId
+          : "";
+        category.innerHTML = productOptionHtml(categories, selectedCategoryId, "Select category");
         category.disabled = !masterId;
-        if (!categoriesAt("category", masterId).some((entry) => entry.id === selectedCategory)) category.value = "";
-        const selectedSubcategory = resetChildren ? "" : subcategory.value;
-        const categoryId = category.value;
-        subcategory.innerHTML = productOptionHtml(categoryId ? categoriesAt("subcategory", categoryId) : [], selectedSubcategory, "Select subcategory");
-        subcategory.disabled = !categoryId;
-        if (!categoriesAt("subcategory", categoryId).some((entry) => entry.id === selectedSubcategory)) subcategory.value = "";
+
+        const currentSubcategoryId = subcategory.value;
+        const subcategories = selectedCategoryId
+          ? categoriesAt("subcategory", selectedCategoryId)
+          : [];
+        const selectedSubcategoryId = subcategories.some((entry) => entry.id === currentSubcategoryId)
+          ? currentSubcategoryId
+          : "";
+        subcategory.innerHTML = productOptionHtml(
+          subcategories,
+          selectedSubcategoryId,
+          "Select subcategory",
+        );
+        subcategory.disabled = !selectedCategoryId || subcategories.length === 0;
       }
 
       function updateProductFilters() {
@@ -3722,22 +3855,24 @@
         const subcategory = document.querySelector("#product-subcategory-filter");
         setCategoryFilterOptions(master, category, "All master categories", "All categories");
         const selectedSubcategory = subcategory.value;
-        const children = category.value ? categoriesAt("subcategory", category.value) : categoriesAt("subcategory");
+        const children = category.value ? categoriesAt("subcategory", category.value) : [];
         subcategory.innerHTML = productOptionHtml(children, selectedSubcategory, "All subcategories");
         if (!children.some((entry) => entry.id === selectedSubcategory)) subcategory.value = "";
+        subcategory.disabled = !category.value || children.length === 0;
         const masterForm = document.querySelector("#product-master-category");
         const selectedMaster = masterForm.value;
         const masters = categoriesAt("master");
         masterForm.innerHTML = productOptionHtml(masters, selectedMaster, "Select master category");
         if (!masters.some((entry) => entry.id === selectedMaster)) masterForm.value = "";
-        updateProductFormCategories(false);
+        updateProductFormCategories();
         document.querySelector("#barcode-master-filter").innerHTML =
           productOptionHtml(categoriesAt("master"), document.querySelector("#barcode-master-filter").value, "All master categories");
         const barcodeCategory = document.querySelector("#barcode-category-filter");
         const barcodeMaster = document.querySelector("#barcode-master-filter");
-        const barcodeCategories = barcodeMaster.value ? categoriesAt("category", barcodeMaster.value) : categoriesAt("category");
+        const barcodeCategories = barcodeMaster.value ? categoriesAt("category", barcodeMaster.value) : [];
         barcodeCategory.innerHTML = productOptionHtml(barcodeCategories, barcodeCategory.value, "All categories");
         if (!barcodeCategories.some((entry) => entry.id === barcodeCategory.value)) barcodeCategory.value = "";
+        barcodeCategory.disabled = !barcodeMaster.value;
         const categoryWarning = document.querySelector("#product-category-warning");
         categoryWarning.hidden = !categoryState.categoriesError;
         document.querySelector("#product-category-warning-message").textContent =
@@ -3806,11 +3941,11 @@
           const isActive = productStatus(product);
           const quantity = productStock(product);
           const threshold = Number(product.lowStockThreshold ?? product.low_stock_threshold ?? 5);
-          const productMasterCategory = productMaster(product);
+          const productCategorySelection = productCategoryPath(product);
           return (!query || haystack.includes(query)) &&
-            (!masterId || productMasterCategory?.id === masterId) &&
-            (!categoryId || valueAsId(product.categoryId ?? product.category_id) === categoryId) &&
-            (!subcategoryId || valueAsId(product.subcategoryId ?? product.subcategory_id) === subcategoryId) &&
+            (!masterId || productCategorySelection.master?.id === masterId) &&
+            (!categoryId || productCategorySelection.category?.id === categoryId) &&
+            (!subcategoryId || productCategorySelection.subcategory?.id === subcategoryId) &&
             (!brand || String(product.brand ?? "") === brand) &&
             (!status || isActive === (status === "active")) &&
             (!stock || (stock === "in-stock" ? quantity > 0 && quantity > threshold : stock === "low-stock" ? quantity > 0 && quantity <= threshold : quantity <= 0));
@@ -4091,13 +4226,27 @@
         document.querySelector("#product-weight").value = editing ? String(product.weight ?? "") : "";
         document.querySelector("#product-status").value = editing ? (productStatus(product) ? "active" : "inactive") : "active";
         document.querySelector("#product-tags").value = editing ? (Array.isArray(product.tags) ? product.tags.join(", ") : String(product.tags ?? "")) : "";
-        const master = productMaster(product);
-        document.querySelector("#product-master-category").value = master?.id || "";
-        updateProductFormCategories(true);
-        document.querySelector("#product-category").value = editing ? valueAsId(product.categoryId ?? product.category_id) : "";
-        updateProductFormCategories(false);
-        document.querySelector("#product-subcategory").value = editing ? valueAsId(product.subcategoryId ?? product.subcategory_id) : "";
-        updateProductFormCategories(false);
+        const { master, category, subcategory } = editing
+          ? productCategoryPath(product)
+          : { master: null, category: null, subcategory: null };
+        const masterSelect = document.querySelector("#product-master-category");
+        masterSelect.innerHTML = productOptionHtml(categoriesAt("master"), master?.id || "", "Select master category");
+        masterSelect.value = master?.id || "";
+        const categorySelect = document.querySelector("#product-category");
+        const subcategorySelect = document.querySelector("#product-subcategory");
+        categorySelect.innerHTML = productOptionHtml(
+          master?.id ? categoriesAt("category", master.id) : [],
+          "",
+          "Select category",
+        );
+        categorySelect.value = category && master && category.parentId === master.id
+          ? category.id
+          : "";
+        updateProductFormCategories();
+        subcategorySelect.value = subcategory?.parentId === categorySelect.value
+          ? subcategory.id
+          : "";
+        updateProductFormCategories();
         if (editing) {
           productVariants(product).forEach((variant) => addVariantEditor({
             ...variant,
@@ -4109,12 +4258,27 @@
         document.querySelector("#product-id").focus();
       }
 
-      function openProductForm(product = null, key = null) {
-        if (!categoryState.categoriesLoaded || categoryState.categoriesError || !categoryState.productsLoaded) {
-          showCategoryToast(categoryState.categoriesError || categoryState.productsError || "Categories and products are still loading. Retry in a moment before editing products.", "error");
-          return;
+      async function openProductForm(product = null, key = null) {
+        const dialog = document.querySelector("#product-form-dialog");
+        if (productState.openingForm || dialog.open) return;
+        productState.openingForm = true;
+        try {
+          await waitForCategories();
+          if (!categoryState.productsLoaded) {
+            showCategoryToast(categoryState.productsError || "Products are still loading. Retry in a moment before editing products.", "error");
+            return;
+          }
+          const currentProduct = key ? categoryState.products[key] : product;
+          if (key && !currentProduct) {
+            showCategoryToast("This product is no longer available. The list has been refreshed.", "error");
+            return;
+          }
+          fillProductForm(currentProduct, key);
+        } catch (error) {
+          showCategoryToast(error.message || "Could not load categories. Retry before editing products.", "error");
+        } finally {
+          productState.openingForm = false;
         }
-        fillProductForm(product, key);
       }
 
       function fieldNumber(id, label, { integer = false, required = false } = {}) {
@@ -4139,6 +4303,9 @@
         const master = productCategory(document.querySelector("#product-master-category").value);
         const category = productCategory(categoryId);
         const subcategory = productCategory(subcategoryId);
+        if (document.querySelector("#product-master-category").value && master?.level !== "master") {
+          throw new Error("The selected master category no longer exists. Select it again.");
+        }
         if (categoryId && (!category || category.level !== "category" || category.parentId !== master?.id)) {
           throw new Error("The selected category no longer belongs to this master category. Select it again.");
         }
@@ -4456,13 +4623,19 @@
               break;
             }
           }
-          let master = masterId ? productCategory(masterId) : null;
-          const category = categoryId ? productCategory(categoryId) : null;
-          const subcategory = subcategoryId ? productCategory(subcategoryId) : null;
+          let master = masterId ? resolveProductCategory(masterId, masterId, "master") : null;
+          let category = categoryId
+            ? resolveProductCategory(categoryId, categoryId, "category", master?.id ?? null)
+            : null;
+          let subcategory = subcategoryId
+            ? resolveProductCategory(subcategoryId, subcategoryId, "subcategory", category?.id ?? null)
+            : null;
+          if (categoryId && !category) errors.push("Category ID does not match its master category.");
+          if (!category && subcategory && !categoryId) category = productCategory(subcategory.parentId);
           if (!master && category) master = masterForCategory(category);
-          if (masterId && master?.level !== "master") errors.push("Master category ID is not valid.");
-          if (categoryId && (!category || category.level !== "category" || (master && category.parentId !== master.id))) errors.push("Category ID does not match its master category.");
-          if (subcategoryId && (!category || !subcategory || subcategory.level !== "subcategory" || subcategory.parentId !== category.id)) errors.push("Subcategory ID does not match its category.");
+          if (masterId && !master) errors.push("Master category ID is not valid.");
+          if (categoryId && category && master && category.parentId !== master.id) errors.push("Category ID does not match its master category.");
+          if (subcategoryId && (!category || !subcategory || subcategory.parentId !== category.id)) errors.push("Subcategory ID does not match its category.");
           const rowStatus = read(values, optionalIndex.status).toLowerCase();
           if (rowStatus && !["active", "inactive"].includes(rowStatus)) errors.push("Status must be active or inactive.");
           let variants = [];
@@ -4969,8 +5142,12 @@
         const removeButton = event.target.closest("[data-remove-variant]");
         if (removeButton) removeButton.closest(".product-variant-row").remove();
       });
-      document.querySelector("#product-master-category").addEventListener("change", () => updateProductFormCategories(true));
-      document.querySelector("#product-category").addEventListener("change", () => updateProductFormCategories(true));
+      document.querySelector("#product-master-category").addEventListener("change", () => {
+        updateProductFormCategories({ clearCategory: true, clearSubcategory: true });
+      });
+      document.querySelector("#product-category").addEventListener("change", () => {
+        updateProductFormCategories({ clearSubcategory: true });
+      });
       document.querySelector("#product-category-retry").addEventListener("click", startCategoryListeners);
       for (const dialog of [
         document.querySelector("#product-form-dialog"),
@@ -5034,6 +5211,24 @@
         control.addEventListener("input", () => { productState.page = 1; renderProducts(); });
         control.addEventListener("change", () => { productState.page = 1; renderProducts(); });
       }
+      document.querySelector("#product-master-filter").addEventListener("change", () => {
+        document.querySelector("#product-category-filter").value = "";
+        document.querySelector("#product-subcategory-filter").value = "";
+        updateProductFilters();
+        productState.page = 1;
+        renderProducts();
+      });
+      document.querySelector("#product-category-filter").addEventListener("change", () => {
+        document.querySelector("#product-subcategory-filter").value = "";
+        updateProductFilters();
+        productState.page = 1;
+        renderProducts();
+      });
+      document.querySelector("#barcode-master-filter").addEventListener("change", () => {
+        document.querySelector("#barcode-category-filter").value = "";
+        updateProductFilters();
+        renderBarcodeManager();
+      });
       bindPaginationControls("products", productState, renderProducts);
       document.querySelector("#product-export-button").addEventListener("click", () => {
         const selected = [...productState.selected].filter((key) => categoryState.products[key]);
@@ -5225,12 +5420,28 @@
         return check;
       }
 
-      logoutButton.addEventListener("click", async () => {
+      logoutButton.addEventListener("click", () => {
         if (logoutButton.disabled) {
           return;
         }
         logoutStatus.hidden = true;
         logoutStatus.textContent = "";
+        logoutConfirmDialog.showModal();
+        logoutConfirmDialog.querySelector("[data-logout-cancel]").focus();
+      });
+      logoutConfirmDialog.querySelectorAll("[data-logout-cancel]").forEach((button) => {
+        button.addEventListener("click", () => logoutConfirmDialog.close());
+      });
+      logoutConfirmDialog.addEventListener("click", (event) => {
+        if (event.target === logoutConfirmDialog) {
+          logoutConfirmDialog.close();
+        }
+      });
+      logoutConfirmButton.addEventListener("click", async () => {
+        if (logoutButton.disabled) {
+          return;
+        }
+        logoutConfirmDialog.close();
         logoutButton.disabled = true;
         logoutButton.setAttribute("aria-busy", "true");
         logoutButton.dataset.state = "loading";
