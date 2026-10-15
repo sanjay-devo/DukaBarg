@@ -1550,6 +1550,12 @@
         white-space: nowrap;
       }
 
+      .customer-status[data-active="true"] {
+        color: #176b38;
+        background: #e8f5ec;
+        font-weight: 600;
+      }
+
       .customer-actions-trigger {
         display: inline-grid;
         width: 36px;
@@ -2607,8 +2613,6 @@
               <div class="customers-toolbar">
                 <span id="customers-selection-summary" aria-live="polite">0 selected</span>
                 <div class="customers-bulk-actions" id="customers-bulk-actions" aria-label="Bulk customer actions" hidden>
-                  <button class="category-secondary-button" id="customers-export-selected" type="button">Export selected</button>
-                  <button class="category-secondary-button" id="customers-export-filtered" type="button">Export all filtered</button>
                   <button class="category-secondary-button" id="customers-clear-selection" type="button">Clear selection</button>
                 </div>
               </div>
@@ -3683,7 +3687,7 @@
             <td><span class="customer-overflow" title="${escapeCustomerText(customer.mobile || "Not provided")}">${escapeCustomerText(customer.mobile || "Not provided")}</span></td>
             <td><span class="customer-overflow" title="${escapeCustomerText(customer.email || "Not provided")}">${escapeCustomerText(customer.email || "Not provided")}</span></td>
             <td>${escapeCustomerText(totalOrders)}</td>
-            <td><span class="customer-status">${escapeCustomerText(customer.status || "Not available")}</span></td>
+            <td><span class="customer-status" data-active="${customer.status.toLowerCase() === "active"}">${escapeCustomerText(customer.status.toLowerCase() === "active" ? "Active" : customer.status || "Not available")}</span></td>
             <td><button class="customer-actions-trigger" type="button" data-customer-menu="${escapeCustomerText(customer.id)}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${escapeCustomerText(displayName)}">⋮</button></td>
           </tr>`;
         }).join("");
@@ -3841,51 +3845,6 @@
         customerState.ordersError = null;
         customerState.ordersLoaded = false;
         startCustomerOrdersListener();
-      }
-
-      function filteredSelectedCustomers() {
-        const all = new Map(customerState.customers.map((customer) => [customer.id, customer]));
-        return [...customerState.selected].map((id) => all.get(id)).filter(Boolean);
-      }
-
-      function exportCustomers(customers) {
-        if (!customers.length) {
-          showCategoryToast("There are no customer records to export.", "error");
-          return;
-        }
-        try {
-          const headers = ["Customer ID", "Name", "Email", "Mobile", "Registration Date"];
-          if (customers.every((customer) => customer.status)) headers.push("Status");
-          const rows = customers.map((customer) => {
-            const values = [
-              customer.id,
-              customer.name,
-              customer.email,
-              customer.mobile,
-              customer.raw.createdAt == null ? "" : formatCustomerDate(customer.raw.createdAt),
-            ];
-            if (headers.includes("Status")) values.push(customer.status);
-            return values;
-          });
-          const csv = [headers, ...rows].map((row) => row.map((value) => {
-            let text = String(value ?? "");
-            if (/^\s*[=+\-@]/.test(text)) text = `'${text}`;
-            return `"${text.replace(/"/g, '""')}"`;
-          }).join(",")).join("\r\n");
-          const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
-          const url = URL.createObjectURL(blob);
-          const anchor = document.createElement("a");
-          anchor.href = url;
-          anchor.download = `dukabarg-customers-${new Date().toISOString().slice(0, 10)}.csv`;
-          document.body.append(anchor);
-          anchor.click();
-          anchor.remove();
-          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-          showCategoryToast(`Exported ${customers.length.toLocaleString("en-IN")} customer${customers.length === 1 ? "" : "s"}.`);
-        } catch (error) {
-          console.error("Customer CSV export failed.", error);
-          showCategoryToast("Customer export failed. Check browser download permissions and retry.", "error");
-        }
       }
 
       function addressEntries(raw) {
@@ -4566,8 +4525,6 @@
         const requestId = ++customerState.orderRequestId;
         void loadCustomerOrders(customer, requestId);
       });
-      document.querySelector("#customers-export-selected").addEventListener("click", () => exportCustomers(filteredSelectedCustomers()));
-      document.querySelector("#customers-export-filtered").addEventListener("click", () => exportCustomers(getFilteredCustomers()));
       document.querySelector("#customers-clear-selection").addEventListener("click", () => {
         customerState.selected.clear();
         renderCustomers();
