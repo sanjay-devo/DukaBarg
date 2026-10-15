@@ -1377,11 +1377,10 @@
 
       .product-row-actions {
         display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2);
+        justify-content: center;
       }
 
-      .product-row-actions button,
+      .product-actions-trigger,
       .products-pagination button {
         min-height: 32px;
         padding: var(--space-2) var(--space-3);
@@ -1394,12 +1393,22 @@
         font-size: var(--font-size-xs);
       }
 
-      .product-row-actions button:hover,
+      .product-actions-trigger {
+        display: inline-grid;
+        width: 36px;
+        min-height: 36px;
+        place-items: center;
+        padding: 0;
+        font-size: var(--font-size-xl);
+        line-height: 1;
+      }
+
+      .product-actions-trigger:hover,
       .products-pagination button:hover:not(:disabled) {
         border-color: var(--color-border-strong);
       }
 
-      .product-row-actions button:focus-visible,
+      .product-actions-trigger:focus-visible,
       .products-pagination button:focus-visible,
       .products-page button:focus-visible,
       .inventory-page button:focus-visible,
@@ -1412,11 +1421,79 @@
         outline-offset: 2px;
       }
 
-      .product-row-actions button:disabled,
+      .product-actions-trigger:disabled,
       .products-page button:disabled,
       .inventory-page button:disabled {
         cursor: not-allowed;
         opacity: 0.55;
+      }
+
+      .product-action-menu {
+        position: fixed;
+        z-index: 1000;
+        width: min(220px, calc(100vw - 16px));
+        max-height: calc(100vh - 16px);
+        padding: var(--space-2);
+        overflow-y: auto;
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+      }
+
+      .product-action-menu[hidden] {
+        display: none;
+      }
+
+      .product-action-menu button {
+        display: flex;
+        width: 100%;
+        min-height: 40px;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-sm);
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .product-action-menu button:hover,
+      .product-action-menu button:focus-visible {
+        background: var(--color-surface-raised);
+        outline: none;
+      }
+
+      .product-action-menu button:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--color-border-strong);
+      }
+
+      .product-action-menu button svg {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .product-action-menu button[data-menu-action="delete"] {
+        margin-top: var(--space-2);
+        color: #b42318;
+        border-top: 1px solid var(--color-border-muted);
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      }
+
+      .product-action-menu button[data-menu-action="delete"]:hover,
+      .product-action-menu button[data-menu-action="delete"]:focus-visible {
+        background: #fef2f2;
       }
 
       .products-feedback {
@@ -2470,6 +2547,14 @@
         ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
       const pendingChecks = new Map();
       let stopAuthListener = null;
+      const productActionMenu = document.createElement("div");
+      productActionMenu.className = "product-action-menu";
+      productActionMenu.id = "product-action-menu";
+      productActionMenu.setAttribute("role", "menu");
+      productActionMenu.setAttribute("aria-label", "Product actions");
+      productActionMenu.hidden = true;
+      document.body.append(productActionMenu);
+      let activeProductMenuTrigger = null;
 
       function showCategoryToast(message, kind = "success") {
         const toast = document.createElement("div");
@@ -3568,7 +3653,124 @@
         if (brands.includes(selected)) select.value = selected;
       }
 
+      function closeProductActionMenu(restoreFocus = false) {
+        productActionMenu.hidden = true;
+        if (activeProductMenuTrigger) {
+          activeProductMenuTrigger.setAttribute("aria-expanded", "false");
+          if (restoreFocus && activeProductMenuTrigger.isConnected) {
+            activeProductMenuTrigger.focus();
+          }
+        }
+        activeProductMenuTrigger = null;
+      }
+
+      function positionProductActionMenu(trigger) {
+        const anchor = trigger.getBoundingClientRect();
+        const menu = productActionMenu.getBoundingClientRect();
+        const gap = 4;
+        const padding = 8;
+        const below = window.innerHeight - anchor.bottom - gap;
+        const above = anchor.top - gap;
+        const top = below < menu.height && above > below
+          ? Math.max(padding, anchor.top - menu.height - gap)
+          : Math.min(anchor.bottom + gap, window.innerHeight - menu.height - padding);
+        const left = Math.min(
+          window.innerWidth - menu.width - padding,
+          Math.max(padding, anchor.right - menu.width),
+        );
+        productActionMenu.style.top = `${top}px`;
+        productActionMenu.style.left = `${left}px`;
+      }
+
+      function openProductActionMenu(trigger) {
+        if (activeProductMenuTrigger === trigger) {
+          closeProductActionMenu();
+          return;
+        }
+        closeProductActionMenu();
+        const key = trigger.dataset.key;
+        const product = categoryState.products[key];
+        if (!product) return;
+        const icons = {
+          view: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+          edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15l-.8 5Z"/></svg>',
+          duplicate: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+          barcode: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5v14M6 5v14M10 5v14M13 5v14M17 5v14M21 5v14"/></svg>',
+          status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7 10 17l-5-5"/></svg>',
+          delete: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>',
+        };
+        const barcode = productBarcode(product);
+        const barcodeLabel = isValidBarcode(barcode) ? "Barcode" : "Generate barcode";
+        const statusLabel = productStatus(product) ? "Deactivate" : "Activate";
+        const actions = [
+          ["view", "View", icons.view],
+          ["edit", "Edit", icons.edit],
+          ["duplicate", "Duplicate", icons.duplicate],
+          [isValidBarcode(barcode) ? "download" : "generate", barcodeLabel, icons.barcode],
+          ["toggle", statusLabel, icons.status],
+          ["delete", "Delete", icons.delete],
+        ];
+        productActionMenu.innerHTML = actions.map(([action, label, icon]) =>
+          `<button type="button" role="menuitem" data-menu-action="${action}">${icon}<span>${label}</span></button>`,
+        ).join("");
+        productActionMenu.dataset.key = key;
+        productActionMenu.hidden = false;
+        activeProductMenuTrigger = trigger;
+        trigger.setAttribute("aria-expanded", "true");
+        positionProductActionMenu(trigger);
+        productActionMenu.querySelector('[role="menuitem"]').focus();
+      }
+
+      productActionMenu.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-menu-action]");
+        if (!button) return;
+        const { key } = productActionMenu.dataset;
+        const { menuAction } = button.dataset;
+        closeProductActionMenu(true);
+        void performProductAction(menuAction, key);
+      });
+
+      productActionMenu.addEventListener("keydown", (event) => {
+        const items = [...productActionMenu.querySelectorAll('[role="menuitem"]')];
+        const currentIndex = items.indexOf(document.activeElement);
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeProductActionMenu(true);
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          items[(currentIndex + direction + items.length) % items.length].focus();
+        } else if (event.key === "Home" || event.key === "End") {
+          event.preventDefault();
+          items[event.key === "Home" ? 0 : items.length - 1].focus();
+        } else if (event.key === "Tab") {
+          closeProductActionMenu(true);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          !productActionMenu.hidden &&
+          !productActionMenu.contains(event.target) &&
+          !event.target.closest("[data-product-menu-trigger]")
+        ) {
+          closeProductActionMenu();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !productActionMenu.hidden) {
+          closeProductActionMenu(true);
+        }
+      });
+      document.addEventListener("scroll", () => {
+        if (!productActionMenu.hidden) closeProductActionMenu();
+      }, true);
+      window.addEventListener("resize", () => {
+        if (!productActionMenu.hidden) closeProductActionMenu();
+      });
+
       function renderProducts() {
+        closeProductActionMenu();
         const loading = !categoryState.productsLoaded && !categoryState.productsError;
         const error = categoryState.productsError;
         const loadingElement = document.querySelector("#products-loading");
@@ -3623,12 +3825,16 @@
             <td>${escapeProductHtml(barcode || "Missing")}</td>
             <td><span class="product-status" data-active="${productStatus(product)}">${productStatus(product) ? "Active" : "Inactive"}</span></td>
             <td><div class="product-row-actions">
-              <button type="button" data-product-action="view" data-key="${escapeProductHtml(key)}">View</button>
-              <button type="button" data-product-action="edit" data-key="${escapeProductHtml(key)}">Edit</button>
-              <button type="button" data-product-action="duplicate" data-key="${escapeProductHtml(key)}">Duplicate</button>
-              <button type="button" data-product-action="${isValidBarcode(barcode) ? "download" : "generate"}" data-key="${escapeProductHtml(key)}">${isValidBarcode(barcode) ? "Barcode" : "Generate barcode"}</button>
-              <button type="button" data-product-action="toggle" data-key="${escapeProductHtml(key)}">${productStatus(product) ? "Deactivate" : "Activate"}</button>
-              <button type="button" data-product-action="delete" data-key="${escapeProductHtml(key)}">Delete</button>
+              <button
+                class="product-actions-trigger"
+                type="button"
+                data-product-menu-trigger
+                data-key="${escapeProductHtml(key)}"
+                aria-label="Actions for ${escapeProductHtml(name)}"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                aria-controls="product-action-menu"
+              >⋮</button>
             </div></td>
           </tr>`;
         }).join("");
@@ -4572,8 +4778,8 @@
       }
       document.querySelector("#product-confirm-action").addEventListener("click", executeConfirmedProductAction);
       document.querySelector("#products-table-body").addEventListener("click", (event) => {
-        const button = event.target.closest("button[data-product-action]");
-        if (button && !button.disabled) void performProductAction(button.dataset.productAction, button.dataset.key);
+        const trigger = event.target.closest("button[data-product-menu-trigger]");
+        if (trigger && !trigger.disabled) openProductActionMenu(trigger);
       });
       document.querySelector("#products-table-body").addEventListener("change", (event) => {
         const checkbox = event.target.closest("input[data-select-product]");
