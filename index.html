@@ -1398,15 +1398,14 @@
 
       .customers-filters {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr) auto auto;
         gap: var(--space-4);
         padding: var(--space-5) 0;
         border-bottom: 1px solid var(--color-border-muted);
       }
 
       .customers-filters input,
-      .customers-filters select,
-      .customer-date-filter input {
+      .customers-filters select {
         width: 100%;
         min-width: 0;
         min-height: 40px;
@@ -1419,11 +1418,8 @@
         font-size: var(--font-size-sm);
       }
 
-      .customer-date-filter {
-        display: grid;
-        gap: var(--space-2);
-        color: var(--color-text-inverse);
-        font-size: var(--font-size-xs);
+      .customers-filters input {
+        min-width: 0;
       }
 
       .customers-toolbar,
@@ -1472,7 +1468,7 @@
 
       .customers-table {
         width: 100%;
-        min-width: 1510px;
+        min-width: 940px;
         border-collapse: collapse;
         table-layout: fixed;
         text-align: left;
@@ -1498,17 +1494,13 @@
         background: var(--color-surface-raised);
       }
 
-      .customers-table th:nth-child(1) { width: 42px; }
-      .customers-table th:nth-child(2) { width: 200px; }
-      .customers-table th:nth-child(3) { width: 140px; }
-      .customers-table th:nth-child(4) { width: 140px; }
-      .customers-table th:nth-child(5) { width: 190px; }
-      .customers-table th:nth-child(6) { width: 145px; }
-      .customers-table th:nth-child(7) { width: 95px; }
-      .customers-table th:nth-child(8) { width: 130px; }
-      .customers-table th:nth-child(9) { width: 125px; }
-      .customers-table th:nth-child(10) { width: 130px; }
-      .customers-table th:nth-child(11) { width: 75px; }
+      .customers-table th:nth-child(1) { width: 4%; }
+      .customers-table th:nth-child(2) { width: 25%; }
+      .customers-table th:nth-child(3) { width: 16%; }
+      .customers-table th:nth-child(4) { width: 25%; }
+      .customers-table th:nth-child(5) { width: 11%; }
+      .customers-table th:nth-child(6) { width: 12%; }
+      .customers-table th:nth-child(7) { width: 7%; }
 
       .customer-cell {
         display: flex;
@@ -1580,7 +1572,6 @@
       .customer-actions-trigger:focus-visible,
       .customers-filters input:focus-visible,
       .customers-filters select:focus-visible,
-      .customer-date-filter input:focus-visible,
       .customers-table input:focus-visible,
       .customers-page button:focus-visible,
       .customer-dialog button:focus-visible,
@@ -1756,6 +1747,10 @@
 
         .customers-filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .customers-filters input {
+          grid-column: 1 / -1;
         }
       }
 
@@ -2586,7 +2581,6 @@
                 <h2 id="customers-section-title">Customers</h2>
                 <p>Manage customer profiles, purchase history, order activity, and account status.</p>
               </div>
-              <button class="category-primary-button" id="customers-export-button" type="button">Export CSV</button>
             </div>
 
             <div class="category-stats customers-stats" aria-label="Customer summary">
@@ -2604,20 +2598,11 @@
 
             <div class="category-table-card customers-card">
               <div class="customers-filters" aria-label="Customer filters">
-                <input id="customers-search-name" type="search" placeholder="Search customer name" aria-label="Search customers by name" />
-                <input id="customers-search-email" type="search" placeholder="Search email" aria-label="Search customers by email" />
-                <input id="customers-search-mobile" type="search" placeholder="Search mobile number" aria-label="Search customers by mobile number" />
-                <input id="customers-search-id" type="search" placeholder="Search customer ID" aria-label="Search customers by customer ID" />
-                <select id="customers-status-filter" aria-label="Filter customers by account status"><option value="">All account statuses</option></select>
-                <label class="customer-date-filter" for="customers-date-from">Registered from<input id="customers-date-from" type="date" aria-label="Registration date from" /></label>
-                <label class="customer-date-filter" for="customers-date-to">Registered to<input id="customers-date-to" type="date" aria-label="Registration date to" /></label>
-                <select id="customers-order-filter" aria-label="Filter customers by order activity" title="Order activity filters are enabled after order data loads">
-                  <option value="all">All order activity</option><option value="with" disabled>With orders</option><option value="without" disabled>Without orders</option>
-                </select>
+                <input id="customers-search" type="search" placeholder="Search by customer name, email, mobile number, or customer ID" aria-label="Search customers by name, email, mobile number, or customer ID" />
                 <select id="customers-sort" aria-label="Sort customers">
                   <option value="newest">Newest</option><option value="oldest">Oldest</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="orders-desc" disabled>Most Orders</option><option value="spend-desc" disabled>Highest Spend</option>
                 </select>
-                <button class="category-secondary-button" id="customers-clear-filters" type="button">Clear filters</button>
+                <button class="category-secondary-button" id="customers-clear-filters" type="button">Clear search</button>
               </div>
               <div class="customers-toolbar">
                 <span id="customers-selection-summary" aria-live="polite">0 selected</span>
@@ -2641,7 +2626,7 @@
                 <table class="customers-table">
                   <thead><tr>
                     <th scope="col"><input id="customers-select-page" type="checkbox" aria-label="Select all customers on this page" /></th>
-                    <th scope="col">Customer</th><th scope="col">Customer ID</th><th scope="col">Mobile</th><th scope="col">Email</th><th scope="col">Registration Date</th><th scope="col">Total Orders</th><th scope="col">Total Spend</th><th scope="col">Last Order</th><th scope="col">Account Status</th><th scope="col">Actions</th>
+                    <th scope="col">Customer</th><th scope="col">Mobile</th><th scope="col">Email</th><th scope="col">Total Orders</th><th scope="col">Account Status</th><th scope="col">Actions</th>
                   </tr></thead>
                   <tbody id="customers-table-body"></tbody>
                 </table>
@@ -2940,12 +2925,20 @@
     <dialog class="customer-dialog" id="customer-edit-dialog" aria-labelledby="customer-edit-title">
       <form class="customer-dialog-content" id="customer-edit-form" novalidate>
         <div class="customer-dialog-heading">
-          <div><h2 id="customer-edit-title">Edit customer</h2><p>Only the customer name is editable in the verified users schema. Email and mobile may be linked to Firebase Authentication and are not changed here.</p></div>
+          <div><h2 id="customer-edit-title">Edit customer</h2><p>Email is saved to the customer profile only. Changing the mobile number requires a verified phone-authentication workflow.</p></div>
           <button class="customer-dialog-close" type="button" data-customer-edit-close aria-label="Close customer editor">×</button>
         </div>
         <div class="category-field">
           <label for="customer-edit-name">Full name</label>
-          <input id="customer-edit-name" name="name" type="text" maxlength="120" autocomplete="name" required />
+          <input id="customer-edit-name" name="fullName" type="text" maxlength="120" autocomplete="name" required />
+        </div>
+        <div class="category-field">
+          <label for="customer-edit-mobile">Mobile number</label>
+          <input id="customer-edit-mobile" name="mobile" type="tel" maxlength="20" inputmode="tel" autocomplete="tel" required />
+        </div>
+        <div class="category-field">
+          <label for="customer-edit-email">Email address</label>
+          <input id="customer-edit-email" name="email" type="email" maxlength="254" autocomplete="email" />
         </div>
         <p class="customer-dialog-error" id="customer-edit-error" role="alert" hidden></p>
         <div class="category-dialog-actions">
@@ -3524,6 +3517,9 @@
       }
 
       function renderCustomerStats() {
+        const orderSortsAvailable = customerState.ordersLoaded && !customerState.ordersError;
+        document.querySelector("#customers-sort").querySelector('option[value="orders-desc"]').disabled = !orderSortsAvailable;
+        document.querySelector("#customers-sort").querySelector('option[value="spend-desc"]').disabled = !orderSortsAvailable;
         const customers = customerState.customers;
         document.querySelector("#customers-stat-total").textContent = customers.length.toLocaleString("en-IN");
         const statusComplete = customerHasStatusSupport();
@@ -3584,44 +3580,16 @@
           : "COMPLETED payments excluding CANCELLED orders";
       }
 
-      function updateCustomerStatusOptions() {
-        const select = document.querySelector("#customers-status-filter");
-        const selected = select.value;
-        const values = [...new Set(customerState.customers.map((customer) => customer.status).filter(Boolean))]
-          .sort((a, b) => a.localeCompare(b));
-        select.replaceChildren(new Option("All account statuses", ""));
-        for (const value of values) select.add(new Option(value, value));
-        if (values.includes(selected)) select.value = selected;
-        const orderActivityAvailable = customerState.ordersLoaded && !customerState.ordersError;
-        document.querySelector("#customers-order-filter").querySelector('option[value="with"]').disabled = !orderActivityAvailable;
-        document.querySelector("#customers-order-filter").querySelector('option[value="without"]').disabled = !orderActivityAvailable;
-        document.querySelector("#customers-sort").querySelector('option[value="orders-desc"]').disabled = !orderActivityAvailable;
-        document.querySelector("#customers-sort").querySelector('option[value="spend-desc"]').disabled = !orderActivityAvailable;
-      }
-
       function getFilteredCustomers() {
-        const nameSearch = document.querySelector("#customers-search-name").value.trim().toLocaleLowerCase();
-        const emailSearch = document.querySelector("#customers-search-email").value.trim().toLocaleLowerCase();
-        const mobileSearch = normalizeCustomerPhone(document.querySelector("#customers-search-mobile").value);
-        const idSearch = document.querySelector("#customers-search-id").value.trim().toLocaleLowerCase();
-        const status = document.querySelector("#customers-status-filter").value.toLocaleLowerCase();
-        const from = document.querySelector("#customers-date-from").value;
-        const to = document.querySelector("#customers-date-to").value;
-        const orderActivity = document.querySelector("#customers-order-filter").value;
+        const search = document.querySelector("#customers-search").value.trim().toLocaleLowerCase();
+        const normalizedSearchPhone = normalizeCustomerPhone(search);
         const sort = document.querySelector("#customers-sort").value;
         const rows = customerState.customers.filter((customer) => {
-          const recordPhone = normalizeCustomerPhone(customer.mobile);
-          const registered = customerDateKey(customer.raw.createdAt);
-          const orderSummary = summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []);
-          return (!nameSearch || customer.name.toLocaleLowerCase().includes(nameSearch)) &&
-            (!emailSearch || customer.email.toLocaleLowerCase().includes(emailSearch)) &&
-            (!mobileSearch || recordPhone.includes(mobileSearch)) &&
-            (!idSearch || customer.id.toLocaleLowerCase().includes(idSearch)) &&
-            (!status || customer.status.toLocaleLowerCase() === status) &&
-            (!from || (registered && registered >= from)) &&
-            (!to || (registered && registered <= to)) &&
-            (orderActivity === "all" || !customerState.ordersLoaded ||
-              (orderActivity === "with" ? orderSummary.total > 0 : orderSummary.total === 0));
+          if (!search) return true;
+          return customer.name.toLocaleLowerCase().includes(search) ||
+            customer.email.toLocaleLowerCase().includes(search) ||
+            customer.id.toLocaleLowerCase().includes(search) ||
+            Boolean(normalizedSearchPhone && normalizeCustomerPhone(customer.mobile).includes(normalizedSearchPhone));
         });
         rows.sort((a, b) => {
           if (sort === "name-asc" || sort === "name-desc") {
@@ -3695,7 +3663,6 @@
         if (!customerState.loaded) return;
 
         renderCustomerStats();
-        updateCustomerStatusOptions();
         const filtered = getFilteredCustomers();
         const pageCount = Math.max(1, customerState.pageSize === Infinity ? 1 : Math.ceil(filtered.length / customerState.pageSize));
         customerState.page = Math.min(customerState.page, pageCount);
@@ -3707,19 +3674,15 @@
             ? `<img src="${escapeCustomerText(customer.photo)}" alt="" loading="lazy" />`
             : escapeCustomerText(customerInitials(customer.name));
           const orderSummary = summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []);
-          const orderColumns = customerState.ordersLoaded && !customerState.ordersError
-            ? `<td>${orderSummary.total.toLocaleString("en-IN")}</td>
-              <td>${orderSummary.incompletePaidAmounts ? "Unavailable" : formatCustomerCurrency(orderSummary.paidTotal)}</td>
-              <td>${orderSummary.latest ? escapeCustomerText(formatCustomerDate(orderSummary.latest, true)) : "Not provided"}</td>`
-            : "<td>—</td><td>—</td><td>—</td>";
+          const totalOrders = customerState.ordersLoaded && !customerState.ordersError
+            ? orderSummary.total.toLocaleString("en-IN")
+            : "—";
           return `<tr>
             <td><input type="checkbox" data-customer-select="${escapeCustomerText(customer.id)}" aria-label="Select ${escapeCustomerText(displayName)}" ${customerState.selected.has(customer.id) ? "checked" : ""} /></td>
             <td><div class="customer-cell"><span class="customer-avatar">${avatar}</span><span class="customer-cell-name" title="${escapeCustomerText(displayName)}">${escapeCustomerText(displayName)}</span></div></td>
-            <td><span class="customer-overflow" title="${escapeCustomerText(customer.id)}">${escapeCustomerText(customer.id)}</span></td>
             <td><span class="customer-overflow" title="${escapeCustomerText(customer.mobile || "Not provided")}">${escapeCustomerText(customer.mobile || "Not provided")}</span></td>
             <td><span class="customer-overflow" title="${escapeCustomerText(customer.email || "Not provided")}">${escapeCustomerText(customer.email || "Not provided")}</span></td>
-            <td>${escapeCustomerText(formatCustomerDate(customer.raw.createdAt))}</td>
-            ${orderColumns}
+            <td>${escapeCustomerText(totalOrders)}</td>
             <td><span class="customer-status">${escapeCustomerText(customer.status || "Not available")}</span></td>
             <td><button class="customer-actions-trigger" type="button" data-customer-menu="${escapeCustomerText(customer.id)}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${escapeCustomerText(displayName)}">⋮</button></td>
           </tr>`;
@@ -4343,9 +4306,6 @@
         const actions = [
           ["view", "View Customer"],
           ["edit", "Edit Customer"],
-          ["orders", "View Orders"],
-          ["copy-id", "Copy Customer ID"],
-          ...(customer.mobile ? [["copy-mobile", "Copy Mobile Number"]] : []),
         ];
         customerActionMenu.innerHTML = actions.map(([action, label]) =>
           `<button type="button" role="menuitem" data-customer-action="${action}">${label}</button>`,
@@ -4367,24 +4327,68 @@
         customerState.selectedCustomerId = customer.id;
         customerEditForm.reset();
         document.querySelector("#customer-edit-name").value = customer.name;
+        document.querySelector("#customer-edit-mobile").value = customer.mobile;
+        document.querySelector("#customer-edit-email").value = customer.email;
         document.querySelector("#customer-edit-error").hidden = true;
         customerEditDialog.showModal();
         document.querySelector("#customer-edit-name").focus();
       }
 
-      async function saveCustomerName(event) {
+      function normalizeEditableCustomerMobile(value) {
+        let digits = String(value ?? "").replace(/\D/g, "");
+        if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+        if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+        return digits;
+      }
+
+      function isValidCustomerMobile(value) {
+        return /^[6-9]\d{9}$/.test(value);
+      }
+
+      async function saveCustomerProfile(event) {
         event.preventDefault();
         if (customerState.saving) return;
         const id = customerState.selectedCustomerId;
         const customer = customerState.customers.find((entry) => entry.id === id);
         const nameInput = document.querySelector("#customer-edit-name");
+        const mobileInput = document.querySelector("#customer-edit-mobile");
+        const emailInput = document.querySelector("#customer-edit-email");
         const error = document.querySelector("#customer-edit-error");
         const save = document.querySelector("#customer-edit-save");
         const name = nameInput.value.trim();
+        const mobile = mobileInput.value.trim();
+        const normalizedMobile = normalizeEditableCustomerMobile(mobile);
+        const originalMobile = normalizeEditableCustomerMobile(customer?.mobile);
+        const email = emailInput.value.trim();
+        const emailChanged = email !== customer?.email;
         error.hidden = true;
-        if (!customer || !name || name.length > 120) {
-          error.textContent = "Enter a customer name between 1 and 120 characters.";
+        if (!customer) {
+          error.textContent = "This customer is no longer available. Refresh the customer list and try again.";
           error.hidden = false;
+          return;
+        }
+        if (!name || name.length > 120) {
+          error.textContent = "Enter a full name between 1 and 120 characters.";
+          error.hidden = false;
+          nameInput.focus();
+          return;
+        }
+        if (!isValidCustomerMobile(normalizedMobile)) {
+          error.textContent = "Enter a valid 10-digit Indian mobile number.";
+          error.hidden = false;
+          mobileInput.focus();
+          return;
+        }
+        if (!emailInput.validity.valid || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+          error.textContent = "Enter a valid email address or leave the field empty.";
+          error.hidden = false;
+          emailInput.focus();
+          return;
+        }
+        if (normalizedMobile !== originalMobile) {
+          error.textContent = "The mobile number is used for Firebase Phone Authentication. No changes were saved. Updating it requires a verified OTP workflow, which is not available in this admin panel.";
+          error.hidden = false;
+          mobileInput.focus();
           return;
         }
         customerState.saving = true;
@@ -4397,16 +4401,24 @@
           if (!current.exists() || !latest || latest.role !== "customer" || latest.uid !== id) {
             throw new Error("This customer record changed or is no longer available. Refresh and try again.");
           }
-          await update(ref(database, `users/${id}`), { fullName: name });
+          const updatedAt = Date.now();
+          await update(ref(database, `users/${id}`), { fullName: name, email, updatedAt });
           customer.raw.fullName = name;
+          customer.raw.email = email;
+          customer.raw.updatedAt = updatedAt;
           customer.name = name;
+          customer.email = email;
           renderCustomers();
+          const refreshDetails = customerViewDialog.open && customerState.selectedCustomerId === id;
           customerEditDialog.close();
-          showCategoryToast("Customer name updated.");
+          if (refreshDetails) openCustomerDetails(customer);
+          showCategoryToast(emailChanged
+            ? "Customer profile updated. Email was saved to the customer profile only; Firebase Authentication email was not changed."
+            : "Customer profile updated.");
         } catch (saveError) {
           error.textContent = saveError?.code
-            ? reportFirebaseError("Saving customer name", saveError)
-            : saveError.message || "Customer name could not be saved. Retry.";
+            ? reportFirebaseError("Saving customer profile", saveError)
+            : saveError.message || "Customer profile could not be saved. Retry.";
           error.hidden = false;
         } finally {
           customerState.saving = false;
@@ -4423,27 +4435,19 @@
         }
       });
 
-      document.querySelectorAll("#customers-search-name, #customers-search-email, #customers-search-mobile, #customers-search-id").forEach((input) => {
-        input.addEventListener("input", () => {
-          window.clearTimeout(customerState.searchTimer);
-          customerState.searchTimer = window.setTimeout(() => {
-            customerState.page = 1;
-            renderCustomers();
-          }, 180);
-        });
-      });
-      for (const selector of ["#customers-status-filter", "#customers-date-from", "#customers-date-to", "#customers-order-filter", "#customers-sort"]) {
-        document.querySelector(selector).addEventListener("change", () => {
+      document.querySelector("#customers-search").addEventListener("input", () => {
+        window.clearTimeout(customerState.searchTimer);
+        customerState.searchTimer = window.setTimeout(() => {
           customerState.page = 1;
           renderCustomers();
-        });
-      }
+        }, 180);
+      });
+      document.querySelector("#customers-sort").addEventListener("change", () => {
+        customerState.page = 1;
+        renderCustomers();
+      });
       document.querySelector("#customers-clear-filters").addEventListener("click", () => {
-        for (const selector of ["#customers-search-name", "#customers-search-email", "#customers-search-mobile", "#customers-search-id", "#customers-date-from", "#customers-date-to"]) {
-          document.querySelector(selector).value = "";
-        }
-        document.querySelector("#customers-status-filter").value = "";
-        document.querySelector("#customers-order-filter").value = "all";
+        document.querySelector("#customers-search").value = "";
         document.querySelector("#customers-sort").value = "newest";
         customerState.page = 1;
         renderCustomers();
@@ -4499,7 +4503,7 @@
         }
         openCustomerMenu(trigger, customer);
       });
-      customerActionMenu.addEventListener("click", async (event) => {
+      customerActionMenu.addEventListener("click", (event) => {
         const button = event.target.closest("button[data-customer-action]");
         if (!button) return;
         const customer = customerState.customers.find((entry) => entry.id === customerActionMenu.dataset.customerId);
@@ -4510,17 +4514,6 @@
         if (!customer) return;
         if (action === "view") openCustomerDetails(customer);
         else if (action === "edit") openCustomerEditor(customer);
-        else if (action === "orders") openCustomerDetails(customer, true);
-        else if (action === "copy-id" || action === "copy-mobile") {
-          const value = action === "copy-id" ? customer.id : customer.mobile;
-          try {
-            await navigator.clipboard.writeText(value);
-            showCategoryToast(action === "copy-id" ? "Customer ID copied." : "Mobile number copied.");
-          } catch (error) {
-            console.error("Copying customer information failed.", error);
-            showCategoryToast("Could not copy this value. Check clipboard permissions and retry.", "error");
-          }
-        }
       });
       document.addEventListener("click", (event) => {
         if (customerActionMenu.hidden || customerActionMenu.contains(event.target) || activeCustomerMenuTrigger?.contains(event.target)) return;
@@ -4573,17 +4566,13 @@
         const requestId = ++customerState.orderRequestId;
         void loadCustomerOrders(customer, requestId);
       });
-      document.querySelector("#customers-export-button").addEventListener("click", () => {
-        const selected = filteredSelectedCustomers();
-        exportCustomers(selected.length ? selected : getFilteredCustomers());
-      });
       document.querySelector("#customers-export-selected").addEventListener("click", () => exportCustomers(filteredSelectedCustomers()));
       document.querySelector("#customers-export-filtered").addEventListener("click", () => exportCustomers(getFilteredCustomers()));
       document.querySelector("#customers-clear-selection").addEventListener("click", () => {
         customerState.selected.clear();
         renderCustomers();
       });
-      customerEditForm.addEventListener("submit", (event) => void saveCustomerName(event));
+      customerEditForm.addEventListener("submit", (event) => void saveCustomerProfile(event));
       for (const button of document.querySelectorAll("[data-customer-close]")) {
         button.addEventListener("click", () => {
           if (customerOrderDetailsDialog.open) customerOrderDetailsDialog.close();
