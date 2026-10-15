@@ -2293,6 +2293,7 @@
                 <input id="barcode-search" type="search" placeholder="Search product, ID, SKU, barcode" aria-label="Search barcode records" />
                 <select id="barcode-master-filter" aria-label="Filter barcodes by master category"><option value="">All master categories</option></select>
                 <select id="barcode-category-filter" aria-label="Filter barcodes by category"><option value="">All categories</option></select>
+                <select id="barcode-subcategory-filter" aria-label="Filter barcodes by subcategory"><option value="">All subcategories</option></select>
                 <select id="barcode-status-filter" aria-label="Filter barcodes by product status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
               </div>
               <div class="products-feedback" id="inventory-loading" aria-live="polite" hidden>
@@ -2351,7 +2352,7 @@
           <div class="product-field full-width"><label for="product-main-image">Main image URL</label><input id="product-main-image" type="url" placeholder="https://…" /></div>
           <div class="product-field full-width"><label for="product-additional-images">Additional image URLs</label><textarea id="product-additional-images" rows="2" placeholder="One URL per line"></textarea></div>
         </div></section>
-        <section class="product-form-section"><h3>Categories</h3><p class="product-category-warning" id="product-category-warning" role="alert" hidden><span id="product-category-warning-message"></span> <button class="category-secondary-button" id="product-category-retry" type="button">Retry</button></p><div class="product-form-grid">
+        <section class="product-form-section"><h3>Categories</h3><p class="product-category-warning" id="product-category-warning" role="alert" hidden><span id="product-category-warning-message"></span> <button class="category-secondary-button" id="product-category-retry" type="button">Retry</button></p><p class="product-category-warning" id="product-hierarchy-warning" role="alert" hidden></p><div class="product-form-grid">
           <div class="product-field"><label for="product-master-category">Master category</label><select id="product-master-category"><option value="">Select master category</option></select></div>
           <div class="product-field"><label for="product-category">Category</label><select id="product-category" disabled><option value="">Select category</option></select></div>
           <div class="product-field"><label for="product-subcategory">Subcategory</label><select id="product-subcategory" disabled><option value="">Select subcategory</option></select></div>
@@ -2629,12 +2630,14 @@
       const database = getDatabase(app);
       const categoryState = {
         categories: [],
+        categoryDiagnostics: [],
         products: {},
         categoriesLoaded: false,
         productsLoaded: false,
         productsReadable: false,
         categoriesError: null,
         productsError: null,
+        listenerGeneration: 0,
         categoriesReadyPromise: null,
         resolveCategoriesReady: null,
         level: "all",
@@ -2642,6 +2645,7 @@
         pageSize: 10,
         editingId: null,
         deletingId: null,
+        saving: false,
         stopCategories: null,
         stopProducts: null,
       };
@@ -2656,6 +2660,9 @@
         reservedBarcodes: new Set(),
         pendingAction: null,
         openingForm: false,
+        saving: false,
+        importing: false,
+        categoryNeedsCorrection: false,
         importRows: [],
       };
       const inventoryState = {
@@ -2742,31 +2749,39 @@
           return String(value);
         }
         if (value && typeof value === "object") {
-          const id = value.id || value.categoryId || value.key;
+          const id = value.id ?? value.categoryId ?? value.key;
           return id == null ? "" : String(id);
         }
         return "";
       }
 
-      function rawParentId(raw) {
-        const candidates = [
+      function firstId(...values) {
+        for (const value of values) {
+          const id = valueAsId(value);
+          if (id) return id;
+        }
+        return "";
+      }
+
+      function rawParentReferences(raw) {
+        const generic = [
           raw.parentCategoryId,
           raw.parentId,
           raw.parent_id,
           raw.parentCategory,
           raw.parent,
         ];
-        for (const candidate of candidates) {
-          const id = valueAsId(candidate);
-          if (id) {
-            return id;
-          }
-        }
-        return "";
+        const master = [raw.masterCategoryId, raw.master_category_id];
+        const category = [raw.categoryId, raw.category_id];
+        return {
+          generic: [...new Set(generic.map(valueAsId).filter(Boolean))],
+          master: [...new Set(master.map(valueAsId).filter(Boolean))],
+          category: [...new Set(category.map(valueAsId).filter(Boolean))],
+        };
       }
 
       function declaredLevel(raw) {
-        const value = String(raw.level ?? raw.categoryLevel ?? raw.category_level ?? raw.type ?? "").toLowerCase();
+        const value = String(raw.level ?? raw.categoryLevel ?? raw.category_level ?? raw.type ?? "").trim().toLowerCase();
         if (["master", "master category", "mastercategory", "root"].includes(value)) {
           return "master";
         }
@@ -2780,48 +2795,57 @@
       }
 
       function normalizeCategories(value) {
-        const rawById = Object.fromEntries(
-          Object.entries(value && typeof value === "object" ? value : {}).filter(
-            ([, raw]) => raw && typeof raw === "object" && !Array.isArray(raw),
-          ),
-        );
+        const rawById = Object.fromEntries(Object.entries(value && typeof value === "object" ? value : {})
+          .filter(([, raw]) => raw && typeof raw === "object" && !Array.isArray(raw)));
+        const diagnostics = [];
         const levelCache = new Map();
-        function resolveLevel(id, seen = new Set()) {
+        function resolveLevel(id, path = new Set()) {
           if (levelCache.has(id)) {
             return levelCache.get(id);
           }
           const raw = rawById[id];
-          if (!raw) {
-            return "master";
-          }
+          if (!raw || path.has(id)) return "";
           const explicit = declaredLevel(raw);
           if (explicit) {
             levelCache.set(id, explicit);
             return explicit;
           }
-          if (seen.has(id)) {
+          const refs = rawParentReferences(raw);
+          if (refs.master.length && refs.category.length) return "";
+          if (refs.master.length) {
+            levelCache.set(id, "category");
             return "category";
           }
-          const parentId = rawParentId(raw) || valueAsId(raw.masterCategoryId ?? raw.master_category_id);
-          if (!parentId) {
+          if (refs.category.length) {
+            levelCache.set(id, "subcategory");
+            return "subcategory";
+          }
+          if (!refs.generic.length) {
             levelCache.set(id, "master");
             return "master";
           }
-          const nextSeen = new Set(seen);
+          const nextSeen = new Set(path);
           nextSeen.add(id);
-          const parentLevel = resolveLevel(parentId, nextSeen);
-          const inferred = parentLevel === "master" ? "category" : "subcategory";
+          const parentLevel = resolveLevel(refs.generic[0], nextSeen);
+          const inferred = parentLevel === "master"
+            ? "category"
+            : parentLevel === "category"
+              ? "subcategory"
+              : "";
           levelCache.set(id, inferred);
           return inferred;
         }
 
-        return Object.entries(rawById).map(([id, raw]) => {
+        const entries = Object.entries(rawById).map(([id, raw]) => {
           const level = resolveLevel(id);
-          const parentId = level === "master"
-            ? ""
-            : rawParentId(raw) ||
-              (level === "category" ? valueAsId(raw.masterCategoryId ?? raw.master_category_id) : "");
-          const name = String(raw.name ?? raw.categoryName ?? raw.title ?? raw.label ?? `Unnamed ${level}`);
+          const refs = rawParentReferences(raw);
+          const parentCandidates = [...new Set([
+            ...refs.generic,
+            ...(level === "category" ? refs.master : []),
+            ...(level === "subcategory" ? refs.category : []),
+          ])];
+          const parentId = level === "master" ? "" : parentCandidates.length === 1 ? parentCandidates[0] : "";
+          const name = String(raw.name || raw.categoryName || raw.title || raw.label || `Unnamed ${level}`);
           const statusValue = raw.status;
           const active =
             typeof statusValue === "string"
@@ -2839,14 +2863,97 @@
             name,
             level,
             parentId,
-            masterCategoryId: valueAsId(raw.masterCategoryId ?? raw.master_category_id),
+            masterCategoryId: firstId(raw.masterCategoryId, raw.master_category_id),
             active,
+            valid: false,
+            error: "",
+            nameMissing: !String(raw.name || raw.categoryName || raw.title || raw.label || "").trim(),
+            storedIdMismatch: Boolean(valueAsId(raw.id) && valueAsId(raw.id) !== id),
             updatedAt: raw.updatedAt ?? raw.updated_at ?? raw.modifiedAt ?? raw.createdAt ?? null,
+            _parentCandidates: parentCandidates,
+            _refs: refs,
           };
         });
+
+        const byId = new Map(entries.map((entry) => [entry.id, entry]));
+        function hasCycle(startId) {
+          const visited = new Set();
+          let id = startId;
+          while (id) {
+            if (visited.has(id)) return true;
+            visited.add(id);
+            const current = byId.get(id);
+            if (!current || current._parentCandidates.length !== 1) return false;
+            id = current._parentCandidates[0];
+          }
+          return false;
+        }
+        function validate(entry, path = new Set()) {
+          if (path.has(entry.id)) return "Circular parent relationship.";
+          const nextPath = new Set(path);
+          nextPath.add(entry.id);
+          const expectedLevel = entry.level === "master" ? "" : entry.level === "category" ? "master" : entry.level === "subcategory" ? "category" : null;
+          if (hasCycle(entry.id)) return "Circular parent relationship.";
+          if (entry._parentCandidates.length > 1) return "Conflicting parent IDs are present.";
+          if (!entry.level) {
+            const missingParent = entry._parentCandidates.find((parentId) => !byId.has(parentId));
+            return missingParent
+              ? `Parent ID "${missingParent}" does not exist.`
+              : "Hierarchy level or parent relationship cannot be resolved.";
+          }
+          if (entry.nameMissing) return "Category name is missing.";
+          if (entry.level === "master") {
+            if (entry._refs.generic.length || entry._refs.master.length || entry._refs.category.length) {
+              return "A master category cannot have a parent.";
+            }
+            return "";
+          }
+          if (!expectedLevel || !entry.parentId) return "Parent category is missing.";
+          const parent = byId.get(entry.parentId);
+          if (!parent) return `Parent ID "${entry.parentId}" does not exist.`;
+          if (parent.level !== expectedLevel) {
+            return `Parent "${entry.parentId}" must be a ${expectedLevel} category.`;
+          }
+          const parentError = validate(parent, nextPath);
+          if (parentError) return parentError;
+          const master = entry.level === "category" ? parent : byId.get(parent.parentId);
+          if (entry.masterCategoryId && entry.masterCategoryId !== master?.id) {
+            return `Master category ID "${entry.masterCategoryId}" does not match the parent hierarchy.`;
+          }
+          return "";
+        }
+
+        for (const entry of entries) {
+          entry.error = validate(entry);
+          entry.valid = !entry.error;
+          if (entry.valid) {
+            const parent = byId.get(entry.parentId);
+            const master = entry.level === "master" ? entry : entry.level === "category" ? parent : byId.get(parent?.parentId);
+            entry.masterCategoryId = master?.id || "";
+          } else {
+            diagnostics.push({ path: `categories/${entry.id}`, id: entry.id, reason: entry.error });
+          }
+          if (entry.storedIdMismatch) {
+            diagnostics.push({
+              path: `categories/${entry.id}`,
+              id: entry.id,
+              reason: `Stored ID "${valueAsId(entry.raw.id)}" differs from the Firebase key; references must use the Firebase key.`,
+            });
+          }
+        }
+        for (const entry of entries) {
+          delete entry._parentCandidates;
+          delete entry._refs;
+        }
+        categoryState.categoryDiagnostics = diagnostics;
+        if (diagnostics.length) {
+          console.warn("Category hierarchy diagnostics:", diagnostics);
+        }
+        return entries;
       }
 
       function masterForCategory(category, categories = categoryState.categories) {
+        if (!category?.valid) return null;
         const visited = new Set();
         let current = category;
         while (current && current.level !== "master") {
@@ -2854,7 +2961,7 @@
           visited.add(current.id);
           current = categories.find((entry) => entry.id === current.parentId) || null;
         }
-        return current?.level === "master" ? current : null;
+        return current?.level === "master" && current.valid ? current : null;
       }
 
       function parentForCategory(category) {
@@ -2882,18 +2989,22 @@
         if (!product || typeof product !== "object") {
           return "";
         }
-        return valueAsId(product.categoryId ?? product.category_id);
+        return productCategoryReference(product, "categoryId", "category_id");
       }
 
-      function productCount(categoryId, products = categoryState.products) {
+      function productCount(
+        categoryId,
+        products = categoryState.products,
+        categories = categoryState.categories,
+      ) {
         return Object.values(products).filter((product) => {
-          const path = productCategoryPath(product);
+          const path = productCategoryPath(product, categories);
           const directReferences = [
-            product?.masterCategoryId ?? product?.master_category_id,
-            product?.categoryId ?? product?.category_id,
-            product?.subcategoryId ?? product?.subcategory_id,
+            productCategoryReference(product, "masterCategoryId", "master_category_id"),
+            productCategoryReference(product, "categoryId", "category_id"),
+            productCategoryReference(product, "subcategoryId", "subcategory_id"),
           ];
-          return directReferences.some((reference) => valueAsId(reference) === categoryId) ||
+          return directReferences.includes(categoryId) ||
             [path.master, path.category, path.subcategory].some((category) => category?.id === categoryId);
         }).length;
       }
@@ -2932,7 +3043,7 @@
         const order = { master: 0, category: 1, subcategory: 2 };
         return [...categoryState.categories].sort(
           (first, second) =>
-            order[first.level] - order[second.level] ||
+            (order[first.level] ?? 3) - (order[second.level] ?? 3) ||
             first.name.localeCompare(second.name, undefined, { sensitivity: "base" }),
         );
       }
@@ -3130,6 +3241,7 @@
         const options = [`<option value="">Select ${parentLevel === "master" ? "a master category" : "a category"}</option>`];
         for (const parent of sortedCategories()) {
           if (
+            parent.valid &&
             parent.level === parentLevel &&
             (parent.active || parent.id === selectedParentId) &&
             parent.id !== editing?.id
@@ -3172,7 +3284,7 @@
         categoryForm.reset();
         categoryFormError.hidden = true;
         categoryFormError.textContent = "";
-        categoryLevelSelect.disabled = Boolean(category);
+        categoryLevelSelect.disabled = Boolean(category?.valid);
         document.querySelector("#category-form-title").textContent = category ? "Edit Category" : "Add Category";
         document.querySelector("#category-form-description").textContent = category
           ? "Update the category details. Existing product references remain unchanged."
@@ -3255,21 +3367,69 @@
           patch.isActive = fields.status === "active";
         }
         if (fields.level === "master") {
-          delete patch.parentId;
-          delete patch.parentCategoryId;
-          delete patch.masterCategoryId;
+          for (const field of [
+            "parentId", "parent_id", "parentCategoryId", "parentCategory", "parent",
+            "masterCategoryId", "master_category_id", "categoryId", "category_id",
+          ]) {
+            if (category.raw[field] !== undefined) patch[field] = null;
+          }
+        } else {
+          for (const field of ["parent_id", "parentCategory"]) {
+            if (category.raw[field] !== undefined) patch[field] = fields.parentId;
+          }
+          if (category.raw.parent !== undefined) patch.parent = fields.parentId;
+          if (category.raw.master_category_id !== undefined) {
+            patch.master_category_id = fields.masterCategoryId;
+          }
+          if (fields.level === "subcategory" && category.raw.categoryId !== undefined) {
+            patch.categoryId = fields.parentId;
+          }
+          if (fields.level === "subcategory" && category.raw.category_id !== undefined) {
+            patch.category_id = fields.parentId;
+          }
         }
         return patch;
       }
 
-      async function saveCategory(event) {
+      async function saveCategoryInternal(event) {
         event.preventDefault();
         categoryFormError.hidden = true;
         const level = categoryLevelSelect.value;
         const name = categoryNameInput.value.trim();
         const status = categoryStatusSelect.value;
         const parentId = level === "master" ? "" : categoryParentSelect.value;
-        const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        if (!categoryState.categoriesLoaded || categoryState.categoriesError) {
+          categoryFormError.textContent = categoryState.categoriesError || "Category data is not ready. Retry before saving.";
+          categoryFormError.hidden = false;
+          return;
+        }
+        let latestCategories;
+        try {
+          const snapshot = await get(ref(database, "categories"));
+          latestCategories = normalizeCategories(snapshot.val());
+          categoryState.categories = latestCategories;
+        } catch (error) {
+          categoryFormError.textContent = reportFirebaseError("Checking categories", error);
+          categoryFormError.hidden = false;
+          return;
+        }
+        const existing = latestCategories.find((entry) => entry.id === categoryState.editingId);
+        if (categoryState.editingId && !existing) {
+          categoryFormError.textContent = "This category no longer exists. Close and reopen the form before saving.";
+          categoryFormError.hidden = false;
+          return;
+        }
+        let latestProducts = categoryState.products;
+        if (existing && (level !== existing.level || parentId !== existing.parentId)) {
+          try {
+            const snapshot = await get(ref(database, "products"));
+            latestProducts = snapshot.val() || {};
+          } catch (error) {
+            categoryFormError.textContent = reportFirebaseError("Checking product references", error);
+            categoryFormError.hidden = false;
+            return;
+          }
+        }
         if (!name) {
           categoryFormError.textContent = "Enter a category name.";
           categoryFormError.hidden = false;
@@ -3285,7 +3445,7 @@
         if (level !== "master") {
           const expectedParentLevel = level === "category" ? "master" : "category";
           const parent = categoryState.categories.find((entry) => entry.id === parentId);
-          if (!parent || parent.level !== expectedParentLevel) {
+          if (!parent?.valid || parent.level !== expectedParentLevel || (!parent.active && parent.id !== existing?.parentId)) {
             categoryFormError.textContent = "Select a valid parent category. The parent list may have changed; close and reopen this form if needed.";
             categoryFormError.hidden = false;
             return;
@@ -3298,7 +3458,27 @@
           return;
         }
         if (existing && existing.level !== level) {
-          categoryFormError.textContent = "The hierarchy level cannot be changed for an existing category.";
+          if (
+            existing.valid ||
+            childrenOf(existing.id, latestCategories).length > 0 ||
+            productCount(existing.id, latestProducts, latestCategories) > 0
+          ) {
+            categoryFormError.textContent = "The hierarchy level cannot be changed while the category has children, product references, or unverified usage.";
+            categoryFormError.hidden = false;
+            return;
+          }
+        }
+        if (existing && parentId !== existing.parentId && childrenOf(existing.id, latestCategories).length) {
+          categoryFormError.textContent = "This category cannot be moved while child categories depend on it.";
+          categoryFormError.hidden = false;
+          return;
+        }
+        if (
+          existing &&
+          parentId !== existing.parentId &&
+          productCount(existing.id, latestProducts, latestCategories) > 0
+        ) {
+          categoryFormError.textContent = "Reassign or resolve linked products before moving this category.";
           categoryFormError.hidden = false;
           return;
         }
@@ -3315,6 +3495,14 @@
             : parent
               ? masterForCategory(parent)
               : null;
+        if (level === "subcategory" && (!master || !master.active)) {
+          categoryFormError.textContent = "The selected category does not have a valid active master category.";
+          categoryFormError.hidden = false;
+          categorySaveButton.disabled = false;
+          categorySaveButton.removeAttribute("aria-busy");
+          categorySaveButton.textContent = existing ? "Save Changes" : "Save Category";
+          return;
+        }
         const fields = {
           name,
           level,
@@ -3357,6 +3545,19 @@
         }
       }
 
+      async function saveCategory(event) {
+        if (categoryState.saving) {
+          event.preventDefault();
+          return;
+        }
+        categoryState.saving = true;
+        try {
+          await saveCategoryInternal(event);
+        } finally {
+          categoryState.saving = false;
+        }
+      }
+
       function openDeleteConfirmation(category) {
         const count = productCount(category.id);
         const children = childrenOf(category.id).length;
@@ -3364,11 +3565,11 @@
           showCategoryToast("Cannot verify product references. Deletion is blocked.", "error");
           return;
         }
-        if (children > 0) {
+        if (!categoryCanBeDeleted(category.id, categoryState.categories, categoryState.products) && children > 0) {
           showCategoryToast("Delete or reassign child categories before deleting this category.", "error");
           return;
         }
-        if (count > 0) {
+        if (!categoryCanBeDeleted(category.id, categoryState.categories, categoryState.products) && count > 0) {
           showCategoryToast(
             `Reassign all ${count} product${count === 1 ? "" : "s"} to another category before deleting this category.`,
             "error",
@@ -3377,7 +3578,7 @@
         }
         categoryState.deletingId = category.id;
         document.querySelector("#category-confirm-message").textContent =
-          `Delete “${category.name}”? This action cannot be undone.`;
+          `Delete “${category.name}”? It has ${children} child categories and is referenced by ${count} products. This action cannot be undone.`;
         categoryConfirmDialog.showModal();
       }
 
@@ -3403,11 +3604,11 @@
           if (!latestCategory) {
             throw new Error("This category no longer exists. Refresh the page and try again.");
           }
-          if (childrenOf(id, categories).length > 0) {
+          if (!categoryCanBeDeleted(id, categories, products) && childrenOf(id, categories).length > 0) {
             throw new Error("This category now has child categories. Delete or reassign them first.");
           }
-          const references = productCount(id, products);
-          if (references > 0) {
+          const references = productCount(id, products, categories);
+          if (!categoryCanBeDeleted(id, categories, products) && references > 0) {
             throw new Error(
               `This category is assigned to ${references} product${references === 1 ? "" : "s"}. Reassign those products before deleting.`,
             );
@@ -3453,6 +3654,9 @@
       function startCategoryListeners() {
         categoryState.stopCategories?.();
         categoryState.stopProducts?.();
+        const generation = ++categoryState.listenerGeneration;
+        categoryState.categories = [];
+        categoryState.categoryDiagnostics = [];
         categoryState.categoriesLoaded = false;
         categoryState.productsLoaded = false;
         categoryState.productsReadable = false;
@@ -3468,16 +3672,38 @@
         categoryState.stopCategories = onValue(
           ref(database, "categories"),
           (snapshot) => {
+            if (generation !== categoryState.listenerGeneration) return;
             categoryState.categories = normalizeCategories(snapshot.val());
             categoryState.categoriesLoaded = true;
             categoryState.categoriesError = null;
+            reportProductCategoryDiagnostics();
             updateProductFilters();
+            if (document.querySelector("#product-form-dialog").open) {
+              const selectedBeforeRefresh = [
+                document.querySelector("#product-master-category").value,
+                document.querySelector("#product-category").value,
+                document.querySelector("#product-subcategory").value,
+              ];
+              updateProductFormCategories();
+              const selectedAfterRefresh = [
+                document.querySelector("#product-master-category").value,
+                document.querySelector("#product-category").value,
+                document.querySelector("#product-subcategory").value,
+              ];
+              if (selectedBeforeRefresh.some((id, index) => id !== selectedAfterRefresh[index])) {
+                productState.categoryNeedsCorrection = true;
+                const warning = document.querySelector("#product-hierarchy-warning");
+                warning.textContent = "Category data changed while this form was open. Review and correct the hierarchy before saving.";
+                warning.hidden = false;
+              }
+            }
             renderCategoryRows();
             renderProducts();
             renderBarcodeManager();
             categoryState.resolveCategoriesReady?.();
           },
           (error) => {
+            if (generation !== categoryState.listenerGeneration) return;
             categoryState.categoriesError = reportFirebaseError("Reading categories", error);
             categoryState.categoriesLoaded = false;
             updateProductFilters();
@@ -3490,15 +3716,18 @@
         categoryState.stopProducts = onValue(
           ref(database, "products"),
           (snapshot) => {
+            if (generation !== categoryState.listenerGeneration) return;
             categoryState.products = snapshot.val() || {};
             categoryState.productsLoaded = true;
             categoryState.productsReadable = true;
             categoryState.productsError = null;
+            reportProductCategoryDiagnostics();
             renderCategoryRows();
             renderProducts();
             renderBarcodeManager();
           },
           (error) => {
+            if (generation !== categoryState.listenerGeneration) return;
             categoryState.products = {};
             categoryState.productsLoaded = true;
             categoryState.productsReadable = false;
@@ -3684,77 +3913,103 @@
         return [];
       }
 
-      function productCategory(categoryId) {
-        return categoryState.categories.find((category) => category.id === valueAsId(categoryId)) || null;
+      function productCategory(categoryId, categories = categoryState.categories) {
+        const id = valueAsId(categoryId);
+        return id ? categories.find((category) => category.id === id) || null : null;
       }
 
-      function resolveProductCategory(value, name, level, parentId = null) {
-        const id = valueAsId(value);
-        const byId = id ? productCategory(id) : null;
-        if (byId) {
-          return byId.level === level && (parentId === null || byId.parentId === parentId)
-            ? byId
-            : null;
+      function productCategoryReference(product, camelCase, snakeCase) {
+        if (Object.prototype.hasOwnProperty.call(product || {}, camelCase)) {
+          return valueAsId(product[camelCase]);
         }
-        const candidates = [id || name, !id ? value?.name : ""]
-          .map((candidate) => String(candidate ?? "").trim().toLocaleLowerCase())
-          .filter(Boolean);
-        for (const candidate of candidates) {
-          const matches = categoryState.categories.filter((category) =>
-            category.level === level &&
-            (parentId === null || category.parentId === parentId) &&
-            category.name.trim().toLocaleLowerCase() === candidate,
-          );
-          if (matches.length === 1) {
-            return matches[0];
+        return valueAsId(product?.[snakeCase]);
+      }
+
+      function productCategoryPath(product, categories = categoryState.categories) {
+        const refs = {
+          master: productCategoryReference(product, "masterCategoryId", "master_category_id"),
+          category: productCategoryReference(product, "categoryId", "category_id"),
+          subcategory: productCategoryReference(product, "subcategoryId", "subcategory_id"),
+        };
+        const names = {
+          master: String(product?.masterCategoryName || product?.master_category_name || "").trim(),
+          category: String(product?.categoryName || product?.category_name || "").trim(),
+          subcategory: String(product?.subcategoryName || product?.subcategory_name || "").trim(),
+        };
+        const result = { master: null, category: null, subcategory: null, error: "" };
+        const byId = (id, level) => {
+          if (!id) return null;
+          const found = productCategory(id, categories);
+          if (!found || !found.valid || found.level !== level) {
+            result.error = `Saved ${level} ID "${id}" is missing, invalid, or has the wrong hierarchy level.`;
+            return null;
+          }
+          return found;
+        };
+
+        const savedMaster = byId(refs.master, "master");
+        const savedCategory = byId(refs.category, "category");
+        const savedSubcategory = byId(refs.subcategory, "subcategory");
+        if (!refs.master && names.master && !savedCategory && !savedSubcategory) {
+          result.error ||= "Master category name is present without a reliable ID.";
+        }
+        if (!refs.category && names.category && !savedSubcategory) {
+          result.error ||= "Category name is present without a reliable ID.";
+        }
+        if (!refs.subcategory && names.subcategory) {
+          result.error ||= "Subcategory name is present without a reliable ID.";
+        }
+
+        if (savedCategory) {
+          const parentMaster = productCategory(savedCategory.parentId, categories);
+          if (!parentMaster?.valid || parentMaster.level !== "master") {
+            result.error ||= "Saved category has no valid master category.";
+          } else if (savedMaster && savedMaster.id !== parentMaster.id) {
+            result.error ||= "Saved master and category IDs belong to different hierarchies.";
+          } else {
+            result.category = savedCategory;
+            result.master = savedMaster || parentMaster;
           }
         }
-        return null;
+
+        if (savedSubcategory) {
+          const parentCategory = productCategory(savedSubcategory.parentId, categories);
+          const parentMaster = parentCategory ? productCategory(parentCategory.parentId, categories) : null;
+          if (!parentCategory?.valid || parentCategory.level !== "category" ||
+              !parentMaster?.valid || parentMaster.level !== "master") {
+            result.error ||= "Saved subcategory has no valid category and master parent.";
+          } else if (
+            (savedCategory && savedCategory.id !== parentCategory.id) ||
+            (savedMaster && savedMaster.id !== parentMaster.id)
+          ) {
+            result.error ||= "Saved subcategory, category, and master IDs belong to different hierarchies.";
+          } else {
+            result.category = parentCategory;
+            result.master = parentMaster;
+            result.subcategory = savedSubcategory;
+          }
+        }
+
+        if (savedMaster && !result.error) result.master = result.master || savedMaster;
+        if (result.error) {
+          result.master = null;
+          result.category = null;
+          result.subcategory = null;
+        }
+        return result;
       }
 
-      function productCategoryPath(product) {
-        const savedMaster = resolveProductCategory(
-          product?.masterCategoryId ?? product?.master_category_id,
-          product?.masterCategoryName ?? product?.master_category_name,
-          "master",
-        );
-        const categoryValue = product?.categoryId ?? product?.category_id;
-        const savedCategoryById = productCategory(categoryValue);
-        const savedCategory = savedCategoryById
-          ? savedCategoryById.level === "category" ? savedCategoryById : null
-          : resolveProductCategory(
-              categoryValue,
-              product?.categoryName ?? product?.category_name,
-              "category",
-              savedMaster?.id ?? null,
-            );
-        const subcategoryValue = product?.subcategoryId ?? product?.subcategory_id;
-        const savedSubcategoryById = productCategory(subcategoryValue);
-        const savedSubcategory = resolveProductCategory(
-          subcategoryValue,
-          product?.subcategoryName ?? product?.subcategory_name,
-          "subcategory",
-          savedSubcategoryById
-            ? null
-            : savedCategory?.id ?? null,
-        );
-        const categoryCandidate = savedCategory ||
-          (savedSubcategory ? productCategory(savedSubcategory.parentId) : null);
-        const hierarchyMaster = categoryCandidate ? masterForCategory(categoryCandidate) : null;
-        const hierarchyMatchesSavedMaster = !savedMaster || !hierarchyMaster || savedMaster.id === hierarchyMaster.id;
-        const category = categoryCandidate?.level === "category" &&
-          hierarchyMaster &&
-          hierarchyMatchesSavedMaster
-          ? categoryCandidate
-          : null;
-        const subcategory = category && savedSubcategory?.parentId === category.id
-          ? savedSubcategory
-          : null;
-        return {
-          master: savedMaster || hierarchyMaster,
-          category,
-          subcategory,
-        };
+      function reportProductCategoryDiagnostics() {
+        if (!categoryState.categoriesLoaded || !categoryState.productsLoaded) return;
+        const diagnostics = Object.entries(categoryState.products)
+          .map(([key, product]) => {
+            const path = productCategoryPath(product);
+            return path.error ? { path: `products/${key}`, reason: path.error } : null;
+          })
+          .filter(Boolean);
+        if (diagnostics.length) {
+          console.warn("Product category reference diagnostics:", diagnostics);
+        }
       }
 
       async function waitForCategories() {
@@ -3784,9 +4039,10 @@
       }
 
       function productCategoryLabel(product) {
-        const { master, category, subcategory } = productCategoryPath(product);
+        const { master, category, subcategory, error } = productCategoryPath(product);
+        if (error) return "Category needs correction";
         const names = [master?.name, category?.name, subcategory?.name].filter(Boolean);
-        return names.length ? names.join(" / ") : String(product?.categoryName ?? "—");
+        return names.length ? names.join(" / ") : "—";
       }
 
       function escapeProductHtml(value) {
@@ -3801,19 +4057,100 @@
         )].join("");
       }
 
-      function categoriesAt(level, parentId = "") {
+      function categoriesAt(level, parentId = "", selectedId = "", activeOnly = false) {
         return categoryState.categories
-          .filter((entry) => entry.level === level && (!parentId || entry.parentId === parentId))
+          .filter((entry) =>
+            entry.valid &&
+            entry.level === level &&
+            (!parentId || entry.parentId === parentId) &&
+            (!activeOnly || entry.active || entry.id === selectedId),
+          )
           .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+      }
+
+      function productFormCategoryOptions(
+        masterId,
+        categoryId,
+        subcategoryId,
+        { clearCategory = false, clearSubcategory = false } = {},
+      ) {
+        const masters = categoriesAt("master", "", masterId, true);
+        const selectedMasterId = masters.some((entry) => entry.id === masterId) ? masterId : "";
+        const categories = selectedMasterId
+          ? categoriesAt("category", selectedMasterId, clearCategory ? "" : categoryId, true)
+          : [];
+        const selectedCategoryId = categories.some((entry) => entry.id === (clearCategory ? "" : categoryId))
+          ? clearCategory ? "" : categoryId
+          : "";
+        const subcategories = selectedCategoryId
+          ? categoriesAt(
+              "subcategory",
+              selectedCategoryId,
+              clearCategory || clearSubcategory ? "" : subcategoryId,
+              true,
+            )
+          : [];
+        const selectedSubcategoryId = subcategories.some(
+          (entry) => entry.id === (clearCategory || clearSubcategory ? "" : subcategoryId),
+        )
+          ? clearCategory || clearSubcategory ? "" : subcategoryId
+          : "";
+        return {
+          masters,
+          masterId: selectedMasterId,
+          categories,
+          categoryId: selectedCategoryId,
+          subcategories,
+          subcategoryId: selectedSubcategoryId,
+        };
+      }
+
+      function validateProductHierarchy(
+        masterId,
+        categoryId,
+        subcategoryId,
+        categories = categoryState.categories,
+        existingProduct = null,
+      ) {
+        const master = productCategory(masterId, categories);
+        const category = productCategory(categoryId, categories);
+        const subcategory = productCategory(subcategoryId, categories);
+        if (masterId && (!master?.valid || master.level !== "master")) {
+          throw new Error("The selected master category no longer exists. Select it again.");
+        }
+        if (categoryId && (!category?.valid || category.level !== "category" || !master || category.parentId !== master.id)) {
+          throw new Error("The selected category no longer belongs to this master category. Select it again.");
+        }
+        if (subcategoryId && (!subcategory?.valid || subcategory.level !== "subcategory" || !category || subcategory.parentId !== category.id)) {
+          throw new Error("The selected subcategory no longer belongs to this category. Select it again.");
+        }
+        if (categoryId && !masterId) throw new Error("Select the master category for the chosen category.");
+        if (subcategoryId && !categoryId) throw new Error("Select the category for the chosen subcategory.");
+        const existingPath = existingProduct ? productCategoryPath(existingProduct, categories) : null;
+        if (master && !master.active && existingPath?.master?.id !== master.id) {
+          throw new Error("Inactive master categories cannot be assigned to a different product.");
+        }
+        if (category && !category.active && existingPath?.category?.id !== category.id) {
+          throw new Error("Inactive categories cannot be newly assigned to a product.");
+        }
+        if (subcategory && !subcategory.active && existingPath?.subcategory?.id !== subcategory.id) {
+          throw new Error("Inactive subcategories cannot be newly assigned to a product.");
+        }
+        return { master, category, subcategory };
+      }
+
+      function categoryCanBeDeleted(categoryId, categories, products) {
+        return childrenOf(categoryId, categories).length === 0 &&
+          productCount(categoryId, products, categories) === 0;
       }
 
       function setCategoryFilterOptions(masterSelect, categorySelect, masterLabel, categoryLabel) {
         const oldMaster = masterSelect.value;
         const oldCategory = categorySelect.value;
-        masterSelect.innerHTML = productOptionHtml(categoriesAt("master"), oldMaster, masterLabel);
-        const masterExists = categoriesAt("master").some((entry) => entry.id === oldMaster);
+        masterSelect.innerHTML = productOptionHtml(categoriesAt("master", "", oldMaster), oldMaster, masterLabel);
+        const masterExists = categoriesAt("master", "", oldMaster).some((entry) => entry.id === oldMaster);
         if (masterExists) masterSelect.value = oldMaster;
-        const categories = masterSelect.value ? categoriesAt("category", masterSelect.value) : [];
+        const categories = masterSelect.value ? categoriesAt("category", masterSelect.value, oldCategory) : [];
         categorySelect.innerHTML = productOptionHtml(categories, oldCategory, categoryLabel);
         categorySelect.disabled = !masterSelect.value;
         if (!categories.some((entry) => entry.id === oldCategory)) categorySelect.value = "";
@@ -3823,30 +4160,20 @@
         const master = document.querySelector("#product-master-category");
         const category = document.querySelector("#product-category");
         const subcategory = document.querySelector("#product-subcategory");
-        const masterId = master.value;
-        if (clearCategory) category.value = "";
-        if (clearSubcategory || clearCategory) subcategory.value = "";
-        const currentCategoryId = category.value;
-        const categories = masterId ? categoriesAt("category", masterId) : [];
-        const selectedCategoryId = categories.some((entry) => entry.id === currentCategoryId)
-          ? currentCategoryId
-          : "";
-        category.innerHTML = productOptionHtml(categories, selectedCategoryId, "Select category");
-        category.disabled = !masterId;
-
-        const currentSubcategoryId = subcategory.value;
-        const subcategories = selectedCategoryId
-          ? categoriesAt("subcategory", selectedCategoryId)
-          : [];
-        const selectedSubcategoryId = subcategories.some((entry) => entry.id === currentSubcategoryId)
-          ? currentSubcategoryId
-          : "";
-        subcategory.innerHTML = productOptionHtml(
-          subcategories,
-          selectedSubcategoryId,
-          "Select subcategory",
+        const options = productFormCategoryOptions(
+          master.value,
+          category.value,
+          subcategory.value,
+          { clearCategory, clearSubcategory },
         );
-        subcategory.disabled = !selectedCategoryId || subcategories.length === 0;
+        master.innerHTML = productOptionHtml(options.masters, options.masterId, "Select master category");
+        master.value = options.masterId;
+        category.innerHTML = productOptionHtml(options.categories, options.categoryId, "Select category");
+        category.value = options.categoryId;
+        category.disabled = !options.masterId;
+        subcategory.innerHTML = productOptionHtml(options.subcategories, options.subcategoryId, "Select subcategory");
+        subcategory.value = options.subcategoryId;
+        subcategory.disabled = !options.categoryId || options.subcategories.length === 0;
       }
 
       function updateProductFilters() {
@@ -3859,20 +4186,27 @@
         subcategory.innerHTML = productOptionHtml(children, selectedSubcategory, "All subcategories");
         if (!children.some((entry) => entry.id === selectedSubcategory)) subcategory.value = "";
         subcategory.disabled = !category.value || children.length === 0;
-        const masterForm = document.querySelector("#product-master-category");
-        const selectedMaster = masterForm.value;
-        const masters = categoriesAt("master");
-        masterForm.innerHTML = productOptionHtml(masters, selectedMaster, "Select master category");
-        if (!masters.some((entry) => entry.id === selectedMaster)) masterForm.value = "";
-        updateProductFormCategories();
-        document.querySelector("#barcode-master-filter").innerHTML =
-          productOptionHtml(categoriesAt("master"), document.querySelector("#barcode-master-filter").value, "All master categories");
-        const barcodeCategory = document.querySelector("#barcode-category-filter");
         const barcodeMaster = document.querySelector("#barcode-master-filter");
+        barcodeMaster.innerHTML =
+          productOptionHtml(categoriesAt("master"), barcodeMaster.value, "All master categories");
+        const barcodeCategory = document.querySelector("#barcode-category-filter");
         const barcodeCategories = barcodeMaster.value ? categoriesAt("category", barcodeMaster.value) : [];
         barcodeCategory.innerHTML = productOptionHtml(barcodeCategories, barcodeCategory.value, "All categories");
         if (!barcodeCategories.some((entry) => entry.id === barcodeCategory.value)) barcodeCategory.value = "";
         barcodeCategory.disabled = !barcodeMaster.value;
+        const barcodeSubcategory = document.querySelector("#barcode-subcategory-filter");
+        const barcodeSubcategories = barcodeCategory.value
+          ? categoriesAt("subcategory", barcodeCategory.value)
+          : [];
+        barcodeSubcategory.innerHTML = productOptionHtml(
+          barcodeSubcategories,
+          barcodeSubcategory.value,
+          "All subcategories",
+        );
+        if (!barcodeSubcategories.some((entry) => entry.id === barcodeSubcategory.value)) {
+          barcodeSubcategory.value = "";
+        }
+        barcodeSubcategory.disabled = !barcodeCategory.value || barcodeSubcategories.length === 0;
         const categoryWarning = document.querySelector("#product-category-warning");
         categoryWarning.hidden = !categoryState.categoriesError;
         document.querySelector("#product-category-warning-message").textContent =
@@ -4097,8 +4431,9 @@
 
       function renderProducts() {
         closeProductActionMenu();
-        const loading = !categoryState.productsLoaded && !categoryState.productsError;
-        const error = categoryState.productsError;
+        const loading = (!categoryState.productsLoaded && !categoryState.productsError) ||
+          (!categoryState.categoriesLoaded && !categoryState.categoriesError && !categoryState.productsError);
+        const error = categoryState.productsError || categoryState.categoriesError;
         const loadingElement = document.querySelector("#products-loading");
         const errorElement = document.querySelector("#products-error");
         const tableWrap = document.querySelector("#products-table-wrap");
@@ -4194,10 +4529,14 @@
         const form = document.querySelector("#product-form");
         form.reset();
         document.querySelector("#product-form-error").hidden = true;
+        const hierarchyWarning = document.querySelector("#product-hierarchy-warning");
+        hierarchyWarning.hidden = true;
+        hierarchyWarning.textContent = "";
         document.querySelector("#product-variants").replaceChildren();
         const editing = Boolean(product);
         productState.editKey = editing ? key : null;
         productState.pendingKey = editing ? key : push(ref(database, "products")).key;
+        productState.categoryNeedsCorrection = false;
         productState.reservedBarcodes = new Set();
         productVariants(product || {}).forEach((variant) => {
           if (variant.barcode) productState.reservedBarcodes.add(variant.barcode);
@@ -4226,22 +4565,33 @@
         document.querySelector("#product-weight").value = editing ? String(product.weight ?? "") : "";
         document.querySelector("#product-status").value = editing ? (productStatus(product) ? "active" : "inactive") : "active";
         document.querySelector("#product-tags").value = editing ? (Array.isArray(product.tags) ? product.tags.join(", ") : String(product.tags ?? "")) : "";
-        const { master, category, subcategory } = editing
+        const selection = editing
           ? productCategoryPath(product)
-          : { master: null, category: null, subcategory: null };
+          : { master: null, category: null, subcategory: null, error: "" };
+        const { master, category, subcategory } = selection;
+        productState.categoryNeedsCorrection = Boolean(selection.error);
+        if (selection.error) {
+          hierarchyWarning.textContent = `Saved category references need correction: ${selection.error} Choose the intended hierarchy before saving.`;
+          hierarchyWarning.hidden = false;
+        }
         const masterSelect = document.querySelector("#product-master-category");
-        masterSelect.innerHTML = productOptionHtml(categoriesAt("master"), master?.id || "", "Select master category");
+        masterSelect.innerHTML = productOptionHtml(
+          categoriesAt("master", "", master?.id || "", true),
+          master?.id || "",
+          "Select master category",
+        );
         masterSelect.value = master?.id || "";
         const categorySelect = document.querySelector("#product-category");
         const subcategorySelect = document.querySelector("#product-subcategory");
         categorySelect.innerHTML = productOptionHtml(
-          master?.id ? categoriesAt("category", master.id) : [],
+          master?.id ? categoriesAt("category", master.id, category?.id || "", true) : [],
           "",
           "Select category",
         );
         categorySelect.value = category && master && category.parentId === master.id
           ? category.id
           : "";
+        categorySelect.disabled = !masterSelect.value;
         updateProductFormCategories();
         subcategorySelect.value = subcategory?.parentId === categorySelect.value
           ? subcategory.id
@@ -4264,7 +4614,7 @@
         productState.openingForm = true;
         try {
           await waitForCategories();
-          if (!categoryState.productsLoaded) {
+          if (!categoryState.productsLoaded || categoryState.productsError) {
             showCategoryToast(categoryState.productsError || "Products are still loading. Retry in a moment before editing products.", "error");
             return;
           }
@@ -4272,6 +4622,9 @@
           if (key && !currentProduct) {
             showCategoryToast("This product is no longer available. The list has been refreshed.", "error");
             return;
+          }
+          if (categoryState.categoriesError || !categoryState.categoriesLoaded) {
+            throw new Error(categoryState.categoriesError || "Categories are still loading. Retry before editing products.");
           }
           fillProductForm(currentProduct, key);
         } catch (error) {
@@ -4297,21 +4650,24 @@
         const name = document.querySelector("#product-name").value.trim();
         if (!id) throw new Error("Enter a Product ID.");
         if (!name) throw new Error("Enter a product name.");
+        if (!categoryState.categoriesLoaded || categoryState.categoriesError) {
+          throw new Error(categoryState.categoriesError || "Category data is not ready. Retry before saving.");
+        }
+        if (productState.categoryNeedsCorrection) {
+          throw new Error("Review and explicitly correct the saved category hierarchy before saving this product.");
+        }
         const barcode = document.querySelector("#product-barcode-value").value.trim();
         const categoryId = document.querySelector("#product-category").value;
         const subcategoryId = document.querySelector("#product-subcategory").value;
-        const master = productCategory(document.querySelector("#product-master-category").value);
-        const category = productCategory(categoryId);
-        const subcategory = productCategory(subcategoryId);
-        if (document.querySelector("#product-master-category").value && master?.level !== "master") {
-          throw new Error("The selected master category no longer exists. Select it again.");
-        }
-        if (categoryId && (!category || category.level !== "category" || category.parentId !== master?.id)) {
-          throw new Error("The selected category no longer belongs to this master category. Select it again.");
-        }
-        if (subcategoryId && (!subcategory || subcategory.level !== "subcategory" || subcategory.parentId !== category?.id)) {
-          throw new Error("The selected subcategory no longer belongs to this category. Select it again.");
-        }
+        const masterId = document.querySelector("#product-master-category").value;
+        const existingProduct = productState.editKey ? categoryState.products[productState.editKey] : null;
+        const { master, category, subcategory } = validateProductHierarchy(
+          masterId,
+          categoryId,
+          subcategoryId,
+          categoryState.categories,
+          existingProduct,
+        );
         if (barcode && /[\u0000-\u001f\u007f]/.test(barcode)) throw new Error("Barcode values cannot contain control characters.");
         const imageUrls = [
           document.querySelector("#product-main-image").value.trim(),
@@ -4323,7 +4679,6 @@
           if (!["http:", "https:"].includes(parsedUrl.protocol)) throw new Error("Image URLs must use HTTP or HTTPS.");
         }
         const sellingPrice = fieldNumber("product-selling-price", "Selling price", { required: true });
-        const existingProduct = productState.editKey ? categoryState.products[productState.editKey] : null;
         const oldVariants = existingProduct?.variants;
         const variants = Array.from(document.querySelectorAll(".product-variant-row")).map((row, index) => {
           const variantId = row.dataset.variantId || `variant-${index + 1}`;
@@ -4388,17 +4743,25 @@
           variants: savedVariants,
           updatedAt: Date.now(),
         };
-        if (!fields.masterCategoryId) {
-          delete fields.masterCategoryId;
-          delete fields.masterCategoryName;
-        }
-        if (!fields.categoryId) {
-          delete fields.categoryId;
-          delete fields.categoryName;
-        }
-        if (!fields.subcategoryId) {
-          delete fields.subcategoryId;
-          delete fields.subcategoryName;
+        if (existingProduct) {
+          for (const [camelId, snakeId, camelName, snakeName] of [
+            ["masterCategoryId", "master_category_id", "masterCategoryName", "master_category_name"],
+            ["categoryId", "category_id", "categoryName", "category_name"],
+            ["subcategoryId", "subcategory_id", "subcategoryName", "subcategory_name"],
+          ]) {
+            const usesSnakeCase =
+              Object.prototype.hasOwnProperty.call(existingProduct, snakeId) &&
+              !Object.prototype.hasOwnProperty.call(existingProduct, camelId);
+            if (usesSnakeCase) {
+              fields[snakeId] = fields[camelId];
+              fields[snakeName] = fields[camelName];
+              delete fields[camelId];
+              delete fields[camelName];
+            } else {
+              if (Object.prototype.hasOwnProperty.call(existingProduct, snakeId)) fields[snakeId] = null;
+              if (Object.prototype.hasOwnProperty.call(existingProduct, snakeName)) fields[snakeName] = null;
+            }
+          }
         }
         if (!fields.mrp && document.querySelector("#product-mrp").value.trim() === "") delete fields.mrp;
         if (fields.discountedPrice == null) delete fields.discountedPrice;
@@ -4409,30 +4772,51 @@
 
       async function saveProduct(event) {
         event.preventDefault();
+        if (productState.saving) return;
+        productState.saving = true;
         const saveButton = document.querySelector("#product-save-button");
         const error = document.querySelector("#product-form-error");
         error.hidden = true;
-        let fields;
-        try {
-          fields = readProductForm(productState.pendingKey);
-        } catch (validationError) {
-          error.textContent = validationError.message;
-          error.hidden = false;
-          return;
-        }
         saveButton.disabled = true;
         saveButton.setAttribute("aria-busy", "true");
         saveButton.textContent = "Saving…";
         try {
+          await waitForCategories();
+          const latestCategories = await get(ref(database, "categories"));
+          categoryState.categories = normalizeCategories(latestCategories.val());
+          categoryState.categoriesLoaded = true;
+          categoryState.categoriesError = null;
+          reportProductCategoryDiagnostics();
+          updateProductFilters();
           const key = productState.editKey || productState.pendingKey;
           if (!key) throw new Error("Could not allocate a Firebase record key. Close and reopen the form, then retry.");
           if (productState.editKey) {
+            if (!categoryState.productsLoaded || categoryState.productsError) {
+              throw new Error(categoryState.productsError || "Product data is unavailable. Retry before updating this product.");
+            }
+            const latestProduct = await get(ref(database, `products/${key}`));
+            if (!latestProduct.exists()) {
+              throw new Error("This product no longer exists. Refresh the product list before editing.");
+            }
+            categoryState.products[key] = latestProduct.val();
+          }
+          const fields = readProductForm(key);
+          if (productState.editKey) {
             await update(ref(database, `products/${key}`), fields);
-            showCategoryToast("Product updated.");
+            const updatedProduct = { ...categoryState.products[key] };
+            for (const [field, value] of Object.entries(fields)) {
+              if (value === null) delete updatedProduct[field];
+              else updatedProduct[field] = value;
+            }
+            categoryState.products[key] = updatedProduct;
           } else {
             await set(ref(database, `products/${key}`), { ...fields, createdAt: Date.now() });
-            showCategoryToast("Product created.");
+            categoryState.products[key] = { ...fields, createdAt: Date.now() };
           }
+          renderCategoryRows();
+          renderProducts();
+          renderBarcodeManager();
+          showCategoryToast(productState.editKey ? "Product updated." : "Product created.");
           document.querySelector("#product-form-dialog").close();
         } catch (errorValue) {
           error.textContent = errorValue?.code
@@ -4440,6 +4824,7 @@
             : errorValue.message || "Saving product failed. Retry.";
           error.hidden = false;
         } finally {
+          productState.saving = false;
           saveButton.disabled = false;
           saveButton.removeAttribute("aria-busy");
           saveButton.textContent = productState.editKey ? "Save Changes" : "Save Product";
@@ -4483,9 +4868,9 @@
             additionalImageUrls: Array.isArray(product.additionalImageUrls ?? product.images)
               ? (product.additionalImageUrls ?? product.images).join("|")
               : String(product.additionalImageUrls ?? product.images ?? ""),
-            masterCategoryId: product.masterCategoryId ?? "",
-            categoryId: product.categoryId ?? "",
-            subcategoryId: product.subcategoryId ?? "",
+            masterCategoryId: productCategoryReference(product, "masterCategoryId", "master_category_id"),
+            categoryId: productCategoryReference(product, "categoryId", "category_id"),
+            subcategoryId: productCategoryReference(product, "subcategoryId", "subcategory_id"),
             mrp: product.mrp ?? "",
             sellingPrice: product.sellingPrice ?? product.price ?? "",
             discountedPrice: product.discountedPrice ?? "",
@@ -4623,19 +5008,16 @@
               break;
             }
           }
-          let master = masterId ? resolveProductCategory(masterId, masterId, "master") : null;
-          let category = categoryId
-            ? resolveProductCategory(categoryId, categoryId, "category", master?.id ?? null)
-            : null;
-          let subcategory = subcategoryId
-            ? resolveProductCategory(subcategoryId, subcategoryId, "subcategory", category?.id ?? null)
-            : null;
-          if (categoryId && !category) errors.push("Category ID does not match its master category.");
-          if (!category && subcategory && !categoryId) category = productCategory(subcategory.parentId);
-          if (!master && category) master = masterForCategory(category);
-          if (masterId && !master) errors.push("Master category ID is not valid.");
-          if (categoryId && category && master && category.parentId !== master.id) errors.push("Category ID does not match its master category.");
-          if (subcategoryId && (!category || !subcategory || subcategory.parentId !== category.id)) errors.push("Subcategory ID does not match its category.");
+          const hierarchy = productCategoryPath({ masterCategoryId: masterId, categoryId, subcategoryId });
+          const master = hierarchy.master;
+          const category = hierarchy.category;
+          const subcategory = hierarchy.subcategory;
+          if ((masterId || categoryId || subcategoryId) && hierarchy.error) {
+            errors.push(`Category hierarchy is invalid: ${hierarchy.error}`);
+          }
+          if ([master, category, subcategory].some((entry) => entry && !entry.active)) {
+            errors.push("Inactive categories cannot be assigned to imported products.");
+          }
           const rowStatus = read(values, optionalIndex.status).toLowerCase();
           if (rowStatus && !["active", "inactive"].includes(rowStatus)) errors.push("Status must be active or inactive.");
           let variants = [];
@@ -4710,43 +5092,76 @@
       }
 
       async function importProducts() {
+        const button = document.querySelector("#product-import-confirm");
+        if (productState.importing) return;
         const rows = productState.importRows.filter((row) => row.errors.length === 0);
         if (!rows.length) return;
+        productState.importing = true;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        try {
+          await waitForCategories();
+          const latestCategories = await get(ref(database, "categories"));
+          categoryState.categories = normalizeCategories(latestCategories.val());
+          categoryState.categoriesLoaded = true;
+          categoryState.categoriesError = null;
+          reportProductCategoryDiagnostics();
+          for (const row of rows) {
+            const hierarchy = productCategoryPath(row.product);
+            if (hierarchy.error) {
+              throw new Error(`Import cancelled: product "${row.product.productId}" has an invalid category hierarchy. ${hierarchy.error}`);
+            }
+            if ([hierarchy.master, hierarchy.category, hierarchy.subcategory].some((entry) => entry && !entry.active)) {
+              throw new Error(`Import cancelled: product "${row.product.productId}" references an inactive category.`);
+            }
+          }
+        } catch (error) {
+          showCategoryToast(
+            error?.code ? reportFirebaseError("Checking imported categories", error) : error.message,
+            "error",
+          );
+          productState.importing = false;
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          return;
+        }
         productState.reservedBarcodes = new Set(
           rows.flatMap((row) => [
             row.product.barcode,
             ...row.product.variants.map((variant) => String(variant.barcode ?? variant.barcodeValue ?? "")),
           ]).filter((barcode) => isValidBarcode(barcode)),
         );
-        const patch = {};
-        for (const row of rows) {
-          const key = push(ref(database, "products")).key;
-          if (!key) throw new Error("Could not allocate a Firebase record key for an imported row.");
-          patch[key] = {
-            ...row.product,
-            barcode: row.product.barcode || generateUniqueBarcode(),
-            variants: row.product.variants.map((variant, index) => ({
-              ...variant,
-              id: String(variant.id ?? `variant-${index + 1}`),
-              sku: String(variant.sku ?? ""),
-              barcode: /^\d{13}$/.test(String(variant.barcode || ""))
-                ? String(variant.barcode)
-                : generateUniqueBarcode(),
-            })),
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          };
-        }
-        const button = document.querySelector("#product-import-confirm");
-        button.disabled = true;
-        button.setAttribute("aria-busy", "true");
         try {
+          const patch = {};
+          for (const row of rows) {
+            const key = push(ref(database, "products")).key;
+            if (!key) throw new Error("Could not allocate a Firebase record key for an imported row.");
+            patch[key] = {
+              ...row.product,
+              barcode: row.product.barcode || generateUniqueBarcode(),
+              variants: row.product.variants.map((variant, index) => ({
+                ...variant,
+                id: String(variant.id ?? `variant-${index + 1}`),
+                sku: String(variant.sku ?? ""),
+                barcode: /^\d{13}$/.test(String(variant.barcode || ""))
+                  ? String(variant.barcode)
+                  : generateUniqueBarcode(),
+              })),
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            };
+          }
           await update(ref(database, "products"), patch);
+          Object.assign(categoryState.products, patch);
           document.querySelector("#product-import-dialog").close();
+          renderCategoryRows();
+          renderProducts();
+          renderBarcodeManager();
           showCategoryToast(`Imported ${rows.length} product${rows.length === 1 ? "" : "s"}.`);
         } catch (error) {
           showCategoryToast(reportFirebaseError("Importing products", error), "error");
         } finally {
+          productState.importing = false;
           button.disabled = false;
           button.removeAttribute("aria-busy");
         }
@@ -4822,19 +5237,22 @@
         const query = document.querySelector("#barcode-search").value.trim().toLocaleLowerCase();
         const masterId = document.querySelector("#barcode-master-filter").value;
         const categoryId = document.querySelector("#barcode-category-filter").value;
+        const subcategoryId = document.querySelector("#barcode-subcategory-filter").value;
         const status = document.querySelector("#barcode-status-filter").value;
         return records.filter((record) => {
-          const master = productMaster(record.product);
+          const path = productCategoryPath(record.product);
           return (!query || [record.name, productId(record.product, record.key), record.sku, record.barcode, record.variantName].join(" ").toLocaleLowerCase().includes(query)) &&
-            (!masterId || master?.id === masterId) &&
-            (!categoryId || valueAsId(record.product.categoryId ?? record.product.category_id) === categoryId) &&
+            (!masterId || path.master?.id === masterId) &&
+            (!categoryId || path.category?.id === categoryId) &&
+            (!subcategoryId || path.subcategory?.id === subcategoryId) &&
             (!status || productStatus(record.product) === (status === "active"));
         });
       }
 
       function renderBarcodeManager() {
-        const loading = !categoryState.productsLoaded && !categoryState.productsError;
-        const error = categoryState.productsError;
+        const loading = (!categoryState.productsLoaded && !categoryState.productsError) ||
+          (!categoryState.categoriesLoaded && !categoryState.categoriesError && !categoryState.productsError);
+        const error = categoryState.productsError || categoryState.categoriesError;
         document.querySelector("#inventory-loading").hidden = !loading;
         document.querySelector("#inventory-error").hidden = !error;
         document.querySelector("#inventory-error-message").textContent = error || "";
@@ -4923,13 +5341,10 @@
           return;
         }
         if (action === "view") {
-          const master = productMaster(product);
-          const category = productCategory(product.categoryId ?? product.category_id);
-          const subcategory = productCategory(product.subcategoryId ?? product.subcategory_id);
           const details = [
             ["Product ID", productId(product, key)], ["Name", productName(product)], ["SKU", productSku(product)],
             ["Barcode", productBarcode(product) || "Missing"], ["Brand", product.brand ?? "—"],
-            ["Category", [master?.name, category?.name, subcategory?.name].filter(Boolean).join(" / ") || "—"],
+            ["Category", productCategoryLabel(product)],
             ["MRP", product.mrp ?? "—"], ["Selling price", product.sellingPrice ?? product.price ?? "—"],
             ["Discounted price", product.discountedPrice ?? "—"], ["Cost price", product.costPrice ?? "—"],
             ["Stock", productStock(product)], ["Low-stock threshold", product.lowStockThreshold ?? 5],
@@ -5143,10 +5558,18 @@
         if (removeButton) removeButton.closest(".product-variant-row").remove();
       });
       document.querySelector("#product-master-category").addEventListener("change", () => {
+        productState.categoryNeedsCorrection = false;
+        document.querySelector("#product-hierarchy-warning").hidden = true;
         updateProductFormCategories({ clearCategory: true, clearSubcategory: true });
       });
       document.querySelector("#product-category").addEventListener("change", () => {
+        productState.categoryNeedsCorrection = false;
+        document.querySelector("#product-hierarchy-warning").hidden = true;
         updateProductFormCategories({ clearSubcategory: true });
+      });
+      document.querySelector("#product-subcategory").addEventListener("change", () => {
+        productState.categoryNeedsCorrection = false;
+        document.querySelector("#product-hierarchy-warning").hidden = true;
       });
       document.querySelector("#product-category-retry").addEventListener("click", startCategoryListeners);
       for (const dialog of [
@@ -5226,6 +5649,12 @@
       });
       document.querySelector("#barcode-master-filter").addEventListener("change", () => {
         document.querySelector("#barcode-category-filter").value = "";
+        document.querySelector("#barcode-subcategory-filter").value = "";
+        updateProductFilters();
+        renderBarcodeManager();
+      });
+      document.querySelector("#barcode-category-filter").addEventListener("change", () => {
+        document.querySelector("#barcode-subcategory-filter").value = "";
         updateProductFilters();
         renderBarcodeManager();
       });
@@ -5252,7 +5681,10 @@
       document.querySelector("#product-import-confirm").addEventListener("click", () => {
         void importProducts().catch((error) => showCategoryToast(error.message || "CSV import failed.", "error"));
       });
-      for (const id of ["barcode-search", "barcode-master-filter", "barcode-category-filter", "barcode-status-filter"]) {
+      for (const id of [
+        "barcode-search", "barcode-master-filter", "barcode-category-filter",
+        "barcode-subcategory-filter", "barcode-status-filter",
+      ]) {
         const control = document.querySelector(`#${id}`);
         const resetInventoryPage = () => {
           inventoryState.page = 1;
