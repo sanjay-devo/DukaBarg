@@ -418,18 +418,6 @@
         margin: 0;
       }
 
-      .page-heading {
-        margin: 0;
-        font-size: var(--font-size-2xl);
-        font-weight: 600;
-      }
-
-      .page-subtitle {
-        margin: var(--space-3) 0 0;
-        color: var(--color-text-inverse);
-        font-size: var(--font-size-sm);
-      }
-
       .welcome-card {
         display: flex;
         min-height: 190px;
@@ -2059,9 +2047,7 @@
           <div class="breadcrumb">Store / <strong id="breadcrumb-current">Dashboard</strong></div>
         </header>
 
-        <section class="main-content" aria-labelledby="page-heading">
-          <h1 class="page-heading" id="page-heading">Dashboard</h1>
-          <p class="page-subtitle" id="page-subtitle">Manage your store’s dashboard from here.</p>
+        <section class="main-content" aria-label="Dashboard content">
 
           <div class="welcome-card">
             <div class="welcome-copy">
@@ -2443,9 +2429,7 @@
       const sidebarToggle = document.querySelector(".sidebar-toggle");
       const backdrop = document.querySelector(".sidebar-backdrop");
       const appShell = document.querySelector(".app-shell");
-      const pageHeading = document.querySelector("#page-heading");
       const breadcrumbCurrent = document.querySelector("#breadcrumb-current");
-      const pageSubtitle = document.querySelector("#page-subtitle");
       const mainContent = document.querySelector(".main-content");
       const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
       const welcomeTitle = document.querySelector("#welcome-title");
@@ -2503,9 +2487,7 @@
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
         mainContent.classList.toggle("is-wide-page", isCategoriesPage || isProductsPage);
-        pageHeading.textContent = pageName;
         breadcrumbCurrent.textContent = pageName;
-        pageSubtitle.textContent = `Manage your store’s ${pageName.toLowerCase()} from here.`;
         categoryPage.hidden = !isCategoriesPage;
         productsPage.hidden = !isProductsPage;
         inventoryPage.hidden = !isInventoryPage;
