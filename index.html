@@ -1655,6 +1655,59 @@
         font-size: var(--font-size-md);
       }
 
+      .orders-status-timeline {
+        display: grid;
+        gap: var(--space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .orders-status-timeline-step {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        align-items: start;
+        gap: var(--space-4);
+      }
+
+      .orders-status-timeline-marker {
+        width: 10px;
+        height: 10px;
+        margin: 5px 4px 0;
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-border-muted);
+        border-radius: 50%;
+      }
+
+      .orders-status-timeline-step[data-state="completed"] .orders-status-timeline-marker {
+        background: #176b38;
+        border-color: #176b38;
+      }
+
+      .orders-status-timeline-step[data-state="current"] .orders-status-timeline-marker {
+        background: #14528a;
+        border-color: #14528a;
+        box-shadow: 0 0 0 3px #e7f2ff;
+      }
+
+      .orders-status-timeline-label {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+      }
+
+      .orders-status-timeline-meta {
+        display: block;
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-status-timeline-step[data-state="upcoming"] .orders-status-timeline-label,
+      .orders-status-timeline-step[data-state="upcoming"] .orders-status-timeline-meta {
+        color: var(--color-text-inverse);
+        font-weight: 400;
+      }
+
       .orders-detail-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5054,6 +5107,75 @@
         OUT_FOR_DELIVERY: ["DELIVERED"],
       };
 
+      const orderStatusTimelineSteps = [
+        { status: "PLACED", label: "Placed", timestampFields: ["placedAt", "createdAt", "transactionTime", "orderDate", "date"] },
+        { status: "CONFIRMED", label: "Confirmed", timestampFields: ["confirmedAt"] },
+        { status: "PROCESSING", label: "Processing", timestampFields: ["processingAt"] },
+        { status: "READY_TO_SHIP", label: "Ready to Ship", timestampFields: ["readyToShipAt"] },
+        { status: "OUT_FOR_DELIVERY", label: "Out for Delivery", timestampFields: ["outForDeliveryAt"] },
+        { status: "DELIVERED", label: "Delivered", timestampFields: ["deliveredAt"] },
+      ];
+      const orderStatusTimestampFields = {
+        CONFIRMED: "confirmedAt",
+        PROCESSING: "processingAt",
+        READY_TO_SHIP: "readyToShipAt",
+        OUT_FOR_DELIVERY: "outForDeliveryAt",
+        DELIVERED: "deliveredAt",
+        CANCELLED: "cancelledAt",
+      };
+
+      function getOrderStatusTimeline(order) {
+        const currentStatus = String(order.orderStatus || "").trim().toUpperCase();
+        const currentIndex = currentStatus === "COMPLETED"
+          ? orderStatusTimelineSteps.length - 1
+          : orderStatusTimelineSteps.findIndex((step) => step.status === currentStatus);
+        return orderStatusTimelineSteps.map((step, index) => {
+          const timestampValue = orderFieldFirstValue(order.raw, step.timestampFields);
+          const timestamp = normalizeOrderTimestamp(timestampValue);
+          const completedByStatus = currentIndex > index;
+          const isCurrent = currentIndex === index;
+          const state = isCurrent ? "current" : (timestamp || completedByStatus) ? "completed" : "upcoming";
+          return {
+            label: step.label,
+            state,
+            timestamp: timestamp ? formatCustomerDate(timestamp, true) : null,
+          };
+        });
+      }
+
+      function renderOrderStatusTimeline(order) {
+        const steps = getOrderStatusTimeline(order);
+        const items = steps.map((step) => {
+          const stateLabel = step.state === "completed"
+            ? "Completed"
+            : step.state === "current" ? "Current" : "Upcoming";
+          const timeLabel = step.timestamp || (step.state === "upcoming" ? "Not reached" : "Timestamp not recorded");
+          return `<li class="orders-status-timeline-step" data-state="${step.state}">
+            <span class="orders-status-timeline-marker" aria-hidden="true"></span>
+            <span><span class="orders-status-timeline-label">${escapeCustomerText(step.label)} · ${stateLabel}</span>
+            <span class="orders-status-timeline-meta">${escapeCustomerText(timeLabel)}</span></span>
+          </li>`;
+        });
+        const cancelled = String(order.orderStatus || "").trim().toUpperCase() === "CANCELLED";
+        if (cancelled) {
+          const cancelledAt = normalizeOrderTimestamp(order.raw.cancelledAt);
+          items.push(`<li class="orders-status-timeline-step" data-state="current">
+            <span class="orders-status-timeline-marker" aria-hidden="true"></span>
+            <span><span class="orders-status-timeline-label">Cancelled · Current</span>
+            <span class="orders-status-timeline-meta">${escapeCustomerText(cancelledAt ? formatCustomerDate(cancelledAt, true) : "Timestamp not recorded")}</span></span>
+          </li>`);
+        }
+        return `<ol class="orders-status-timeline" aria-label="Order status timeline">${items.join("")}</ol>`;
+      }
+
+      function orderFieldFirstValue(raw, fields) {
+        for (const field of fields) {
+          const value = raw?.[field];
+          if (value !== null && value !== undefined && value !== "") return value;
+        }
+        return null;
+      }
+
       function orderFieldNumber(raw, fields) {
         for (const field of fields) {
           const value = raw?.[field];
@@ -5519,16 +5641,13 @@
           ["Discount", orderFieldNumber(source, ["discount", "discountAmount", "couponDiscount"])],
           ["Final total", order.amount],
         ].filter(([, value]) => value !== null);
-        const timestampKeys = Object.keys(source).filter((key) => /At$/.test(key) && source[key] !== undefined && source[key] !== null && source[key] !== "");
-        const timestamps = timestampKeys
-          .map((key) => orderDetailItem(key.replace(/At$/, "").replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase()), formatCustomerDate(source[key], true)));
         document.querySelector("#orders-details-title").textContent = `Order ${order.id}`;
         document.querySelector("#orders-details-subtitle").textContent = order.timestamp ? formatCustomerDate(order.timestamp, true) : "Order date not provided";
         document.querySelector("#orders-details-content").innerHTML =
           `<section class="orders-detail-section"><h3>Order and customer</h3><dl class="orders-detail-grid">${fields.map(([label, value]) => orderDetailItem(label, value)).join("")}</dl></section>
           <section class="orders-detail-section"><h3>Products</h3>${products}</section>
           <section class="orders-detail-section"><h3>Totals</h3>${totals.length ? `<div class="orders-total-list">${totals.map(([label, value]) => `<div class="orders-total-row"><span>${escapeCustomerText(label)}</span><strong>${escapeCustomerText(formatCustomerCurrency(value))}</strong></div>`).join("")}</div>` : "<p>No order totals are stored on this record.</p>"}</section>
-          ${timestamps.length ? `<section class="orders-detail-section"><h3>Status timestamps</h3><dl class="orders-detail-grid">${timestamps.join("")}</dl></section>` : ""}
+          <section class="orders-detail-section"><h3>Status timeline</h3>${renderOrderStatusTimeline(order)}</section>
           ${source.customerInstructions || source.instructions || source.notes ? `<section class="orders-detail-section"><h3>Customer instructions</h3><p>${escapeCustomerText(displayOrderValue(source.customerInstructions ?? source.instructions ?? source.notes))}</p></section>` : ""}`;
         ordersDetailsDialog.showModal();
       }
@@ -5608,13 +5727,19 @@
         if (!(orderStatusTransitions[order.orderStatus.toUpperCase()] || []).includes(status)) {
           throw new Error("That status transition is not available for this order.");
         }
-        const result = await runTransaction(
-          ref(database, `${order.path}/orderStatus`),
-          (current) => current === order.orderStatus ? status : undefined,
+        const timestampField = orderStatusTimestampFields[status];
+        if (!timestampField) throw new Error("No timestamp field is configured for that order status.");
+        const patch = { orderStatus: status };
+        if (order.raw[timestampField] === undefined || order.raw[timestampField] === null || order.raw[timestampField] === "") {
+          patch[timestampField] = Date.now();
+        }
+        const atomicPatch = Object.fromEntries(
+          Object.entries(patch).map(([field, value]) => [`${order.path}/${field}`, value]),
         );
-        if (!result.committed) throw new Error("The order status changed in Firebase. Reload the order list before trying again.");
+        await update(ref(database), atomicPatch);
         order.raw.orderStatus = status;
         order.orderStatus = status;
+        if (patch[timestampField] !== undefined) order.raw[timestampField] = patch[timestampField];
       }
 
       async function commitOrderPayment(order) {

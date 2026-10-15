@@ -50,6 +50,30 @@
           ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
           ".validate": "newData.isString() && ((data.val() === 'PLACED' && (newData.val() === 'CONFIRMED' || newData.val() === 'CANCELLED')) || (data.val() === 'CONFIRMED' && (newData.val() === 'PROCESSING' || newData.val() === 'CANCELLED')) || (data.val() === 'PROCESSING' && (newData.val() === 'READY_TO_SHIP' || newData.val() === 'CANCELLED')) || (data.val() === 'READY_TO_SHIP' && newData.val() === 'OUT_FOR_DELIVERY') || (data.val() === 'OUT_FOR_DELIVERY' && newData.val() === 'DELIVERED'))"
         },
+        "confirmedAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'CONFIRMED') || (data.exists() && newData.val() === data.val()))"
+        },
+        "processingAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'PROCESSING') || (data.exists() && newData.val() === data.val()))"
+        },
+        "readyToShipAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'READY_TO_SHIP') || (data.exists() && newData.val() === data.val()))"
+        },
+        "outForDeliveryAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'OUT_FOR_DELIVERY') || (data.exists() && newData.val() === data.val()))"
+        },
+        "deliveredAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'DELIVERED') || (data.exists() && newData.val() === data.val()))"
+        },
+        "cancelledAt": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'CANCELLED') || (data.exists() && newData.val() === data.val()))"
+        },
         "$orderId": {
           "paymentStatus": {
             ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
@@ -58,6 +82,30 @@
           "orderStatus": {
             ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
             ".validate": "newData.isString() && ((data.val() === 'PLACED' && (newData.val() === 'CONFIRMED' || newData.val() === 'CANCELLED')) || (data.val() === 'CONFIRMED' && (newData.val() === 'PROCESSING' || newData.val() === 'CANCELLED')) || (data.val() === 'PROCESSING' && (newData.val() === 'READY_TO_SHIP' || newData.val() === 'CANCELLED')) || (data.val() === 'READY_TO_SHIP' && newData.val() === 'OUT_FOR_DELIVERY') || (data.val() === 'OUT_FOR_DELIVERY' && newData.val() === 'DELIVERED'))"
+          },
+          "confirmedAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'CONFIRMED') || (data.exists() && newData.val() === data.val()))"
+          },
+          "processingAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'PROCESSING') || (data.exists() && newData.val() === data.val()))"
+          },
+          "readyToShipAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'READY_TO_SHIP') || (data.exists() && newData.val() === data.val()))"
+          },
+          "outForDeliveryAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'OUT_FOR_DELIVERY') || (data.exists() && newData.val() === data.val()))"
+          },
+          "deliveredAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'DELIVERED') || (data.exists() && newData.val() === data.val()))"
+          },
+          "cancelledAt": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.parent().child('orderStatus').val() === 'CANCELLED') || (data.exists() && newData.val() === data.val()))"
           }
         }
       }
