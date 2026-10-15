@@ -3,6 +3,7 @@
     ".read": false,
     ".write": false,
     "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         ".write": "auth != null && ((auth.uid === $uid && ((!data.exists() && newData.child('role').val() === 'user' && newData.child('uid').val() === auth.uid) || (data.exists() && data.child('role').exists() && newData.child('role').val() === data.child('role').val() && newData.child('uid').val() === data.child('uid').val()))) || root.child('users').child(auth.uid).child('role').val() === 'admin')",

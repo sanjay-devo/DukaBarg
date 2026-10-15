@@ -707,6 +707,7 @@
       .category-page[hidden],
       .products-page[hidden],
       .inventory-page[hidden],
+      .customers-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -1294,6 +1295,497 @@
       .products-page,
       .inventory-page {
         margin-top: var(--space-7);
+      }
+
+      .customers-page {
+        margin-top: var(--space-7);
+      }
+
+      .customers-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .customer-stat-note {
+        display: block;
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .customers-order-data-error {
+        margin: calc(-1 * var(--space-3)) 0 var(--space-5);
+        color: var(--color-border-strong);
+        font-size: var(--font-size-sm);
+      }
+
+      .customers-order-data-error[hidden] {
+        display: none;
+      }
+
+      .customers-order-data-error button {
+        margin-left: var(--space-3);
+      }
+
+      .customer-orders-list {
+        display: grid;
+        gap: var(--space-4);
+        margin-top: var(--space-4);
+      }
+
+      .customer-order-card {
+        display: grid;
+        gap: var(--space-4);
+        padding: var(--space-5);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .customer-order-card-header,
+      .customer-order-card-meta,
+      .customer-order-card-actions,
+      .customer-order-items {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-3) var(--space-5);
+      }
+
+      .customer-order-card-header {
+        justify-content: space-between;
+      }
+
+      .customer-order-card-header strong,
+      .customer-order-item-name {
+        overflow-wrap: anywhere;
+      }
+
+      .customer-order-card-meta {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .customer-order-status-badge {
+        display: inline-flex;
+        padding: var(--space-2) var(--space-3);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .customer-order-status-badge[data-status="DELIVERED"],
+      .customer-order-status-badge[data-status="COMPLETED"] {
+        color: #176b38;
+        background: #e8f5ec;
+      }
+
+      .customer-order-status-badge[data-status="CANCELLED"],
+      .customer-order-status-badge[data-status="FAILED"] {
+        color: #8c321b;
+        background: #fff0eb;
+      }
+
+      .customer-order-items {
+        align-items: flex-start;
+        flex-direction: column;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .customer-order-card-actions {
+        justify-content: flex-end;
+      }
+
+      .customers-filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-4);
+        padding: var(--space-5) 0;
+        border-bottom: 1px solid var(--color-border-muted);
+      }
+
+      .customers-filters input,
+      .customers-filters select,
+      .customer-date-filter input {
+        width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .customer-date-filter {
+        display: grid;
+        gap: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .customers-toolbar,
+      .customers-bulk-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+
+      .customers-toolbar {
+        justify-content: space-between;
+        padding: var(--space-4) 0;
+        border-bottom: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+      }
+
+      .customers-feedback {
+        padding: var(--space-7);
+        color: var(--color-text-inverse);
+        text-align: center;
+        font-size: var(--font-size-sm);
+      }
+
+      .customers-feedback[hidden] {
+        display: none;
+      }
+
+      .customers-feedback[data-kind="error"] {
+        display: grid;
+        justify-items: center;
+        gap: var(--space-5);
+        color: var(--color-border-strong);
+      }
+
+      .customers-feedback[data-kind="error"][hidden],
+      .customers-pagination[hidden],
+      .customers-bulk-actions[hidden] {
+        display: none;
+      }
+
+      .customers-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .customers-table {
+        width: 100%;
+        min-width: 1510px;
+        border-collapse: collapse;
+        table-layout: fixed;
+        text-align: left;
+      }
+
+      .customers-table th {
+        padding: var(--space-5);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .customers-table td {
+        padding: var(--space-5);
+        border-top: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+        vertical-align: middle;
+      }
+
+      .customers-table tbody tr:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .customers-table th:nth-child(1) { width: 42px; }
+      .customers-table th:nth-child(2) { width: 200px; }
+      .customers-table th:nth-child(3) { width: 140px; }
+      .customers-table th:nth-child(4) { width: 140px; }
+      .customers-table th:nth-child(5) { width: 190px; }
+      .customers-table th:nth-child(6) { width: 145px; }
+      .customers-table th:nth-child(7) { width: 95px; }
+      .customers-table th:nth-child(8) { width: 130px; }
+      .customers-table th:nth-child(9) { width: 125px; }
+      .customers-table th:nth-child(10) { width: 130px; }
+      .customers-table th:nth-child(11) { width: 75px; }
+
+      .customer-cell {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: var(--space-4);
+      }
+
+      .customer-avatar {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        place-items: center;
+        overflow: hidden;
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: 50%;
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .customer-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .customer-cell-name,
+      .customer-overflow {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .customer-status {
+        display: inline-flex;
+        max-width: 100%;
+        padding: var(--space-2) var(--space-3);
+        overflow: hidden;
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .customer-actions-trigger {
+        display: inline-grid;
+        width: 36px;
+        min-height: 36px;
+        place-items: center;
+        padding: 0;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: var(--font-size-xl);
+        line-height: 1;
+      }
+
+      .customer-actions-trigger:hover {
+        border-color: var(--color-border-strong);
+      }
+
+      .customer-actions-trigger:focus-visible,
+      .customers-filters input:focus-visible,
+      .customers-filters select:focus-visible,
+      .customer-date-filter input:focus-visible,
+      .customers-table input:focus-visible,
+      .customers-page button:focus-visible,
+      .customer-dialog button:focus-visible,
+      .customer-dialog input:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .customer-action-menu {
+        position: fixed;
+        z-index: 1000;
+        width: min(220px, calc(100vw - 16px));
+        max-height: calc(100vh - 16px);
+        padding: var(--space-2);
+        overflow-y: auto;
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+      }
+
+      .customer-action-menu[hidden] {
+        display: none;
+      }
+
+      .customer-action-menu button {
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-sm);
+        text-align: left;
+      }
+
+      .customer-action-menu button:hover,
+      .customer-action-menu button:focus-visible {
+        background: var(--color-surface-raised);
+      }
+
+      .customer-action-menu button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: -2px;
+      }
+
+      .customers-pagination .pagination-pages {
+        flex-wrap: wrap;
+      }
+
+      .customer-dialog {
+        width: min(760px, calc(100vw - 24px));
+        max-height: min(92vh, 900px);
+        padding: 0;
+        overflow: auto;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .customer-dialog::backdrop {
+        background: var(--color-backdrop);
+      }
+
+      .customer-dialog-content {
+        padding: var(--space-7);
+      }
+
+      .customer-dialog-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+
+      .customer-dialog-heading h2 {
+        margin: 0;
+        font-size: var(--font-size-lg);
+      }
+
+      .customer-dialog-heading p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .customer-dialog-close {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        color: var(--color-text-inverse);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-size-lg);
+      }
+
+      .customer-detail-section {
+        margin-top: var(--space-6);
+      }
+
+      .customer-detail-section h3 {
+        margin: 0 0 var(--space-4);
+        font-size: var(--font-size-md);
+      }
+
+      .customer-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4) var(--space-6);
+      }
+
+      .customer-detail-item {
+        min-width: 0;
+      }
+
+      .customer-detail-item dt {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .customer-detail-item dd {
+        margin: var(--space-2) 0 0;
+        overflow-wrap: anywhere;
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+      }
+
+      .customer-detail-photo {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border: 1px solid var(--color-border-muted);
+        border-radius: 50%;
+      }
+
+      .customer-address-card {
+        margin-top: var(--space-3);
+        padding: var(--space-5);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+      }
+
+      .customer-dialog-message {
+        padding: var(--space-5);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-sm);
+      }
+
+      .customer-dialog-error {
+        margin: var(--space-5) 0 0;
+        color: var(--color-border-strong);
+        font-size: var(--font-size-sm);
+      }
+
+      .customer-dialog-error[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 760px) {
+        .customers-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .customers-filters {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 480px) {
+        .customers-stats,
+        .customers-filters,
+        .customer-detail-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .customers-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .customers-bulk-actions {
+          width: 100%;
+        }
+
+        .customers-bulk-actions button {
+          flex: 1 1 auto;
+        }
+
+        .customers-pagination .category-pagination-controls {
+          flex-wrap: wrap;
+        }
+
+        .customer-dialog-content {
+          padding: var(--space-6);
+        }
       }
 
       .products-heading-actions,
@@ -2088,6 +2580,92 @@
             </span>
           </div>
 
+          <section class="customers-page" id="customers-page" aria-labelledby="customers-section-title" hidden>
+            <div class="category-heading-row customers-heading-row">
+              <div>
+                <h2 id="customers-section-title">Customers</h2>
+                <p>Manage customer profiles, purchase history, order activity, and account status.</p>
+              </div>
+              <button class="category-primary-button" id="customers-export-button" type="button">Export CSV</button>
+            </div>
+
+            <div class="category-stats customers-stats" aria-label="Customer summary">
+              <article class="category-stat"><span class="category-stat-label">Total Customers</span><strong class="category-stat-value" id="customers-stat-total">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Active Customers</span><strong class="category-stat-value" id="customers-stat-active">—</strong><span class="customer-stat-note" id="customers-stat-active-note">Unavailable: no account status field</span></article>
+              <article class="category-stat"><span class="category-stat-label">New Customers (30 days)</span><strong class="category-stat-value" id="customers-stat-new">—</strong></article>
+              <article class="category-stat"><span class="category-stat-label">Customers With Orders</span><strong class="category-stat-value" id="customers-stat-with-orders">—</strong><span class="customer-stat-note" id="customers-stat-orders-note">Waiting for order data</span></article>
+              <article class="category-stat"><span class="category-stat-label">Total Customer Orders</span><strong class="category-stat-value" id="customers-stat-orders">—</strong><span class="customer-stat-note" id="customers-stat-count-note">Waiting for order data</span></article>
+              <article class="category-stat"><span class="category-stat-label">Total Customer Spend</span><strong class="category-stat-value" id="customers-stat-spend">—</strong><span class="customer-stat-note" id="customers-stat-spend-note">Waiting for verified payment data</span></article>
+            </div>
+            <div class="customers-order-data-error" id="customers-order-data-error" role="alert" hidden>
+              <span id="customers-order-data-error-message"></span>
+              <button class="category-secondary-button" id="customers-order-retry" type="button">Retry order data</button>
+            </div>
+
+            <div class="category-table-card customers-card">
+              <div class="customers-filters" aria-label="Customer filters">
+                <input id="customers-search-name" type="search" placeholder="Search customer name" aria-label="Search customers by name" />
+                <input id="customers-search-email" type="search" placeholder="Search email" aria-label="Search customers by email" />
+                <input id="customers-search-mobile" type="search" placeholder="Search mobile number" aria-label="Search customers by mobile number" />
+                <input id="customers-search-id" type="search" placeholder="Search customer ID" aria-label="Search customers by customer ID" />
+                <select id="customers-status-filter" aria-label="Filter customers by account status"><option value="">All account statuses</option></select>
+                <label class="customer-date-filter" for="customers-date-from">Registered from<input id="customers-date-from" type="date" aria-label="Registration date from" /></label>
+                <label class="customer-date-filter" for="customers-date-to">Registered to<input id="customers-date-to" type="date" aria-label="Registration date to" /></label>
+                <select id="customers-order-filter" aria-label="Filter customers by order activity" title="Order activity filters are enabled after order data loads">
+                  <option value="all">All order activity</option><option value="with" disabled>With orders</option><option value="without" disabled>Without orders</option>
+                </select>
+                <select id="customers-sort" aria-label="Sort customers">
+                  <option value="newest">Newest</option><option value="oldest">Oldest</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="orders-desc" disabled>Most Orders</option><option value="spend-desc" disabled>Highest Spend</option>
+                </select>
+                <button class="category-secondary-button" id="customers-clear-filters" type="button">Clear filters</button>
+              </div>
+              <div class="customers-toolbar">
+                <span id="customers-selection-summary" aria-live="polite">0 selected</span>
+                <div class="customers-bulk-actions" id="customers-bulk-actions" aria-label="Bulk customer actions" hidden>
+                  <button class="category-secondary-button" id="customers-export-selected" type="button">Export selected</button>
+                  <button class="category-secondary-button" id="customers-export-filtered" type="button">Export all filtered</button>
+                  <button class="category-secondary-button" id="customers-clear-selection" type="button">Clear selection</button>
+                </div>
+              </div>
+              <div class="customers-feedback" id="customers-loading" aria-live="polite">
+                <div class="category-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="visually-hidden">Loading customers</span>
+              </div>
+              <div class="customers-feedback" id="customers-error" data-kind="error" role="alert" hidden>
+                <span id="customers-error-message"></span>
+                <button class="category-secondary-button" id="customers-retry" type="button">Retry loading</button>
+              </div>
+              <div class="customers-feedback" id="customers-data-warning" role="status" hidden></div>
+              <div class="customers-feedback" id="customers-empty" hidden></div>
+              <div class="customers-table-wrap" id="customers-table-wrap" hidden>
+                <table class="customers-table">
+                  <thead><tr>
+                    <th scope="col"><input id="customers-select-page" type="checkbox" aria-label="Select all customers on this page" /></th>
+                    <th scope="col">Customer</th><th scope="col">Customer ID</th><th scope="col">Mobile</th><th scope="col">Email</th><th scope="col">Registration Date</th><th scope="col">Total Orders</th><th scope="col">Total Spend</th><th scope="col">Last Order</th><th scope="col">Account Status</th><th scope="col">Actions</th>
+                  </tr></thead>
+                  <tbody id="customers-table-body"></tbody>
+                </table>
+              </div>
+              <div class="category-pagination customers-pagination" id="customers-pagination" hidden>
+                <div class="pagination-summary">
+                  <span id="customers-page-summary"></span>
+                  <label class="pagination-size" for="customers-page-size">Rows per page
+                    <select id="customers-page-size" aria-label="Customer rows per page"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="all">Unlimited</option></select>
+                  </label>
+                </div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="customers-previous">Previous</button>
+                  <div class="pagination-pages" id="customers-page-buttons" aria-label="Customer pages"></div>
+                  <label class="pagination-page-input" for="customers-page-input">Page
+                    <input id="customers-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to customer page" />
+                    <span>of <span id="customers-page-count">1</span></span>
+                  </label>
+                  <button type="button" id="customers-next">Next</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section class="category-page" id="category-page" aria-labelledby="category-section-title" hidden>
             <div class="category-heading-row">
               <div>
@@ -2333,6 +2911,49 @@
       </main>
     </div>
 
+    <dialog class="customer-dialog" id="customer-view-dialog" aria-labelledby="customer-view-title">
+      <div class="customer-dialog-content">
+        <div class="customer-dialog-heading">
+          <div><h2 id="customer-view-title">Customer details</h2><p id="customer-view-subtitle"></p></div>
+          <button class="customer-dialog-close" type="button" data-customer-close aria-label="Close customer details">×</button>
+        </div>
+        <div id="customer-view-content" aria-live="polite"></div>
+        <div class="customer-detail-section">
+          <h3>Recent Orders</h3>
+          <div class="customer-dialog-message" id="customer-orders-unavailable" role="status" aria-live="polite" tabindex="-1">Loading orders…</div>
+          <button class="category-secondary-button" id="customer-orders-retry-details" type="button" hidden>Retry loading orders</button>
+          <div class="customer-orders-list" id="customer-orders-list" aria-live="polite"></div>
+        </div>
+        <div class="category-dialog-actions"><button class="category-secondary-button" type="button" data-customer-close>Close</button></div>
+      </div>
+    </dialog>
+    <dialog class="customer-dialog customer-order-details-dialog" id="customer-order-details-dialog" aria-labelledby="customer-order-details-title">
+      <div class="customer-dialog-content">
+        <div class="customer-dialog-heading">
+          <div><h2 id="customer-order-details-title">Order details</h2></div>
+          <button class="customer-dialog-close" type="button" data-order-details-close aria-label="Close order details">×</button>
+        </div>
+        <div id="customer-order-details-content"></div>
+        <div class="category-dialog-actions"><button class="category-secondary-button" type="button" data-order-details-close>Close</button></div>
+      </div>
+    </dialog>
+    <dialog class="customer-dialog" id="customer-edit-dialog" aria-labelledby="customer-edit-title">
+      <form class="customer-dialog-content" id="customer-edit-form" novalidate>
+        <div class="customer-dialog-heading">
+          <div><h2 id="customer-edit-title">Edit customer</h2><p>Only the customer name is editable in the verified users schema. Email and mobile may be linked to Firebase Authentication and are not changed here.</p></div>
+          <button class="customer-dialog-close" type="button" data-customer-edit-close aria-label="Close customer editor">×</button>
+        </div>
+        <div class="category-field">
+          <label for="customer-edit-name">Full name</label>
+          <input id="customer-edit-name" name="name" type="text" maxlength="120" autocomplete="name" required />
+        </div>
+        <p class="customer-dialog-error" id="customer-edit-error" role="alert" hidden></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-customer-edit-close>Cancel</button>
+          <button class="category-primary-button" id="customer-edit-save" type="submit">Save changes</button>
+        </div>
+      </form>
+    </dialog>
     <dialog class="product-dialog" id="product-form-dialog" aria-labelledby="product-form-title">
       <form class="product-dialog-form" id="product-form" novalidate>
         <div class="product-dialog-header">
@@ -2486,6 +3107,7 @@
       const categoryPage = document.querySelector("#category-page");
       const productsPage = document.querySelector("#products-page");
       const inventoryPage = document.querySelector("#inventory-page");
+      const customersPage = document.querySelector("#customers-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -2533,6 +3155,7 @@
         const isCategoriesPage = activeLink.hash === "#categories";
         const isProductsPage = activeLink.hash === "#products";
         const isInventoryPage = activeLink.hash === "#inventory";
+        const isCustomersPage = activeLink.hash === "#customers";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -2540,7 +3163,8 @@
         categoryPage.hidden = !isCategoriesPage;
         productsPage.hidden = !isProductsPage;
         inventoryPage.hidden = !isInventoryPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage;
+        customersPage.hidden = !isCustomersPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -2669,6 +3293,28 @@
         page: 1,
         pageSize: 10,
       };
+      const customerState = {
+        customers: [],
+        loaded: false,
+        error: null,
+        malformedCount: 0,
+        stop: null,
+        generation: 0,
+        ordersByCustomer: Object.create(null),
+        ordersLoaded: false,
+        ordersError: null,
+        ordersMalformedCount: 0,
+        stopOrders: null,
+        ordersGeneration: 0,
+        page: 1,
+        pageSize: 10,
+        selected: new Set(),
+        selectedCustomerId: null,
+        detailOrders: [],
+        orderRequestId: 0,
+        saving: false,
+        searchTimer: null,
+      };
       let barcodeLibraryPromise = null;
       const categoryTableBody = document.querySelector("#category-table-body");
       const categoryLoading = document.querySelector("#category-loading");
@@ -2694,6 +3340,25 @@
       const categoryStatusSelect = document.querySelector("#category-status");
       const categorySaveButton = document.querySelector("#category-save-button");
       const categoryToastRegion = document.querySelector("#category-toast-region");
+      const customerTableBody = document.querySelector("#customers-table-body");
+      const customerLoading = document.querySelector("#customers-loading");
+      const customerError = document.querySelector("#customers-error");
+      const customerErrorMessage = document.querySelector("#customers-error-message");
+      const customerEmpty = document.querySelector("#customers-empty");
+      const customerTableWrap = document.querySelector("#customers-table-wrap");
+      const customerPagination = document.querySelector("#customers-pagination");
+      const customerViewDialog = document.querySelector("#customer-view-dialog");
+      const customerOrderDetailsDialog = document.querySelector("#customer-order-details-dialog");
+      const customerEditDialog = document.querySelector("#customer-edit-dialog");
+      const customerEditForm = document.querySelector("#customer-edit-form");
+      const customerActionMenu = document.createElement("div");
+      customerActionMenu.className = "customer-action-menu";
+      customerActionMenu.id = "customer-action-menu";
+      customerActionMenu.setAttribute("role", "menu");
+      customerActionMenu.setAttribute("aria-label", "Customer actions");
+      customerActionMenu.hidden = true;
+      document.body.append(customerActionMenu);
+      let activeCustomerMenuTrigger = null;
       const categoryConfirmDialog = document.querySelector("#category-confirm-dialog");
       const categoryConfirmDelete = document.querySelector("#category-confirm-delete");
       const categoryViewDialog = document.querySelector("#category-view-dialog");
@@ -2743,6 +3408,1213 @@
           ? `${action} failed (${code}): ${error?.message || String(error)}`
           : `${action} failed. Please retry.`;
       }
+
+      function escapeCustomerText(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[character]);
+      }
+
+      function normalizeCustomerDate(value) {
+        if (value instanceof Date) {
+          return Number.isNaN(value.getTime()) ? null : value;
+        }
+        if (typeof value === "number" && Number.isFinite(value)) {
+          const milliseconds = value < 100000000000 ? value * 1000 : value;
+          const date = new Date(milliseconds);
+          return Number.isNaN(date.getTime()) ? null : date;
+        }
+        if (typeof value === "string" && value.trim()) {
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? null : date;
+        }
+        return null;
+      }
+
+      function formatCustomerDate(value, withTime = false) {
+        const date = normalizeCustomerDate(value);
+        if (!date) return "Not provided";
+        return new Intl.DateTimeFormat("en-IN", withTime
+          ? { dateStyle: "medium", timeStyle: "short" }
+          : { dateStyle: "medium" }).format(date);
+      }
+
+      function customerDateKey(value) {
+        const date = normalizeCustomerDate(value);
+        if (!date) return "";
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function customerStatus(raw) {
+        const rawStatus = raw.accountStatus ?? raw.status;
+        if (typeof rawStatus === "string" && rawStatus.trim()) {
+          return rawStatus.trim();
+        }
+        if (typeof raw.active === "boolean") return raw.active ? "Active" : "Inactive";
+        if (typeof raw.isActive === "boolean") return raw.isActive ? "Active" : "Inactive";
+        return "";
+      }
+
+      function customerPhone(raw) {
+        const value = raw.mobile ?? raw.mobileNumber ?? raw.phone ?? raw.phoneNumber ?? raw.contactNumber;
+        return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
+      }
+
+      function customerPhoto(raw) {
+        const value = raw.profileImage ?? raw.photoURL ?? raw.photoUrl ?? raw.imageUrl;
+        if (typeof value !== "string") return "";
+        try {
+          const url = new URL(value, window.location.href);
+          return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+        } catch {
+          return "";
+        }
+      }
+
+      function customerInitials(name) {
+        const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+        return parts.length ? `${parts[0][0]}${parts.length > 1 ? parts[parts.length - 1][0] : ""}`.toUpperCase() : "?";
+      }
+
+      function normalizeCustomerPhone(value) {
+        return String(value || "").replace(/\D/g, "");
+      }
+
+      function parseCustomers(value) {
+        if (value == null) return { customers: [], malformedCount: 0 };
+        if (typeof value !== "object" || Array.isArray(value)) {
+          throw new Error("Firebase returned an unexpected users data structure.");
+        }
+        const customers = [];
+        let malformedCount = 0;
+        for (const [id, raw] of Object.entries(value)) {
+          if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+            if (raw !== null && raw !== undefined) malformedCount += 1;
+            continue;
+          }
+          if (raw.role !== "customer") continue;
+          if (typeof raw.uid !== "string" || raw.uid !== id) {
+            malformedCount += 1;
+            continue;
+          }
+          customers.push({
+            id,
+            uid: raw.uid,
+            raw,
+            name: typeof raw.fullName === "string" && raw.fullName.trim()
+              ? raw.fullName.trim()
+              : typeof raw.name === "string" ? raw.name.trim() : "",
+            email: typeof raw.email === "string" ? raw.email.trim() : "",
+            mobile: customerPhone(raw),
+            registeredAt: normalizeCustomerDate(raw.createdAt),
+            status: customerStatus(raw),
+            photo: customerPhoto(raw),
+          });
+        }
+        return { customers, malformedCount };
+      }
+
+      function customerHasStatusSupport() {
+        return customerState.customers.length > 0 &&
+          customerState.customers.every((customer) => Boolean(customer.status));
+      }
+
+      function renderCustomerStats() {
+        const customers = customerState.customers;
+        document.querySelector("#customers-stat-total").textContent = customers.length.toLocaleString("en-IN");
+        const statusComplete = customerHasStatusSupport();
+        const activeCount = customers.filter((customer) => customer.status.toLowerCase() === "active").length;
+        document.querySelector("#customers-stat-active").textContent = statusComplete ? activeCount.toLocaleString("en-IN") : "—";
+        document.querySelector("#customers-stat-active-note").textContent = statusComplete
+          ? "Based on the stored account status"
+          : customers.length
+            ? "Unavailable: account status is missing for some customers"
+            : "Unavailable: no customer status data";
+        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const newCount = customers.filter((customer) =>
+          customer.registeredAt && customer.registeredAt.getTime() >= thirtyDaysAgo && customer.registeredAt.getTime() <= Date.now(),
+        ).length;
+        document.querySelector("#customers-stat-new").textContent = newCount.toLocaleString("en-IN");
+        const withOrders = document.querySelector("#customers-stat-with-orders");
+        const orderCount = document.querySelector("#customers-stat-orders");
+        const spend = document.querySelector("#customers-stat-spend");
+        const ordersNote = document.querySelector("#customers-stat-orders-note");
+        const countNote = document.querySelector("#customers-stat-count-note");
+        const spendNote = document.querySelector("#customers-stat-spend-note");
+        const ordersError = document.querySelector("#customers-order-data-error");
+        ordersError.hidden = !customerState.ordersError;
+        document.querySelector("#customers-order-data-error-message").textContent = customerState.ordersError || "";
+        if (customerState.ordersError) {
+          withOrders.textContent = "—";
+          orderCount.textContent = "—";
+          spend.textContent = "—";
+          ordersNote.textContent = "Order data unavailable";
+          countNote.textContent = "Order data unavailable";
+          spendNote.textContent = "Verified payment data unavailable";
+          return;
+        }
+        if (!customerState.ordersLoaded) {
+          withOrders.textContent = "—";
+          orderCount.textContent = "—";
+          spend.textContent = "—";
+          ordersNote.textContent = "Loading orders…";
+          countNote.textContent = "Loading orders…";
+          spendNote.textContent = "Loading verified payments…";
+          return;
+        }
+        const perCustomer = customers.map((customer) =>
+          summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []),
+        );
+        const customerSpendIncomplete = perCustomer.some((summary) => summary.incompletePaidAmounts);
+        const totalOrders = perCustomer.reduce((sum, summary) => sum + summary.total, 0);
+        const totalSpend = perCustomer.reduce((sum, summary) => sum + summary.paidTotal, 0);
+        withOrders.textContent = perCustomer.filter((summary) => summary.total > 0).length.toLocaleString("en-IN");
+        orderCount.textContent = totalOrders.toLocaleString("en-IN");
+        spend.textContent = customerSpendIncomplete ? "Unavailable" : formatCustomerCurrency(totalSpend);
+        ordersNote.textContent = customerState.ordersMalformedCount
+          ? `${customerState.ordersMalformedCount} malformed order record${customerState.ordersMalformedCount === 1 ? "" : "s"} excluded`
+          : "Matched by customer Firebase UID";
+        countNote.textContent = `${totalOrders.toLocaleString("en-IN")} records under customer order paths`;
+        spendNote.textContent = customerSpendIncomplete
+          ? "Some COMPLETED payments have invalid grandTotal amounts"
+          : "COMPLETED payments excluding CANCELLED orders";
+      }
+
+      function updateCustomerStatusOptions() {
+        const select = document.querySelector("#customers-status-filter");
+        const selected = select.value;
+        const values = [...new Set(customerState.customers.map((customer) => customer.status).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b));
+        select.replaceChildren(new Option("All account statuses", ""));
+        for (const value of values) select.add(new Option(value, value));
+        if (values.includes(selected)) select.value = selected;
+        const orderActivityAvailable = customerState.ordersLoaded && !customerState.ordersError;
+        document.querySelector("#customers-order-filter").querySelector('option[value="with"]').disabled = !orderActivityAvailable;
+        document.querySelector("#customers-order-filter").querySelector('option[value="without"]').disabled = !orderActivityAvailable;
+        document.querySelector("#customers-sort").querySelector('option[value="orders-desc"]').disabled = !orderActivityAvailable;
+        document.querySelector("#customers-sort").querySelector('option[value="spend-desc"]').disabled = !orderActivityAvailable;
+      }
+
+      function getFilteredCustomers() {
+        const nameSearch = document.querySelector("#customers-search-name").value.trim().toLocaleLowerCase();
+        const emailSearch = document.querySelector("#customers-search-email").value.trim().toLocaleLowerCase();
+        const mobileSearch = normalizeCustomerPhone(document.querySelector("#customers-search-mobile").value);
+        const idSearch = document.querySelector("#customers-search-id").value.trim().toLocaleLowerCase();
+        const status = document.querySelector("#customers-status-filter").value.toLocaleLowerCase();
+        const from = document.querySelector("#customers-date-from").value;
+        const to = document.querySelector("#customers-date-to").value;
+        const orderActivity = document.querySelector("#customers-order-filter").value;
+        const sort = document.querySelector("#customers-sort").value;
+        const rows = customerState.customers.filter((customer) => {
+          const recordPhone = normalizeCustomerPhone(customer.mobile);
+          const registered = customerDateKey(customer.raw.createdAt);
+          const orderSummary = summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []);
+          return (!nameSearch || customer.name.toLocaleLowerCase().includes(nameSearch)) &&
+            (!emailSearch || customer.email.toLocaleLowerCase().includes(emailSearch)) &&
+            (!mobileSearch || recordPhone.includes(mobileSearch)) &&
+            (!idSearch || customer.id.toLocaleLowerCase().includes(idSearch)) &&
+            (!status || customer.status.toLocaleLowerCase() === status) &&
+            (!from || (registered && registered >= from)) &&
+            (!to || (registered && registered <= to)) &&
+            (orderActivity === "all" || !customerState.ordersLoaded ||
+              (orderActivity === "with" ? orderSummary.total > 0 : orderSummary.total === 0));
+        });
+        rows.sort((a, b) => {
+          if (sort === "name-asc" || sort === "name-desc") {
+            const direction = sort === "name-desc" ? -1 : 1;
+            return direction * (a.name || a.id).localeCompare(b.name || b.id, undefined, { sensitivity: "base" });
+          }
+          if (sort === "orders-desc") {
+            return summarizeCustomerOrders(customerState.ordersByCustomer[b.uid] || []).total -
+              summarizeCustomerOrders(customerState.ordersByCustomer[a.uid] || []).total;
+          }
+          if (sort === "spend-desc") {
+            const aSpend = summarizeCustomerOrders(customerState.ordersByCustomer[a.uid] || []);
+            const bSpend = summarizeCustomerOrders(customerState.ordersByCustomer[b.uid] || []);
+            if (aSpend.incompletePaidAmounts !== bSpend.incompletePaidAmounts) {
+              return aSpend.incompletePaidAmounts ? 1 : -1;
+            }
+            return bSpend.paidTotal - aSpend.paidTotal;
+          }
+          const aTime = a.registeredAt?.getTime() ?? (sort === "oldest" ? Number.MAX_SAFE_INTEGER : -1);
+          const bTime = b.registeredAt?.getTime() ?? (sort === "oldest" ? Number.MAX_SAFE_INTEGER : -1);
+          return (sort === "oldest" ? aTime - bTime : bTime - aTime) || a.id.localeCompare(b.id);
+        });
+        return rows;
+      }
+
+      function renderCustomerPagination(total, pageCount) {
+        const pageButtons = document.querySelector("#customers-page-buttons");
+        pageButtons.replaceChildren();
+        const startPage = Math.max(1, Math.min(customerState.page - 3, pageCount - 6));
+        const endPage = Math.min(pageCount, startPage + 6);
+        for (let page = startPage; page <= endPage; page += 1) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to customer page ${page}`);
+          if (page === customerState.page) button.setAttribute("aria-current", "page");
+          button.addEventListener("click", () => {
+            customerState.page = page;
+            renderCustomers();
+          });
+          pageButtons.append(button);
+        }
+        const pageSize = customerState.pageSize;
+        const start = total ? (pageSize === Infinity ? 1 : (customerState.page - 1) * pageSize + 1) : 0;
+        const end = total ? (pageSize === Infinity ? total : Math.min(total, customerState.page * pageSize)) : 0;
+        document.querySelector("#customers-page-summary").textContent =
+          `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${total.toLocaleString("en-IN")} customers`;
+        document.querySelector("#customers-page-count").textContent = String(pageCount);
+        const pageInput = document.querySelector("#customers-page-input");
+        pageInput.max = String(pageCount);
+        pageInput.value = String(customerState.page);
+        document.querySelector("#customers-previous").disabled = customerState.page <= 1;
+        document.querySelector("#customers-next").disabled = customerState.page >= pageCount;
+        customerPagination.hidden = total === 0;
+      }
+
+      function renderCustomers() {
+        customerLoading.hidden = customerState.loaded || Boolean(customerState.error);
+        customerError.hidden = !customerState.error;
+        customerTableWrap.hidden = !customerState.loaded || Boolean(customerState.error);
+        document.querySelector("#customers-data-warning").hidden = !customerState.loaded || customerState.malformedCount === 0;
+        document.querySelector("#customers-data-warning").textContent = customerState.malformedCount
+          ? `${customerState.malformedCount} malformed customer record${customerState.malformedCount === 1 ? " was" : "s were"} ignored because the UID did not match the Firebase record key or the record was invalid.`
+          : "";
+        if (customerState.error) {
+          customerErrorMessage.textContent = customerState.error;
+          customerEmpty.hidden = true;
+          customerPagination.hidden = true;
+          return;
+        }
+        if (!customerState.loaded) return;
+
+        renderCustomerStats();
+        updateCustomerStatusOptions();
+        const filtered = getFilteredCustomers();
+        const pageCount = Math.max(1, customerState.pageSize === Infinity ? 1 : Math.ceil(filtered.length / customerState.pageSize));
+        customerState.page = Math.min(customerState.page, pageCount);
+        const first = customerState.pageSize === Infinity ? 0 : (customerState.page - 1) * customerState.pageSize;
+        const visible = customerState.pageSize === Infinity ? filtered : filtered.slice(first, first + customerState.pageSize);
+        const rowsMarkup = visible.map((customer) => {
+          const displayName = customer.name || "Not provided";
+          const avatar = customer.photo
+            ? `<img src="${escapeCustomerText(customer.photo)}" alt="" loading="lazy" />`
+            : escapeCustomerText(customerInitials(customer.name));
+          const orderSummary = summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []);
+          const orderColumns = customerState.ordersLoaded && !customerState.ordersError
+            ? `<td>${orderSummary.total.toLocaleString("en-IN")}</td>
+              <td>${orderSummary.incompletePaidAmounts ? "Unavailable" : formatCustomerCurrency(orderSummary.paidTotal)}</td>
+              <td>${orderSummary.latest ? escapeCustomerText(formatCustomerDate(orderSummary.latest, true)) : "Not provided"}</td>`
+            : "<td>—</td><td>—</td><td>—</td>";
+          return `<tr>
+            <td><input type="checkbox" data-customer-select="${escapeCustomerText(customer.id)}" aria-label="Select ${escapeCustomerText(displayName)}" ${customerState.selected.has(customer.id) ? "checked" : ""} /></td>
+            <td><div class="customer-cell"><span class="customer-avatar">${avatar}</span><span class="customer-cell-name" title="${escapeCustomerText(displayName)}">${escapeCustomerText(displayName)}</span></div></td>
+            <td><span class="customer-overflow" title="${escapeCustomerText(customer.id)}">${escapeCustomerText(customer.id)}</span></td>
+            <td><span class="customer-overflow" title="${escapeCustomerText(customer.mobile || "Not provided")}">${escapeCustomerText(customer.mobile || "Not provided")}</span></td>
+            <td><span class="customer-overflow" title="${escapeCustomerText(customer.email || "Not provided")}">${escapeCustomerText(customer.email || "Not provided")}</span></td>
+            <td>${escapeCustomerText(formatCustomerDate(customer.raw.createdAt))}</td>
+            ${orderColumns}
+            <td><span class="customer-status">${escapeCustomerText(customer.status || "Not available")}</span></td>
+            <td><button class="customer-actions-trigger" type="button" data-customer-menu="${escapeCustomerText(customer.id)}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${escapeCustomerText(displayName)}">⋮</button></td>
+          </tr>`;
+        }).join("");
+        customerTableBody.innerHTML = rowsMarkup;
+        customerEmpty.hidden = filtered.length > 0;
+        customerEmpty.textContent = customerState.customers.length
+          ? "No customers match these filters. Adjust the search or clear filters."
+          : "No customer accounts are available under users.";
+        customerTableWrap.hidden = filtered.length === 0;
+        renderCustomerPagination(filtered.length, pageCount);
+        const pageIds = visible.map((customer) => customer.id);
+        const selectedOnPage = pageIds.filter((id) => customerState.selected.has(id)).length;
+        const pageSelect = document.querySelector("#customers-select-page");
+        pageSelect.checked = pageIds.length > 0 && selectedOnPage === pageIds.length;
+        pageSelect.indeterminate = selectedOnPage > 0 && selectedOnPage < pageIds.length;
+        document.querySelector("#customers-selection-summary").textContent =
+          `${customerState.selected.size.toLocaleString("en-IN")} selected`;
+        document.querySelector("#customers-bulk-actions").hidden = customerState.selected.size === 0;
+      }
+
+      function setCustomerError(error) {
+        const code = String(error?.code || "").toLowerCase();
+        if (error instanceof Error && error.message.includes("unexpected users data structure")) {
+          customerState.error = "Customer data could not be read because Firebase returned an unexpected format. Retry after checking the users records.";
+        } else if (code.includes("permission_denied") || code.includes("permission-denied")) {
+          customerState.error = "Firebase denied access to the customer list. Confirm the admin-only users list rule is deployed and this account has the admin role.";
+        } else if (code.includes("network") || code.includes("unavailable") || navigator.onLine === false) {
+          customerState.error = "Could not connect to Firebase. Check your connection and retry.";
+        } else if (code.includes("timeout")) {
+          customerState.error = "Customer loading timed out. Check your connection and retry.";
+        } else {
+          customerState.error = "Customer records could not be loaded. Retry, or check the Firebase Realtime Database permissions.";
+        }
+      }
+
+      function startCustomerListener() {
+        if (customerState.stop) return;
+        const generation = ++customerState.generation;
+        customerState.loaded = false;
+        customerState.error = null;
+        customerState.malformedCount = 0;
+        renderCustomers();
+        const timeout = window.setTimeout(() => {
+          if (generation === customerState.generation && !customerState.loaded) {
+            setCustomerError({ code: "timeout" });
+            renderCustomers();
+          }
+        }, 15000);
+        customerState.stop = onValue(
+          ref(database, "users"),
+          (snapshot) => {
+            if (generation !== customerState.generation) return;
+            window.clearTimeout(timeout);
+            try {
+              const parsed = parseCustomers(snapshot.val());
+              customerState.customers = parsed.customers;
+              customerState.malformedCount = parsed.malformedCount;
+              customerState.loaded = true;
+              customerState.error = null;
+              const knownIds = new Set(customerState.customers.map((customer) => customer.id));
+              for (const id of customerState.selected) if (!knownIds.has(id)) customerState.selected.delete(id);
+            } catch (error) {
+              customerState.loaded = false;
+              setCustomerError(error);
+            }
+            renderCustomers();
+          },
+          (error) => {
+            if (generation !== customerState.generation) return;
+            window.clearTimeout(timeout);
+            customerState.loaded = false;
+            setCustomerError(error);
+            renderCustomers();
+          },
+        );
+      }
+
+      function retryCustomerLoad() {
+        customerState.stop?.();
+        customerState.stop = null;
+        customerState.generation += 1;
+        customerState.error = null;
+        startCustomerListener();
+      }
+
+      function startCustomerOrdersListener() {
+        if (customerState.stopOrders) return;
+        const generation = ++customerState.ordersGeneration;
+        customerState.ordersLoaded = false;
+        customerState.ordersError = null;
+        customerState.ordersMalformedCount = 0;
+        renderCustomers();
+        const timeout = window.setTimeout(() => {
+          if (generation === customerState.ordersGeneration && !customerState.ordersLoaded && !customerState.ordersError) {
+            customerState.ordersError = "Loading Firebase order data at orders timed out. Check the connection and retry.";
+            renderCustomers();
+          }
+        }, 15000);
+        customerState.stopOrders = onValue(
+          ref(database, "orders"),
+          (snapshot) => {
+            if (generation !== customerState.ordersGeneration) return;
+            window.clearTimeout(timeout);
+            try {
+              const value = snapshot.val();
+              if (value !== null && (typeof value !== "object" || Array.isArray(value))) {
+                throw new Error("The orders node has an unexpected data format.");
+              }
+              const ordersByCustomer = Object.create(null);
+              let malformedCount = 0;
+              for (const [uid, records] of Object.entries(value || {})) {
+                try {
+                  const parsed = parseCustomerOrders(records, uid);
+                  ordersByCustomer[uid] = parsed.orders;
+                  malformedCount += parsed.malformedCount;
+                } catch {
+                  malformedCount += 1;
+                }
+              }
+              customerState.ordersByCustomer = ordersByCustomer;
+              customerState.ordersMalformedCount = malformedCount;
+              customerState.ordersLoaded = true;
+              customerState.ordersError = null;
+            } catch (error) {
+              customerState.ordersLoaded = false;
+              customerState.ordersError = error instanceof Error && error.message.includes("unexpected data format")
+                ? "Firebase returned an unexpected format at orders. Order metrics and order-based filters are unavailable."
+                : "Customer order data could not be processed. Retry loading order data.";
+              reportFirebaseError("Parsing customer order data", error);
+            }
+            renderCustomers();
+          },
+          (error) => {
+            if (generation !== customerState.ordersGeneration) return;
+            window.clearTimeout(timeout);
+            customerState.ordersLoaded = false;
+            const code = String(error?.code || "").toLowerCase();
+            if (code.includes("permission_denied") || code.includes("permission-denied")) {
+              customerState.ordersError = "Firebase denied the read at orders. The current Realtime Database rules do not grant this admin access; ask an administrator to authorize order reads.";
+            } else if (code.includes("network") || code.includes("unavailable") || navigator.onLine === false) {
+              customerState.ordersError = "Could not connect to Firebase at orders. Check your connection and retry.";
+            } else {
+              customerState.ordersError = "Could not load customer order data from orders. Retry or check Realtime Database permissions.";
+            }
+            reportFirebaseError("Loading customer order data", error);
+            renderCustomers();
+          },
+        );
+      }
+
+      function retryCustomerOrders() {
+        customerState.stopOrders?.();
+        customerState.stopOrders = null;
+        customerState.ordersGeneration += 1;
+        customerState.ordersError = null;
+        customerState.ordersLoaded = false;
+        startCustomerOrdersListener();
+      }
+
+      function filteredSelectedCustomers() {
+        const all = new Map(customerState.customers.map((customer) => [customer.id, customer]));
+        return [...customerState.selected].map((id) => all.get(id)).filter(Boolean);
+      }
+
+      function exportCustomers(customers) {
+        if (!customers.length) {
+          showCategoryToast("There are no customer records to export.", "error");
+          return;
+        }
+        try {
+          const headers = ["Customer ID", "Name", "Email", "Mobile", "Registration Date"];
+          if (customers.every((customer) => customer.status)) headers.push("Status");
+          const rows = customers.map((customer) => {
+            const values = [
+              customer.id,
+              customer.name,
+              customer.email,
+              customer.mobile,
+              customer.raw.createdAt == null ? "" : formatCustomerDate(customer.raw.createdAt),
+            ];
+            if (headers.includes("Status")) values.push(customer.status);
+            return values;
+          });
+          const csv = [headers, ...rows].map((row) => row.map((value) => {
+            let text = String(value ?? "");
+            if (/^\s*[=+\-@]/.test(text)) text = `'${text}`;
+            return `"${text.replace(/"/g, '""')}"`;
+          }).join(",")).join("\r\n");
+          const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = `dukabarg-customers-${new Date().toISOString().slice(0, 10)}.csv`;
+          document.body.append(anchor);
+          anchor.click();
+          anchor.remove();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showCategoryToast(`Exported ${customers.length.toLocaleString("en-IN")} customer${customers.length === 1 ? "" : "s"}.`);
+        } catch (error) {
+          console.error("Customer CSV export failed.", error);
+          showCategoryToast("Customer export failed. Check browser download permissions and retry.", "error");
+        }
+      }
+
+      function addressEntries(raw) {
+        const entries = [];
+        const candidates = Object.entries(raw).filter(([key]) =>
+          /^(address|addresses|defaultaddress|shippingaddress|billingaddress)$/.test(key.replace(/[^a-z]/gi, "").toLowerCase()),
+        );
+        for (const [key, candidate] of candidates) {
+          if (typeof candidate === "string" && candidate.trim()) {
+            entries.push([key === "address" ? "Address" : key, { addressLine1: candidate.trim() }]);
+            continue;
+          }
+          if (Array.isArray(candidate)) {
+            candidate.forEach((item, index) => {
+              if (item && typeof item === "object" && !Array.isArray(item)) entries.push([`Address ${index + 1}`, item]);
+            });
+          } else if (candidate && typeof candidate === "object") {
+            const isAddress = Object.keys(candidate).some((key) =>
+              /address|city|state|postal|zip|pin|locality|street|line/i.test(key),
+            );
+            if (isAddress) entries.push(["Address", candidate]);
+            else for (const [label, item] of Object.entries(candidate)) {
+              if (item && typeof item === "object" && !Array.isArray(item)) entries.push([label, item]);
+            }
+          }
+        }
+        return entries;
+      }
+
+      function renderCustomerAddress(label, address) {
+        const fields = [
+          [["name", "fullName", "recipientName"], "Name"],
+          [["phone", "mobile", "phoneNumber", "mobileNumber"], "Phone"],
+          [["addressLine1", "line1", "streetAddress", "address"], "Address line 1"],
+          [["addressLine2", "line2"], "Address line 2"],
+          [["street"], "Street"], [["locality"], "Locality"], [["area"], "Area"],
+          [["city"], "City"], [["state", "stateName"], "State"],
+          [["pinCode", "pincode", "postalCode", "zipCode", "zip"], "PIN / postal code"],
+          [["isDefault", "default"], "Default address"],
+        ];
+        const normalized = new Map(Object.entries(address).map(([key, value]) => [
+          key.replace(/[^a-z]/gi, "").toLowerCase(),
+          value,
+        ]));
+        const items = fields.flatMap(([aliases, title]) => {
+          const value = aliases.map((key) => normalized.get(key.replace(/[^a-z]/gi, "").toLowerCase()))
+            .find((entry) => entry !== undefined && entry !== null && entry !== "");
+          if (value === undefined || (typeof value === "object")) return [];
+          return [`<div class="customer-detail-item"><dt>${escapeCustomerText(title)}</dt><dd>${escapeCustomerText(typeof value === "boolean" ? (value ? "Yes" : "No") : value)}</dd></div>`];
+        });
+        return items.length
+          ? `<div class="customer-address-card"><strong>${escapeCustomerText(label)}</strong><dl class="customer-detail-grid">${items.join("")}</dl></div>`
+          : "";
+      }
+
+      const customerOrderStatuses = {
+        pending: ["PLACED", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "OUT_FOR_DELIVERY"],
+        completed: "DELIVERED",
+        cancelled: "CANCELLED",
+        paymentCompleted: "COMPLETED",
+        paymentPending: "PENDING",
+        paymentFailed: "FAILED",
+      };
+
+      function normalizeOrderTimestamp(value) {
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return normalizeCustomerDate(value);
+        }
+        if (typeof value === "string" && value.trim()) {
+          const numericValue = Number(value);
+          return normalizeCustomerDate(Number.isFinite(numericValue) ? numericValue : value);
+        }
+        return null;
+      }
+
+      function parseCustomerOrders(value, customerId) {
+        if (value == null) return { orders: [], malformedCount: 0 };
+        if (typeof value !== "object" || Array.isArray(value)) {
+          throw new Error("The order list has an unexpected data format.");
+        }
+        const orders = [];
+        let malformedCount = 0;
+        let unknownOrderStatusCount = 0;
+        let unknownPaymentStatusCount = 0;
+        for (const [id, raw] of Object.entries(value)) {
+          if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+            malformedCount += 1;
+            continue;
+          }
+          if (!["grandTotal", "orderStatus", "paymentStatus", "transactionTime", "placedAt", "items", "orderItems"]
+            .some((field) => Object.prototype.hasOwnProperty.call(raw, field))) {
+            malformedCount += 1;
+            continue;
+          }
+          if (raw.userId != null && String(raw.userId) !== customerId) {
+            malformedCount += 1;
+            continue;
+          }
+          const paymentStatus = typeof raw.paymentStatus === "string"
+            ? raw.paymentStatus
+            : customerOrderStatuses.paymentPending;
+          const orderStatus = typeof raw.orderStatus === "string"
+            ? raw.orderStatus
+            : paymentStatus === customerOrderStatuses.paymentFailed
+              ? customerOrderStatuses.cancelled
+              : "PLACED";
+          if (
+            !customerOrderStatuses.pending.includes(orderStatus) &&
+            orderStatus !== customerOrderStatuses.completed &&
+            orderStatus !== customerOrderStatuses.cancelled
+          ) {
+            unknownOrderStatusCount += 1;
+          }
+          if (![customerOrderStatuses.paymentCompleted, customerOrderStatuses.paymentPending, customerOrderStatuses.paymentFailed].includes(paymentStatus)) {
+            unknownPaymentStatusCount += 1;
+          }
+          const amountValue = raw.grandTotal;
+          const amount = typeof amountValue === "number" || (typeof amountValue === "string" && amountValue.trim())
+            ? Number(amountValue)
+            : NaN;
+          const rawItems = raw.items ?? raw.orderItems;
+          const itemValues = Array.isArray(rawItems)
+            ? rawItems
+            : rawItems && typeof rawItems === "object"
+              ? Object.values(rawItems)
+              : [];
+          const items = itemValues.filter((item) => item && typeof item === "object" && !Array.isArray(item)).map((item) => ({
+            name: firstNonEmptyString(item.productName, item.name, item.title),
+            quantity: typeof item.quantity === "number" && Number.isFinite(item.quantity) && item.quantity > 0
+              ? item.quantity
+              : typeof item.quantity === "string" && Number.isFinite(Number(item.quantity)) && Number(item.quantity) > 0
+                ? Number(item.quantity)
+                : null,
+            price: typeof item.price === "number" || (typeof item.price === "string" && item.price.trim())
+              ? Number(item.price)
+              : null,
+          }));
+          orders.push({
+            id,
+            raw,
+            paymentStatus,
+            orderStatus,
+            amount: Number.isFinite(amount) && amount >= 0 ? amount : null,
+            date: normalizeOrderTimestamp(raw.placedAt) ||
+              normalizeOrderTimestamp(raw.transactionTime) ||
+              normalizeOrderTimestamp(raw.createdAt),
+            paymentMethod: firstNonEmptyString(raw.paymentMethod, raw.paymentMode, raw.method),
+            items,
+            itemCount: items.length && items.every((item) => item.quantity !== null)
+              ? items.reduce((sum, item) => sum + (item.quantity ?? 0), 0)
+              : null,
+          });
+        }
+        return { orders, malformedCount, unknownOrderStatusCount, unknownPaymentStatusCount };
+      }
+
+      function firstNonEmptyString(...values) {
+        const value = values.find((entry) => typeof entry === "string" && entry.trim());
+        return value ? value.trim() : "";
+      }
+
+      function renderCustomerRecentOrders(orders, message = "", kind = "info") {
+        const list = document.querySelector("#customer-orders-list");
+        const state = document.querySelector("#customer-orders-unavailable");
+        document.querySelector("#customer-orders-retry-details").hidden = kind !== "error";
+        list.replaceChildren();
+        state.textContent = message;
+        state.dataset.kind = message ? kind : "";
+        if (!orders.length) return;
+        state.textContent = "";
+        const cards = orders.slice().sort((a, b) =>
+          (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
+        ).map((order) => {
+          const items = order.items.length
+            ? `<div class="customer-order-items">${order.items.map((item) =>
+              `<span class="customer-order-item-name">${escapeCustomerText(item.name || "Product name not provided")}${item.quantity ? ` × ${escapeCustomerText(item.quantity)}` : ""}</span>`,
+            ).join("")}</div>`
+            : "";
+          const itemSummary = order.itemCount === null
+            ? "Item count not provided"
+            : `${order.itemCount.toLocaleString("en-IN")} item${order.itemCount === 1 ? "" : "s"}`;
+          return `<article class="customer-order-card">
+            <div class="customer-order-card-header">
+              <strong>Order ${escapeCustomerText(order.id)}</strong>
+              <span>${escapeCustomerText(order.amount === null ? "Amount not provided" : formatCustomerCurrency(order.amount))}</span>
+            </div>
+            <div class="customer-order-card-meta">
+              <span>${escapeCustomerText(order.date ? formatCustomerDate(order.date, true) : "Order date not provided")}</span>
+              <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.orderStatus)}">Order: ${escapeCustomerText(order.orderStatus)}</span>
+              <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.paymentStatus)}">Payment: ${escapeCustomerText(order.paymentStatus)}</span>
+              <span>${escapeCustomerText(itemSummary)}</span>
+              <span>${escapeCustomerText(order.paymentMethod || "Payment method not provided")}</span>
+            </div>
+            ${items}
+            <div class="customer-order-card-actions">
+              <button class="category-secondary-button" type="button" data-customer-order-details="${escapeCustomerText(order.id)}">View Details</button>
+            </div>
+          </article>`;
+        });
+        list.innerHTML = cards.join("");
+      }
+
+      function openCustomerOrderDetails(order) {
+        document.querySelector("#customer-order-details-title").textContent = `Order ${order.id}`;
+        const items = order.items.length
+          ? `<ul>${order.items.map((item) => `<li>${escapeCustomerText(item.name || "Product name not provided")}${item.quantity ? ` × ${escapeCustomerText(item.quantity)}` : ""}${Number.isFinite(item.price) ? ` — ${escapeCustomerText(formatCustomerCurrency(item.price))}` : ""}</li>`).join("")}</ul>`
+          : "<p>No product item details are stored on this order.</p>";
+        document.querySelector("#customer-order-details-content").innerHTML =
+          `<dl class="customer-detail-grid">
+            <div class="customer-detail-item"><dt>Order ID</dt><dd>${escapeCustomerText(order.id)}</dd></div>
+            <div class="customer-detail-item"><dt>Date</dt><dd>${escapeCustomerText(order.date ? formatCustomerDate(order.date, true) : "Not provided")}</dd></div>
+            <div class="customer-detail-item"><dt>Order status</dt><dd>${escapeCustomerText(order.orderStatus)}</dd></div>
+            <div class="customer-detail-item"><dt>Payment status</dt><dd>${escapeCustomerText(order.paymentStatus)}</dd></div>
+            <div class="customer-detail-item"><dt>Amount</dt><dd>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</dd></div>
+            <div class="customer-detail-item"><dt>Payment method</dt><dd>${escapeCustomerText(order.paymentMethod || "Not provided")}</dd></div>
+          </dl><section class="customer-detail-section"><h3>Items</h3>${items}</section>`;
+        customerOrderDetailsDialog.showModal();
+      }
+
+      function formatCustomerCurrency(value) {
+        return new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(value);
+      }
+
+      function summarizeCustomerOrders(orders) {
+        const paidOrders = orders.filter((order) =>
+          order.paymentStatus === customerOrderStatuses.paymentCompleted &&
+          order.orderStatus !== customerOrderStatuses.cancelled,
+        );
+        const incompletePaidAmounts = paidOrders.some((order) => order.amount === null);
+        const paidTotal = paidOrders.reduce((sum, order) => sum + (order.amount ?? 0), 0);
+        const latestTimestamp = orders.reduce(
+          (latest, order) => Math.max(latest, order.date?.getTime() ?? 0),
+          0,
+        );
+        const pendingStatuses = new Set(customerOrderStatuses.pending);
+        return {
+          total: orders.length,
+          completed: orders.filter((order) => order.orderStatus === customerOrderStatuses.completed).length,
+          cancelled: orders.filter((order) => order.orderStatus === customerOrderStatuses.cancelled).length,
+          pending: orders.filter((order) => pendingStatuses.has(order.orderStatus)).length,
+          paidTotal,
+          paidOrderCount: paidOrders.length,
+          incompletePaidAmounts,
+          latest: latestTimestamp ? new Date(latestTimestamp) : null,
+        };
+      }
+
+      function renderCustomerOrderMetrics(metrics, message) {
+        document.querySelector("#customer-order-total").textContent = metrics.total;
+        document.querySelector("#customer-order-completed").textContent = metrics.completed;
+        document.querySelector("#customer-order-cancelled").textContent = metrics.cancelled;
+        document.querySelector("#customer-order-pending").textContent = metrics.pending;
+        document.querySelector("#customer-order-paid").textContent = metrics.paid;
+        document.querySelector("#customer-order-latest").textContent = metrics.latest;
+        document.querySelector("#customer-order-average").textContent = metrics.average;
+        const lastActivity = document.querySelector("#customer-profile-last-activity");
+        if (lastActivity) lastActivity.textContent = metrics.latest;
+        const state = document.querySelector("#customer-orders-unavailable");
+        state.textContent = message;
+        state.dataset.kind = metrics.kind || "info";
+      }
+
+      async function loadCustomerOrders(customer, requestId) {
+        const orderPath = `orders/${customer.uid}`;
+        renderCustomerRecentOrders([], "Loading recent orders…");
+        renderCustomerOrderMetrics({
+          total: "Loading…",
+          completed: "Loading…",
+          cancelled: "Loading…",
+          pending: "Loading…",
+          paid: "Loading…",
+          latest: "Loading…",
+          average: "Loading…",
+        }, "Loading this customer’s orders…");
+        try {
+          const snapshot = await withAuthTimeout(
+            get(ref(database, orderPath)),
+            "Customer order loading",
+          );
+          if (
+            requestId !== customerState.orderRequestId ||
+            customerState.selectedCustomerId !== customer.uid ||
+            !customerViewDialog.open
+          ) return;
+
+          const parsed = parseCustomerOrders(snapshot.val(), customer.uid);
+          const orders = parsed.orders;
+          customerState.detailOrders = orders;
+          const summary = summarizeCustomerOrders(orders);
+          const averageOrderValue = summary.paidOrderCount && !summary.incompletePaidAmounts
+            ? formatCustomerCurrency(summary.paidTotal / summary.paidOrderCount)
+            : summary.paidOrderCount ? "Unavailable" : "No paid orders yet";
+          const messages = [];
+          if (!orders.length) {
+            messages.push("No orders found for this customer.");
+          } else {
+            messages.push(`${orders.length.toLocaleString("en-IN")} recent order${orders.length === 1 ? "" : "s"}.`);
+          }
+          if (summary.incompletePaidAmounts) {
+            messages.push("At least one COMPLETED payment has a missing or invalid grandTotal; paid amount and average are unavailable.");
+          }
+          if (parsed.malformedCount) {
+            messages.push(`${parsed.malformedCount} malformed or mismatched order record${parsed.malformedCount === 1 ? " was" : "s were"} excluded.`);
+          }
+          if (parsed.unknownOrderStatusCount || parsed.unknownPaymentStatusCount) {
+            messages.push(
+              `${parsed.unknownOrderStatusCount} order record${parsed.unknownOrderStatusCount === 1 ? " has" : "s have"} an unrecognized order status and ${parsed.unknownPaymentStatusCount} have an unrecognized payment status; only documented Flutter statuses are included in status totals and paid amounts.`,
+            );
+          }
+          messages.push("Payment totals use paymentStatus COMPLETED and grandTotal; the order schema has no refund fields, so these are gross paid amounts.");
+
+          renderCustomerOrderMetrics({
+            total: summary.total.toLocaleString("en-IN"),
+            completed: summary.completed.toLocaleString("en-IN"),
+            cancelled: summary.cancelled.toLocaleString("en-IN"),
+            pending: summary.pending.toLocaleString("en-IN"),
+            paid: summary.incompletePaidAmounts ? "Unavailable" : formatCustomerCurrency(summary.paidTotal),
+            latest: summary.latest ? formatCustomerDate(summary.latest.getTime(), true) : "No activity recorded",
+            average: averageOrderValue,
+          }, messages.join(" "));
+          renderCustomerRecentOrders(orders, orders.length ? "" : "No orders found for this customer.");
+        } catch (error) {
+          if (
+            requestId !== customerState.orderRequestId ||
+            customerState.selectedCustomerId !== customer.uid ||
+            !customerViewDialog.open
+          ) return;
+          const code = String(error?.code || "").toLowerCase();
+          let message;
+          if (code.includes("permission_denied") || code.includes("permission-denied")) {
+            message = `Firebase denied the read at ${orderPath}. database.rules.json has no orders read grant (the root read rule is false); ask an administrator to add an authorized order-read rule. No order metrics were calculated.`;
+          } else if (code.includes("network") || code.includes("unavailable") || navigator.onLine === false) {
+            message = `Could not load orders from ${orderPath} because the network is unavailable. Check your connection and retry by reopening customer details.`;
+          } else if (code.includes("timeout")) {
+            message = `Loading orders from ${orderPath} timed out. Check your connection and reopen customer details to retry.`;
+          } else if (error instanceof Error && error.message.includes("unexpected data format")) {
+            message = `Orders at ${orderPath} have an unexpected data format. No order metrics were calculated.`;
+          } else {
+            message = `Could not load orders from ${orderPath}. No order metrics were calculated; reopen customer details to retry.`;
+          }
+          renderCustomerOrderMetrics({
+            total: "Unavailable",
+            completed: "Unavailable",
+            cancelled: "Unavailable",
+            pending: "Unavailable",
+            paid: "Unavailable",
+            latest: "Unavailable",
+            average: "Unavailable",
+            kind: "error",
+          }, message);
+          renderCustomerRecentOrders([], message, "error");
+          reportFirebaseError("Loading customer orders", error);
+        }
+      }
+
+      function openCustomerDetails(customer, focusOrders = false) {
+        const raw = customer.raw;
+        const photo = customer.photo
+          ? `<div class="customer-detail-item"><dt>Profile image</dt><dd><img src="${escapeCustomerText(customer.photo)}" alt="${escapeCustomerText(customer.name || "Customer")} profile" class="customer-detail-photo" /></dd></div>`
+          : "";
+        const profileItems = [
+          ["Full name", customer.name || "Not provided"],
+          ["Customer ID / Firebase UID", customer.uid],
+          ["Mobile number", customer.mobile || "Not provided"],
+          ["Email address", customer.email || "Not provided"],
+          ["Registration date", formatCustomerDate(raw.createdAt, true)],
+          ["Account status", customer.status || "Not available"],
+          ["Last activity", "Loading…"],
+        ];
+        const profile = profileItems.map(([label, value]) =>
+          `<div class="customer-detail-item"><dt>${escapeCustomerText(label)}</dt><dd${label === "Last activity" ? ' id="customer-profile-last-activity"' : ""}>${escapeCustomerText(value)}</dd></div>`,
+        ).join("");
+        const addresses = addressEntries(raw).map(([label, address]) => renderCustomerAddress(label, address)).filter(Boolean).join("");
+        document.querySelector("#customer-view-title").textContent = customer.name || "Customer details";
+        document.querySelector("#customer-view-subtitle").textContent = `Firebase UID: ${customer.uid}`;
+        document.querySelector("#customer-view-content").innerHTML =
+          `<section class="customer-detail-section"><h3>Profile</h3><dl class="customer-detail-grid">${photo}${profile}</dl></section>` +
+          `<section class="customer-detail-section"><h3>Address information</h3>${addresses || '<p class="customer-dialog-message">No address information is stored on this customer record.</p>'}</section>` +
+          `<section class="customer-detail-section"><h3>Purchase summary</h3><dl class="customer-detail-grid">
+            <div class="customer-detail-item"><dt>Total orders</dt><dd id="customer-order-total">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Completed orders</dt><dd id="customer-order-completed">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Cancelled orders</dt><dd id="customer-order-cancelled">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Pending orders</dt><dd id="customer-order-pending">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Successfully paid amount</dt><dd id="customer-order-paid">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Most recent order</dt><dd id="customer-order-latest">Loading…</dd></div>
+            <div class="customer-detail-item"><dt>Average order value</dt><dd id="customer-order-average">Loading…</dd></div>
+          </dl></section>`;
+        const requestId = ++customerState.orderRequestId;
+        customerState.selectedCustomerId = customer.uid;
+        customerState.detailOrders = [];
+        document.querySelector("#customer-orders-unavailable").textContent = `Loading orders from orders/${customer.uid}…`;
+        document.querySelector("#customer-orders-unavailable").dataset.kind = "loading";
+        customerViewDialog.showModal();
+        void loadCustomerOrders(customer, requestId);
+        if (focusOrders) {
+          const ordersMessage = document.querySelector("#customer-orders-unavailable");
+          ordersMessage.focus();
+          ordersMessage.scrollIntoView({ block: "center" });
+        }
+      }
+
+      function openCustomerMenu(trigger, customer) {
+        if (!customer) return;
+        if (activeCustomerMenuTrigger === trigger && !customerActionMenu.hidden) {
+          customerActionMenu.hidden = true;
+          trigger.setAttribute("aria-expanded", "false");
+          activeCustomerMenuTrigger = null;
+          return;
+        }
+        activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeCustomerMenuTrigger = trigger;
+        trigger.setAttribute("aria-expanded", "true");
+        const actions = [
+          ["view", "View Customer"],
+          ["edit", "Edit Customer"],
+          ["orders", "View Orders"],
+          ["copy-id", "Copy Customer ID"],
+          ...(customer.mobile ? [["copy-mobile", "Copy Mobile Number"]] : []),
+        ];
+        customerActionMenu.innerHTML = actions.map(([action, label]) =>
+          `<button type="button" role="menuitem" data-customer-action="${action}">${label}</button>`,
+        ).join("");
+        customerActionMenu.dataset.customerId = customer.id;
+        customerActionMenu.hidden = false;
+        const rect = trigger.getBoundingClientRect();
+        const menuRect = customerActionMenu.getBoundingClientRect();
+        const left = Math.max(8, Math.min(window.innerWidth - menuRect.width - 8, rect.right - menuRect.width));
+        const top = rect.bottom + menuRect.height <= window.innerHeight - 8
+          ? rect.bottom + 4
+          : Math.max(8, rect.top - menuRect.height - 4);
+        customerActionMenu.style.left = `${left}px`;
+        customerActionMenu.style.top = `${top}px`;
+        customerActionMenu.querySelector("button")?.focus();
+      }
+
+      function openCustomerEditor(customer) {
+        customerState.selectedCustomerId = customer.id;
+        customerEditForm.reset();
+        document.querySelector("#customer-edit-name").value = customer.name;
+        document.querySelector("#customer-edit-error").hidden = true;
+        customerEditDialog.showModal();
+        document.querySelector("#customer-edit-name").focus();
+      }
+
+      async function saveCustomerName(event) {
+        event.preventDefault();
+        if (customerState.saving) return;
+        const id = customerState.selectedCustomerId;
+        const customer = customerState.customers.find((entry) => entry.id === id);
+        const nameInput = document.querySelector("#customer-edit-name");
+        const error = document.querySelector("#customer-edit-error");
+        const save = document.querySelector("#customer-edit-save");
+        const name = nameInput.value.trim();
+        error.hidden = true;
+        if (!customer || !name || name.length > 120) {
+          error.textContent = "Enter a customer name between 1 and 120 characters.";
+          error.hidden = false;
+          return;
+        }
+        customerState.saving = true;
+        save.disabled = true;
+        save.setAttribute("aria-busy", "true");
+        save.textContent = "Saving…";
+        try {
+          const current = await get(ref(database, `users/${id}`));
+          const latest = current.val();
+          if (!current.exists() || !latest || latest.role !== "customer" || latest.uid !== id) {
+            throw new Error("This customer record changed or is no longer available. Refresh and try again.");
+          }
+          await update(ref(database, `users/${id}`), { fullName: name });
+          customer.raw.fullName = name;
+          customer.name = name;
+          renderCustomers();
+          customerEditDialog.close();
+          showCategoryToast("Customer name updated.");
+        } catch (saveError) {
+          error.textContent = saveError?.code
+            ? reportFirebaseError("Saving customer name", saveError)
+            : saveError.message || "Customer name could not be saved. Retry.";
+          error.hidden = false;
+        } finally {
+          customerState.saving = false;
+          save.disabled = false;
+          save.removeAttribute("aria-busy");
+          save.textContent = "Save changes";
+        }
+      }
+
+      window.addEventListener("hashchange", () => {
+        if (window.location.hash === "#customers" && document.body.classList.contains("is-admin-authorized")) {
+          startCustomerListener();
+          startCustomerOrdersListener();
+        }
+      });
+
+      document.querySelectorAll("#customers-search-name, #customers-search-email, #customers-search-mobile, #customers-search-id").forEach((input) => {
+        input.addEventListener("input", () => {
+          window.clearTimeout(customerState.searchTimer);
+          customerState.searchTimer = window.setTimeout(() => {
+            customerState.page = 1;
+            renderCustomers();
+          }, 180);
+        });
+      });
+      for (const selector of ["#customers-status-filter", "#customers-date-from", "#customers-date-to", "#customers-order-filter", "#customers-sort"]) {
+        document.querySelector(selector).addEventListener("change", () => {
+          customerState.page = 1;
+          renderCustomers();
+        });
+      }
+      document.querySelector("#customers-clear-filters").addEventListener("click", () => {
+        for (const selector of ["#customers-search-name", "#customers-search-email", "#customers-search-mobile", "#customers-search-id", "#customers-date-from", "#customers-date-to"]) {
+          document.querySelector(selector).value = "";
+        }
+        document.querySelector("#customers-status-filter").value = "";
+        document.querySelector("#customers-order-filter").value = "all";
+        document.querySelector("#customers-sort").value = "newest";
+        customerState.page = 1;
+        renderCustomers();
+      });
+      document.querySelector("#customers-page-size").addEventListener("change", (event) => {
+        customerState.pageSize = event.target.value === "all" ? Infinity : Number(event.target.value);
+        customerState.page = 1;
+        renderCustomers();
+      });
+      document.querySelector("#customers-previous").addEventListener("click", () => {
+        customerState.page = Math.max(1, customerState.page - 1);
+        renderCustomers();
+      });
+      document.querySelector("#customers-next").addEventListener("click", () => {
+        customerState.page += 1;
+        renderCustomers();
+      });
+      document.querySelector("#customers-page-input").addEventListener("change", (event) => {
+        const page = Number(event.target.value);
+        const count = Math.max(1, customerState.pageSize === Infinity ? 1 : Math.ceil(getFilteredCustomers().length / customerState.pageSize));
+        if (!Number.isInteger(page) || page < 1 || page > count) {
+          event.target.value = String(customerState.page);
+          showCategoryToast(`Enter a page number from 1 to ${count}.`, "error");
+          return;
+        }
+        customerState.page = page;
+        renderCustomers();
+      });
+      document.querySelector("#customers-select-page").addEventListener("change", (event) => {
+        const filtered = getFilteredCustomers();
+        const start = customerState.pageSize === Infinity ? 0 : (customerState.page - 1) * customerState.pageSize;
+        const visible = customerState.pageSize === Infinity ? filtered : filtered.slice(start, start + customerState.pageSize);
+        for (const customer of visible) {
+          if (event.target.checked) customerState.selected.add(customer.id);
+          else customerState.selected.delete(customer.id);
+        }
+        renderCustomers();
+      });
+      customerTableBody.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-customer-select]");
+        if (!checkbox) return;
+        if (checkbox.checked) customerState.selected.add(checkbox.dataset.customerSelect);
+        else customerState.selected.delete(checkbox.dataset.customerSelect);
+        renderCustomers();
+      });
+      customerTableBody.addEventListener("click", (event) => {
+        const trigger = event.target.closest("button[data-customer-menu]");
+        if (!trigger) return;
+        const customer = customerState.customers.find((entry) => entry.id === trigger.dataset.customerMenu);
+        if (!customer) {
+          showCategoryToast("This customer is no longer available. Retry loading the list.", "error");
+          return;
+        }
+        openCustomerMenu(trigger, customer);
+      });
+      customerActionMenu.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-customer-action]");
+        if (!button) return;
+        const customer = customerState.customers.find((entry) => entry.id === customerActionMenu.dataset.customerId);
+        const action = button.dataset.customerAction;
+        customerActionMenu.hidden = true;
+        activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeCustomerMenuTrigger = null;
+        if (!customer) return;
+        if (action === "view") openCustomerDetails(customer);
+        else if (action === "edit") openCustomerEditor(customer);
+        else if (action === "orders") openCustomerDetails(customer, true);
+        else if (action === "copy-id" || action === "copy-mobile") {
+          const value = action === "copy-id" ? customer.id : customer.mobile;
+          try {
+            await navigator.clipboard.writeText(value);
+            showCategoryToast(action === "copy-id" ? "Customer ID copied." : "Mobile number copied.");
+          } catch (error) {
+            console.error("Copying customer information failed.", error);
+            showCategoryToast("Could not copy this value. Check clipboard permissions and retry.", "error");
+          }
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (customerActionMenu.hidden || customerActionMenu.contains(event.target) || activeCustomerMenuTrigger?.contains(event.target)) return;
+        customerActionMenu.hidden = true;
+        activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeCustomerMenuTrigger = null;
+      });
+      document.addEventListener("keydown", (event) => {
+        if (customerActionMenu.hidden) return;
+        const items = [...customerActionMenu.querySelectorAll('[role="menuitem"]')];
+        const index = items.indexOf(document.activeElement);
+        if (event.key === "Escape") {
+          customerActionMenu.hidden = true;
+          activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+          activeCustomerMenuTrigger?.focus();
+          activeCustomerMenuTrigger = null;
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const next = event.key === "ArrowDown" ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+          items[next]?.focus();
+        } else if (event.key === "Home") items[0]?.focus();
+        else if (event.key === "End") items[items.length - 1]?.focus();
+        else if (event.key === "Tab") {
+          customerActionMenu.hidden = true;
+          activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+          activeCustomerMenuTrigger = null;
+        }
+      });
+      window.addEventListener("scroll", () => {
+        customerActionMenu.hidden = true;
+        activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeCustomerMenuTrigger = null;
+      }, true);
+      window.addEventListener("resize", () => {
+        customerActionMenu.hidden = true;
+        activeCustomerMenuTrigger?.setAttribute("aria-expanded", "false");
+        activeCustomerMenuTrigger = null;
+      });
+      document.querySelector("#customers-retry").addEventListener("click", retryCustomerLoad);
+      document.querySelector("#customers-order-retry").addEventListener("click", retryCustomerOrders);
+      document.querySelector("#customer-orders-list").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-customer-order-details]");
+        if (!button) return;
+        const order = customerState.detailOrders.find((entry) => entry.id === button.dataset.customerOrderDetails);
+        if (order) openCustomerOrderDetails(order);
+      });
+      document.querySelector("#customer-orders-retry-details").addEventListener("click", () => {
+        const customer = customerState.customers.find((entry) => entry.uid === customerState.selectedCustomerId);
+        if (!customer || !customerViewDialog.open) return;
+        const requestId = ++customerState.orderRequestId;
+        void loadCustomerOrders(customer, requestId);
+      });
+      document.querySelector("#customers-export-button").addEventListener("click", () => {
+        const selected = filteredSelectedCustomers();
+        exportCustomers(selected.length ? selected : getFilteredCustomers());
+      });
+      document.querySelector("#customers-export-selected").addEventListener("click", () => exportCustomers(filteredSelectedCustomers()));
+      document.querySelector("#customers-export-filtered").addEventListener("click", () => exportCustomers(getFilteredCustomers()));
+      document.querySelector("#customers-clear-selection").addEventListener("click", () => {
+        customerState.selected.clear();
+        renderCustomers();
+      });
+      customerEditForm.addEventListener("submit", (event) => void saveCustomerName(event));
+      for (const button of document.querySelectorAll("[data-customer-close]")) {
+        button.addEventListener("click", () => {
+          if (customerOrderDetailsDialog.open) customerOrderDetailsDialog.close();
+          customerViewDialog.close();
+        });
+      }
+      for (const button of document.querySelectorAll("[data-order-details-close]")) {
+        button.addEventListener("click", () => customerOrderDetailsDialog.close());
+      }
+      for (const button of document.querySelectorAll("[data-customer-edit-close]")) {
+        button.addEventListener("click", () => {
+          if (!customerState.saving) customerEditDialog.close();
+        });
+      }
+      for (const dialog of [customerViewDialog, customerEditDialog]) {
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog && !(dialog === customerEditDialog && customerState.saving)) {
+            dialog.close();
+          }
+          customerViewDialog.addEventListener("close", () => {
+            customerState.orderRequestId += 1;
+            customerState.selectedCustomerId = null;
+          });
+          customerOrderDetailsDialog.addEventListener("click", (event) => {
+            if (event.target === customerOrderDetailsDialog) customerOrderDetailsDialog.close();
+          });
+        });
+      }
+      customerEditDialog.addEventListener("cancel", (event) => {
+        if (customerState.saving) event.preventDefault();
+      });
 
       function valueAsId(value) {
         if (typeof value === "string" || typeof value === "number") {
@@ -5827,6 +7699,10 @@
             authGate.hidden = true;
             if (!categoryState.stopCategories) {
               startCategoryListeners();
+            }
+            if (window.location.hash === "#customers") {
+              startCustomerListener();
+              startCustomerOrdersListener();
             }
           } catch (error) {
             if (auth.currentUser?.uid !== user.uid) {
