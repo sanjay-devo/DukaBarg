@@ -413,6 +413,11 @@
         padding: var(--space-8) var(--space-7);
       }
 
+      .main-content.is-wide-page {
+        max-width: none;
+        margin: 0;
+      }
+
       .page-heading {
         margin: 0;
         font-size: var(--font-size-2xl);
@@ -914,10 +919,7 @@
       }
 
       .category-table-card {
-        overflow: hidden;
-        background: var(--color-surface-muted);
-        border: 1px solid var(--color-border-muted);
-        border-radius: var(--radius-lg);
+        width: 100%;
       }
 
       .category-table-wrap {
@@ -1049,13 +1051,16 @@
         align-items: center;
         justify-content: space-between;
         gap: var(--space-5);
-        padding: var(--space-5) var(--space-6);
+        padding: var(--space-5) 0;
         color: var(--color-text-inverse);
         font-size: var(--font-size-xs);
       }
 
       .category-pagination-controls {
         display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
         gap: var(--space-3);
       }
 
@@ -1073,6 +1078,58 @@
       .category-pagination button:disabled {
         cursor: not-allowed;
         opacity: 0.5;
+      }
+
+      .pagination-summary,
+      .pagination-size,
+      .pagination-page-input {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .pagination-summary {
+        flex-wrap: wrap;
+      }
+
+      .pagination-pages {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .category-pagination .pagination-pages button[aria-current="page"],
+      .products-pagination .pagination-pages button[aria-current="page"] {
+        color: var(--color-surface-muted);
+        background: var(--color-text-primary);
+        border-color: var(--color-text-primary);
+        font-weight: 600;
+      }
+
+      .pagination-size select,
+      .pagination-page-input input {
+        min-height: 34px;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        font: inherit;
+      }
+
+      .pagination-size select {
+        min-width: 80px;
+      }
+
+      .pagination-page-input input {
+        width: 64px;
+      }
+
+      .pagination-size select:focus-visible,
+      .pagination-page-input input:focus-visible,
+      .category-pagination button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
       }
 
       .category-dialog {
@@ -1526,9 +1583,27 @@
 
       .products-pagination {
         justify-content: space-between;
-        padding: var(--space-5);
+        padding: var(--space-5) 0;
         color: var(--color-text-inverse);
         font-size: var(--font-size-sm);
+      }
+
+      .category-pagination button,
+      .products-pagination button {
+        min-width: 34px;
+      }
+
+      @media (max-width: 760px) {
+        .category-pagination,
+        .products-pagination {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .category-pagination-controls {
+          justify-content: flex-start;
+          width: 100%;
+        }
       }
 
       .product-dialog {
@@ -2099,9 +2174,28 @@
                 </table>
               </div>
               <div class="category-pagination" id="category-pagination" hidden>
-                <span id="category-page-summary"></span>
+                <div class="pagination-summary">
+                  <span id="category-page-summary"></span>
+                  <label class="pagination-size" for="category-page-size">
+                    Rows per page
+                    <select id="category-page-size" aria-label="Category rows per page">
+                      <option value="10" selected>10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="500">500</option>
+                      <option value="all">All</option>
+                    </select>
+                  </label>
+                </div>
                 <div class="category-pagination-controls">
                   <button type="button" id="category-previous">Previous</button>
+                  <div class="pagination-pages" id="category-page-buttons" aria-label="Category pages"></div>
+                  <label class="pagination-page-input" for="category-page-input">
+                    Page
+                    <input id="category-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to category page" />
+                    <span>of <span id="category-page-count">1</span></span>
+                  </label>
                   <button type="button" id="category-next">Next</button>
                 </div>
               </div>
@@ -2163,8 +2257,30 @@
                 </table>
               </div>
               <div class="products-pagination" id="products-pagination" hidden>
-                <span id="products-page-summary"></span>
-                <div class="products-pagination"><button type="button" id="products-previous">Previous</button><button type="button" id="products-next">Next</button></div>
+                <div class="pagination-summary">
+                  <span id="products-page-summary"></span>
+                  <label class="pagination-size" for="products-page-size">
+                    Rows per page
+                    <select id="products-page-size" aria-label="Product rows per page">
+                      <option value="10" selected>10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="500">500</option>
+                      <option value="all">All</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="products-previous">Previous</button>
+                  <div class="pagination-pages" id="products-page-buttons" aria-label="Product pages"></div>
+                  <label class="pagination-page-input" for="products-page-input">
+                    Page
+                    <input id="products-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to product page" />
+                    <span>of <span id="products-page-count">1</span></span>
+                  </label>
+                  <button type="button" id="products-next">Next</button>
+                </div>
               </div>
             </div>
           </section>
@@ -2330,6 +2446,7 @@
       const pageHeading = document.querySelector("#page-heading");
       const breadcrumbCurrent = document.querySelector("#breadcrumb-current");
       const pageSubtitle = document.querySelector("#page-subtitle");
+      const mainContent = document.querySelector(".main-content");
       const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
       const welcomeTitle = document.querySelector("#welcome-title");
       const categoryPage = document.querySelector("#category-page");
@@ -2385,6 +2502,7 @@
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
+        mainContent.classList.toggle("is-wide-page", isCategoriesPage || isProductsPage);
         pageHeading.textContent = pageName;
         breadcrumbCurrent.textContent = pageName;
         pageSubtitle.textContent = `Manage your store’s ${pageName.toLowerCase()} from here.`;
@@ -2489,6 +2607,7 @@
         productsError: null,
         level: "all",
         page: 1,
+        pageSize: 10,
         editingId: null,
         deletingId: null,
         stopCategories: null,
@@ -2534,7 +2653,6 @@
       const categoryConfirmDialog = document.querySelector("#category-confirm-dialog");
       const categoryConfirmDelete = document.querySelector("#category-confirm-delete");
       const categoryViewDialog = document.querySelector("#category-view-dialog");
-      const categoryPageSize = 10;
       const gateTitle = document.querySelector("#auth-gate-title");
       const gateMessage = document.querySelector("#auth-gate-message");
       const gateActions = document.querySelector("#auth-gate-actions");
@@ -2805,6 +2923,74 @@
         }
       }
 
+      function renderPaginationControls(prefix, state, total) {
+        const pageSize = state.pageSize === "all" ? Math.max(total, 1) : state.pageSize;
+        const pageCount = Math.max(1, Math.ceil(total / pageSize));
+        state.page = Math.min(Math.max(1, state.page), pageCount);
+        const start = total ? (state.page - 1) * pageSize : 0;
+        const end = Math.min(start + pageSize, total);
+        const previous = document.querySelector(`#${prefix}-previous`);
+        const next = document.querySelector(`#${prefix}-next`);
+        const pageInput = document.querySelector(`#${prefix}-page-input`);
+        const pageButtons = document.querySelector(`#${prefix}-page-buttons`);
+        const summary = document.querySelector(`#${prefix}-page-summary`);
+
+        summary.textContent = `${total ? start + 1 : 0}–${end} of ${total}`;
+        pageInput.value = String(state.page);
+        pageInput.max = String(pageCount);
+        document.querySelector(`#${prefix}-page-count`).textContent = String(pageCount);
+        previous.disabled = state.page <= 1;
+        next.disabled = state.page >= pageCount;
+
+        const pages = new Set([1, pageCount]);
+        for (let page = Math.max(1, state.page - 2); page <= Math.min(pageCount, state.page + 2); page += 1) {
+          pages.add(page);
+        }
+        const orderedPages = [...pages].sort((a, b) => a - b);
+        let previousPage = 0;
+        pageButtons.innerHTML = orderedPages.map((page) => {
+          const gap = page - previousPage > 1 ? '<span aria-hidden="true">…</span>' : "";
+          previousPage = page;
+          return `${gap}<button type="button" data-page="${page}" aria-label="Page ${page}"${page === state.page ? ' aria-current="page"' : ""}>${page}</button>`;
+        }).join("");
+        return { start, end, pageSize, pageCount };
+      }
+
+      function bindPaginationControls(prefix, state, render) {
+        const changePage = (page) => {
+          state.page = page;
+          render();
+        };
+        document.querySelector(`#${prefix}-previous`).addEventListener("click", () => {
+          changePage(state.page - 1);
+        });
+        document.querySelector(`#${prefix}-next`).addEventListener("click", () => {
+          changePage(state.page + 1);
+        });
+        document.querySelector(`#${prefix}-page-buttons`).addEventListener("click", (event) => {
+          const button = event.target.closest("button[data-page]");
+          if (button) changePage(Number(button.dataset.page));
+        });
+        const pageInput = document.querySelector(`#${prefix}-page-input`);
+        const applyPageInput = () => {
+          const page = Number(pageInput.value);
+          if (Number.isFinite(page)) changePage(Math.trunc(page));
+          else render();
+        };
+        pageInput.addEventListener("change", applyPageInput);
+        pageInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            applyPageInput();
+          }
+        });
+        document.querySelector(`#${prefix}-page-size`).addEventListener("change", (event) => {
+          state.pageSize = event.target.value === "all" ? "all" : Number(event.target.value);
+          state.page = 1;
+          render();
+        });
+      }
+
       function renderCategoryRows() {
         const loading = !categoryState.categoriesLoaded && !categoryState.categoriesError;
         categoryLoading.hidden = !loading;
@@ -2833,10 +3019,12 @@
             (!query || entry.name.toLocaleLowerCase().includes(query))
           );
         });
-        const pageCount = Math.max(1, Math.ceil(filtered.length / categoryPageSize));
-        categoryState.page = Math.min(categoryState.page, pageCount);
-        const start = (categoryState.page - 1) * categoryPageSize;
-        const visible = filtered.slice(start, start + categoryPageSize);
+        const { start, end } = renderPaginationControls(
+          "category",
+          categoryState,
+          filtered.length,
+        );
+        const visible = filtered.slice(start, end);
         categoryTableBody.innerHTML = visible.map((entry) => {
           const parent = parentForCategory(entry);
           const count = categoryState.productsReadable ? productCount(entry.id) : null;
@@ -2874,16 +3062,12 @@
           ? `Products could not be read (${categoryState.productsError}). Product counts and delete actions are unavailable until access is restored.`
           : "Waiting for product data. Delete actions will be available after product references are checked.";
 
+        categoryPagination.hidden = false;
         if (filtered.length === 0) {
           categoryEmpty.hidden = false;
           return;
         }
         categoryTableWrap.hidden = false;
-        categoryPagination.hidden = false;
-        document.querySelector("#category-page-summary").textContent =
-          `Showing ${start + 1}–${Math.min(start + categoryPageSize, filtered.length)} of ${filtered.length}`;
-        document.querySelector("#category-previous").disabled = categoryState.page <= 1;
-        document.querySelector("#category-next").disabled = categoryState.page >= pageCount;
       }
 
       function rebuildParentOptions() {
@@ -3365,14 +3549,7 @@
           }
         });
       });
-      document.querySelector("#category-previous").addEventListener("click", () => {
-        categoryState.page -= 1;
-        renderCategoryRows();
-      });
-      document.querySelector("#category-next").addEventListener("click", () => {
-        categoryState.page += 1;
-        renderCategoryRows();
-      });
+      bindPaginationControls("category", categoryState, renderCategoryRows);
 
       function productName(product) {
         return String(product?.name ?? product?.productName ?? product?.title ?? "");
@@ -3792,10 +3969,12 @@
         updateProductFilters();
         renderProductFilterOptions();
         const products = filteredProducts();
-        const pageCount = Math.max(1, Math.ceil(products.length / productState.pageSize));
-        productState.page = Math.min(productState.page, pageCount);
-        const start = (productState.page - 1) * productState.pageSize;
-        const visible = products.slice(start, start + productState.pageSize);
+        const { start, end } = renderPaginationControls(
+          "products",
+          productState,
+          products.length,
+        );
+        const visible = products.slice(start, end);
         document.querySelector("#products-selection-summary").textContent =
           `${[...productState.selected].filter((key) => Boolean(categoryState.products[key])).length} selected`;
         const bulk = document.querySelector("#products-bulk-actions");
@@ -3805,6 +3984,7 @@
         if (!visible.length) {
           empty.hidden = false;
           tbody.replaceChildren();
+          pagination.hidden = false;
           return;
         }
         tableWrap.hidden = false;
@@ -3839,10 +4019,6 @@
           </tr>`;
         }).join("");
         pagination.hidden = false;
-        document.querySelector("#products-page-summary").textContent =
-          `${products.length ? start + 1 : 0}–${Math.min(start + productState.pageSize, products.length)} of ${products.length}`;
-        document.querySelector("#products-previous").disabled = productState.page <= 1;
-        document.querySelector("#products-next").disabled = productState.page >= pageCount;
         const pageKeys = visible.map(([key]) => key);
         const selectAll = document.querySelector("#product-select-all");
         selectAll.checked = pageKeys.length > 0 && pageKeys.every((key) => productState.selected.has(key));
@@ -4790,7 +4966,12 @@
         renderBarcodeManager();
       });
       document.querySelector("#product-select-all").addEventListener("change", (event) => {
-        const visible = filteredProducts().slice((productState.page - 1) * productState.pageSize, productState.page * productState.pageSize);
+        const products = filteredProducts();
+        const pageSize = productState.pageSize === "all" ? products.length : productState.pageSize;
+        const visible = products.slice(
+          (productState.page - 1) * pageSize,
+          productState.page * pageSize,
+        );
         for (const [key] of visible) {
           if (event.target.checked) productState.selected.add(key);
           else productState.selected.delete(key);
@@ -4822,14 +5003,7 @@
         control.addEventListener("input", () => { productState.page = 1; renderProducts(); });
         control.addEventListener("change", () => { productState.page = 1; renderProducts(); });
       }
-      document.querySelector("#products-previous").addEventListener("click", () => {
-        productState.page = Math.max(1, productState.page - 1);
-        renderProducts();
-      });
-      document.querySelector("#products-next").addEventListener("click", () => {
-        productState.page += 1;
-        renderProducts();
-      });
+      bindPaginationControls("products", productState, renderProducts);
       document.querySelector("#product-export-button").addEventListener("click", () => {
         const selected = [...productState.selected].filter((key) => categoryState.products[key]);
         const entries = selected.length
