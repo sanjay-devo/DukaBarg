@@ -7487,7 +7487,7 @@
         CONFIRMED: ["PROCESSING", "CANCELLED"],
         PROCESSING: ["READY_TO_SHIP", "CANCELLED"],
         READY_TO_SHIP: ["OUT_FOR_DELIVERY"],
-        OUT_FOR_DELIVERY: ["DELIVERED"],
+        OUT_FOR_DELIVERY: ["DELIVERED", "CANCELLED"],
       };
 
       const orderStatusTimelineSteps = [
