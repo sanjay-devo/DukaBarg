@@ -1256,6 +1256,64 @@
         font-weight: 600;
       }
 
+      .category-name-content {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+      }
+
+      .category-image-thumbnail {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        object-fit: cover;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+      }
+
+      .category-image-editor {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .category-image-preview {
+        width: min(100%, 240px);
+        max-height: 180px;
+        object-fit: contain;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .category-image-preview[hidden] {
+        display: none;
+      }
+
+      .category-image-progress {
+        width: 100%;
+        height: 8px;
+        accent-color: var(--color-border-strong);
+      }
+
+      .category-image-progress[hidden] {
+        display: none;
+      }
+
+      .category-view-image {
+        grid-column: 1 / -1;
+        max-width: min(100%, 320px);
+        max-height: 220px;
+        object-fit: contain;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .category-view-image[hidden] {
+        display: none;
+      }
+
       .category-level,
       .category-status {
         display: inline-flex;
@@ -4844,16 +4902,31 @@
     <dialog class="product-dialog" id="product-view-dialog" aria-labelledby="product-view-title">
       <div class="product-dialog-content">
         <div class="product-dialog-header">
-          <div><h2 id="product-view-title">Product details</h2><p id="product-view-context"></p></div>
+          <div><h2 id="product-view-title" data-product-view-title>Product details</h2><p data-product-view-context></p></div>
           <button class="product-dialog-close" type="button" data-product-close aria-label="Close product details">×</button>
         </div>
         <section class="product-view-gallery" aria-label="Product images">
-          <div class="product-view-main-image" id="product-view-main-image">
-            <span class="product-view-image-empty" id="product-view-gallery-empty">No product images available.</span>
+          <div class="product-view-main-image" data-product-view-main-image>
+            <span class="product-view-image-empty" data-product-view-gallery-empty>No product images available.</span>
           </div>
-          <div class="product-view-gallery-thumbnails" id="product-view-gallery-thumbnails" aria-label="Select product image"></div>
+          <div class="product-view-gallery-thumbnails" data-product-view-gallery-thumbnails aria-label="Select product image"></div>
         </section>
-        <dl class="product-view-details" id="product-view-details"></dl>
+        <dl class="product-view-details" data-product-view-details></dl>
+      </div>
+    </dialog>
+    <dialog class="product-dialog" id="inventory-product-view-dialog" aria-labelledby="inventory-product-view-title">
+      <div class="product-dialog-content">
+        <div class="product-dialog-header">
+          <div><h2 id="inventory-product-view-title" data-product-view-title>Product details</h2><p data-product-view-context></p></div>
+          <button class="product-dialog-close" type="button" data-product-close aria-label="Close product details">×</button>
+        </div>
+        <section class="product-view-gallery" aria-label="Product images">
+          <div class="product-view-main-image" data-product-view-main-image>
+            <span class="product-view-image-empty" data-product-view-gallery-empty>No product images available.</span>
+          </div>
+          <div class="product-view-gallery-thumbnails" data-product-view-gallery-thumbnails aria-label="Select product image"></div>
+        </section>
+        <dl class="product-view-details" data-product-view-details></dl>
       </div>
     </dialog>
     <dialog class="product-dialog" id="product-confirm-dialog" aria-labelledby="product-confirm-title">
@@ -4897,6 +4970,16 @@
               <option value="inactive">Inactive</option>
             </select>
           </div>
+          <div class="category-field">
+            <label for="category-image-input">Category image</label>
+            <div class="category-image-editor">
+              <input id="category-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="category-image-hint category-image-upload-status" />
+              <span class="category-field-hint" id="category-image-hint">JPEG, PNG, WebP, or GIF. Maximum file size: 5 MB. Existing image is kept unless replaced.</span>
+              <img class="category-image-preview" id="category-image-preview" alt="Selected category image preview" hidden />
+              <progress class="category-image-progress" id="category-image-progress" max="100" value="0" aria-label="Category image upload progress" hidden></progress>
+              <span class="category-field-hint" id="category-image-upload-status" role="status" aria-live="polite"></span>
+            </div>
+          </div>
         </div>
         <p class="category-dialog-error" id="category-form-error" role="alert" hidden></p>
         <div class="category-dialog-actions">
@@ -4912,6 +4995,7 @@
           <div><h2 id="category-view-title">Category details</h2></div>
           <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
         </div>
+        <img class="category-view-image" id="category-view-image" alt="" hidden />
         <dl class="category-view-details" id="category-view-details"></dl>
         <div class="category-dialog-actions">
           <button class="category-secondary-button" type="button" data-close-dialog>Close</button>
@@ -5091,6 +5175,13 @@
         set,
         update,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+      import {
+        deleteObject,
+        getDownloadURL,
+        getStorage,
+        ref as storageRef,
+        uploadBytesResumable,
+      } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
@@ -5116,10 +5207,15 @@
         ]).finally(() => window.clearTimeout(timeoutId));
       }
 
+      function showDashboardDialog(dialog) {
+        if (!dialog.open) dialog.showModal();
+      }
+
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
+      const storage = getStorage(app);
       const categoryState = {
         categories: [],
         categoryDiagnostics: [],
@@ -5294,6 +5390,19 @@
       const categoryNameInput = document.querySelector("#category-name");
       const categoryStatusSelect = document.querySelector("#category-status");
       const categorySaveButton = document.querySelector("#category-save-button");
+      const categoryImageInput = document.querySelector("#category-image-input");
+      const categoryImagePreview = document.querySelector("#category-image-preview");
+      const categoryImageProgress = document.querySelector("#category-image-progress");
+      const categoryImageUploadStatus = document.querySelector("#category-image-upload-status");
+      const categoryViewImage = document.querySelector("#category-view-image");
+      let categoryImagePreviewObjectUrl = null;
+      const categoryImageMimeExtensions = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif",
+      };
+      const maxCategoryImageBytes = 5 * 1024 * 1024;
       const categoryToastRegion = document.querySelector("#category-toast-region");
       const customerTableBody = document.querySelector("#customers-table-body");
       const customerLoading = document.querySelector("#customers-loading");
@@ -5332,6 +5441,14 @@
       customerActionMenu.hidden = true;
       document.body.append(customerActionMenu);
       let activeCustomerMenuTrigger = null;
+      const categoryActionMenu = document.createElement("div");
+      categoryActionMenu.className = "product-action-menu";
+      categoryActionMenu.id = "category-action-menu";
+      categoryActionMenu.setAttribute("role", "menu");
+      categoryActionMenu.setAttribute("aria-label", "Category actions");
+      categoryActionMenu.hidden = true;
+      document.body.append(categoryActionMenu);
+      let activeCategoryMenuTrigger = null;
       const categoryConfirmDialog = document.querySelector("#category-confirm-dialog");
       const categoryConfirmDelete = document.querySelector("#category-confirm-delete");
       const categoryViewDialog = document.querySelector("#category-view-dialog");
@@ -5357,6 +5474,7 @@
       productActionMenu.hidden = true;
       document.body.append(productActionMenu);
       let activeProductMenuTrigger = null;
+      let productViewReturnFocus = null;
 
       function showCategoryToast(message, kind = "success") {
         const toast = document.createElement("div");
@@ -6224,7 +6342,7 @@
         document.querySelector("#support-status-error").hidden = true;
         document.querySelector("#support-status-error").textContent = "";
         document.querySelector("#support-status-save").disabled = true;
-        if (!dialog.open) dialog.showModal();
+        showDashboardDialog(dialog);
         select.focus();
       }
 
@@ -6366,7 +6484,7 @@
         const profileFields = document.querySelector("#support-profile-fields");
         profileFields.replaceChildren();
         profileState.textContent = "Loading the matching users record…";
-        if (!dialog.open) dialog.showModal();
+        showDashboardDialog(dialog);
         if (!userId || [".", "#", "$", "[", "]", "/"].some((character) => userId.includes(character))) {
           profileState.textContent = "The callback user ID is not a valid users record key.";
           return;
@@ -7168,7 +7286,7 @@
             <div class="customer-detail-item"><dt>Amount</dt><dd>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</dd></div>
             <div class="customer-detail-item"><dt>Payment method</dt><dd>${escapeCustomerText(order.paymentMethod || "Not provided")}</dd></div>
           </dl><section class="customer-detail-section"><h3>Items</h3>${items}</section>`;
-        customerOrderDetailsDialog.showModal();
+        showDashboardDialog(customerOrderDetailsDialog);
       }
 
       function formatCustomerCurrency(value) {
@@ -7349,7 +7467,7 @@
         customerState.detailOrders = [];
         document.querySelector("#customer-orders-unavailable").textContent = `Loading orders from orders/${customer.uid}…`;
         document.querySelector("#customer-orders-unavailable").dataset.kind = "loading";
-        customerViewDialog.showModal();
+        showDashboardDialog(customerViewDialog);
         void loadCustomerOrders(customer, requestId);
         if (focusOrders) {
           const ordersMessage = document.querySelector("#customer-orders-unavailable");
@@ -7396,7 +7514,7 @@
         document.querySelector("#customer-edit-mobile").value = customer.mobile;
         document.querySelector("#customer-edit-email").value = customer.email;
         document.querySelector("#customer-edit-error").hidden = true;
-        customerEditDialog.showModal();
+        showDashboardDialog(customerEditDialog);
         document.querySelector("#customer-edit-name").focus();
       }
 
@@ -8044,7 +8162,7 @@
           <section class="orders-detail-section"><h3>Totals</h3>${totals.length ? `<div class="orders-total-list">${totals.map(([label, value]) => `<div class="orders-total-row"><span>${escapeCustomerText(label)}</span><strong>${escapeCustomerText(formatCustomerCurrency(value))}</strong></div>`).join("")}</div>` : "<p>No order totals are stored on this record.</p>"}</section>
           <section class="orders-detail-section"><h3>Status timeline</h3>${renderOrderStatusTimeline(order)}</section>
           ${source.customerInstructions || source.instructions || source.notes ? `<section class="orders-detail-section"><h3>Customer instructions</h3><p>${escapeCustomerText(displayOrderValue(source.customerInstructions ?? source.instructions ?? source.notes))}</p></section>` : ""}`;
-        ordersDetailsDialog.showModal();
+        showDashboardDialog(ordersDetailsDialog);
       }
 
       function openOrderCustomer(order) {
@@ -8114,7 +8232,7 @@
         const labels = { CONFIRMED: "Confirmed", PROCESSING: "Processing", READY_TO_SHIP: "Ready to ship", OUT_FOR_DELIVERY: "Out for delivery", DELIVERED: "Delivered", CANCELLED: "Cancelled" };
         select.replaceChildren(...transitions.map((status) => new Option(labels[status] || status, status)));
         document.querySelector("#orders-status-error").hidden = true;
-        ordersStatusDialog.showModal();
+        showDashboardDialog(ordersStatusDialog);
       }
 
       async function commitOrderStatus(order, status) {
@@ -8487,7 +8605,11 @@
       document.querySelectorAll("[data-support-dialog-close]").forEach((button) => {
         button.addEventListener("click", () => document.querySelector("#support-details-dialog").close());
       });
+      document.querySelector("#support-details-dialog").addEventListener("click", (event) => {
+        if (event.target === event.currentTarget) event.currentTarget.close();
+      });
       document.querySelector("#support-details-dialog").addEventListener("close", () => {
+        if (document.querySelector("#support-details-dialog").open) return;
         supportState.detailRequestId += 1;
         supportState.activeDetailKey = null;
       });
@@ -8507,7 +8629,9 @@
         if (supportState.savingStatus) event.preventDefault();
       });
       document.querySelector("#support-status-dialog").addEventListener("close", () => {
-        if (!supportState.savingStatus) supportState.activeStatusKey = null;
+        if (!document.querySelector("#support-status-dialog").open && !supportState.savingStatus) {
+          supportState.activeStatusKey = null;
+        }
       });
       document.querySelector("#support-active-tab").addEventListener("click", () => setSupportView("active"));
       document.querySelector("#support-all-tab").addEventListener("click", () => setSupportView("all"));
@@ -8744,6 +8868,7 @@
         if (event.target === customerViewDialog) customerViewDialog.close();
       });
       customerViewDialog.addEventListener("close", () => {
+        if (customerViewDialog.open) return;
         customerState.orderRequestId += 1;
         customerState.selectedCustomerId = null;
       });
@@ -8874,6 +8999,7 @@
             level,
             parentId,
             masterCategoryId: firstId(raw.masterCategoryId, raw.master_category_id),
+            imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl.trim() : "",
             active,
             valid: false,
             error: "",
@@ -9049,6 +9175,163 @@
         })[character]);
       }
 
+      function safeCategoryImageUrl(value) {
+        if (typeof value !== "string" || !value.trim()) return "";
+        try {
+          const url = new URL(value.trim(), window.location.href);
+          return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+        } catch {
+          return "";
+        }
+      }
+
+      function reportCategoryImageError(error) {
+        const code = error?.code || "unknown";
+        console.error(`Uploading category image failed (Firebase code: ${code}).`, error);
+        if (code.includes("unauthorized") || code.includes("unauthenticated")) {
+          return "Firebase Storage denied this upload. Check Storage rules for authenticated admin uploads.";
+        }
+        if (code.includes("network")) {
+          return "A network error interrupted the image upload. Check your connection and retry.";
+        }
+        return isDevelopment
+          ? `Uploading category image failed (${code}): ${error?.message || String(error)}`
+          : "Uploading category image failed. Please retry.";
+      }
+
+      function clearCategoryImagePreviewObjectUrl() {
+        if (categoryImagePreviewObjectUrl) {
+          URL.revokeObjectURL(categoryImagePreviewObjectUrl);
+          categoryImagePreviewObjectUrl = null;
+        }
+      }
+
+      function showCategoryImagePreview(value = "", isLocalObjectUrl = false) {
+        clearCategoryImagePreviewObjectUrl();
+        categoryImagePreview.hidden = true;
+        categoryImagePreview.removeAttribute("src");
+        const url = isLocalObjectUrl ? value : safeCategoryImageUrl(value);
+        if (!url) return;
+        categoryImagePreview.src = url;
+        categoryImagePreview.hidden = false;
+        if (isLocalObjectUrl) categoryImagePreviewObjectUrl = url;
+      }
+
+      function resetCategoryImageSelection() {
+        clearCategoryImagePreviewObjectUrl();
+        categoryImageInput.value = "";
+        categoryImagePreview.hidden = true;
+        categoryImagePreview.removeAttribute("src");
+        categoryImageProgress.hidden = true;
+        categoryImageProgress.value = 0;
+        categoryImageUploadStatus.textContent = "";
+      }
+
+      async function categoryImageValidationError(file) {
+        if (!file) return "";
+        if (!Object.prototype.hasOwnProperty.call(categoryImageMimeExtensions, file.type)) {
+          return "Choose a JPEG, PNG, WebP, or GIF image.";
+        }
+        if (file.size <= 0) return "The selected image is empty.";
+        if (file.size > maxCategoryImageBytes) return "Category images must be 5 MB or smaller.";
+        let signature;
+        try {
+          signature = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+        } catch {
+          return "The selected image could not be read. Choose it again.";
+        }
+        const matches = {
+          "image/jpeg": signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff,
+          "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((byte, index) => signature[index] === byte),
+          "image/webp": String.fromCharCode(...signature.slice(0, 4)) === "RIFF" &&
+            String.fromCharCode(...signature.slice(8, 12)) === "WEBP",
+          "image/gif": ["GIF87a", "GIF89a"].includes(String.fromCharCode(...signature.slice(0, 6))),
+        };
+        if (!matches[file.type]) return "The selected file contents do not match its image type.";
+        return "";
+      }
+
+      function managedCategoryImagePath(url, categoryId) {
+        const bucket = storage.app.options.storageBucket;
+        if (!bucket || typeof url !== "string") return "";
+        try {
+          const parsed = new URL(url);
+          const match = parsed.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+          if (
+            parsed.hostname !== "firebasestorage.googleapis.com" ||
+            !match ||
+            decodeURIComponent(match[1]) !== bucket
+          ) {
+            return "";
+          }
+          const objectPath = decodeURIComponent(match[2]);
+          return objectPath.startsWith(`category-images/${categoryId}/`) ? objectPath : "";
+        } catch {
+          return "";
+        }
+      }
+
+      async function removeCategoryImageAtPath(objectPath, categoryId) {
+        if (!objectPath.startsWith(`category-images/${categoryId}/`)) return "skipped";
+        try {
+          await deleteObject(storageRef(storage, objectPath));
+          return "deleted";
+        } catch (error) {
+          if (error?.code === "storage/object-not-found") return "deleted";
+          console.error("Removing an unused category image failed.", error);
+          return "failed";
+        }
+      }
+
+      async function removeManagedCategoryImage(url, categoryId, categories = []) {
+        const objectPath = managedCategoryImagePath(url, categoryId);
+        if (!objectPath || categories.some((entry) => entry.id !== categoryId && entry.imageUrl === url)) {
+          return "skipped";
+        }
+        return removeCategoryImageAtPath(objectPath, categoryId);
+      }
+
+      function newCategoryImagePath(file, categoryId) {
+        const extension = categoryImageMimeExtensions[file.type];
+        return `category-images/${categoryId}/${crypto.randomUUID()}.${extension}`;
+      }
+
+      async function uploadCategoryImage(file, objectPath, level, onUploaded) {
+        const task = uploadBytesResumable(storageRef(storage, objectPath), file, {
+          contentType: file.type,
+        });
+        categoryImageProgress.hidden = false;
+        categoryImageProgress.value = 0;
+        categoryImageUploadStatus.textContent = "Uploading image: 0%";
+        try {
+          await new Promise((resolve, reject) => {
+            task.on(
+              "state_changed",
+              (snapshot) => {
+                const percent = snapshot.totalBytes
+                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                  : 0;
+                categoryImageProgress.value = percent;
+                categoryImageUploadStatus.textContent = `Uploading ${level} image: ${percent}%`;
+              },
+              reject,
+              () => {
+                onUploaded();
+                resolve();
+              },
+            );
+          });
+          const downloadURL = await getDownloadURL(task.snapshot.ref);
+          categoryImageProgress.value = 100;
+          categoryImageUploadStatus.textContent = "Image uploaded. Saving category…";
+          return downloadURL;
+        } catch (error) {
+          categoryImageProgress.hidden = true;
+          categoryImageUploadStatus.textContent = "";
+          throw error;
+        }
+      }
+
       function sortedCategories() {
         const order = { master: 0, category: 1, subcategory: 2 };
         return [...categoryState.categories].sort(
@@ -9153,7 +9436,121 @@
         });
       }
 
+      function closeCategoryActionMenu(restoreFocus = false) {
+        categoryActionMenu.hidden = true;
+        if (activeCategoryMenuTrigger) {
+          activeCategoryMenuTrigger.setAttribute("aria-expanded", "false");
+          if (restoreFocus && activeCategoryMenuTrigger.isConnected) activeCategoryMenuTrigger.focus();
+        }
+        activeCategoryMenuTrigger = null;
+      }
+
+      function positionCategoryActionMenu(trigger) {
+        const anchor = trigger.getBoundingClientRect();
+        const menu = categoryActionMenu.getBoundingClientRect();
+        const gap = 4;
+        const padding = 8;
+        const below = window.innerHeight - anchor.bottom - gap;
+        const above = anchor.top - gap;
+        const top = below < menu.height && above > below
+          ? Math.max(padding, anchor.top - menu.height - gap)
+          : Math.min(anchor.bottom + gap, window.innerHeight - menu.height - padding);
+        const left = Math.min(
+          window.innerWidth - menu.width - padding,
+          Math.max(padding, anchor.right - menu.width),
+        );
+        categoryActionMenu.style.top = `${top}px`;
+        categoryActionMenu.style.left = `${left}px`;
+      }
+
+      function openCategoryActionMenu(trigger) {
+        if (activeCategoryMenuTrigger === trigger) {
+          closeCategoryActionMenu();
+          return;
+        }
+        closeCategoryActionMenu();
+        const category = categoryState.categories.find((entry) => entry.id === trigger.dataset.id);
+        if (!category) return;
+        const icons = {
+          view: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+          edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15l-.8 5Z"/></svg>',
+          toggle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7 10 17l-5-5"/></svg>',
+          delete: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>',
+        };
+        const actions = [
+          ["view", "View", icons.view],
+          ["edit", "Edit", icons.edit],
+          ["toggle", category.active ? "Deactivate" : "Activate", icons.toggle],
+          ["delete", "Delete", icons.delete],
+        ];
+        categoryActionMenu.innerHTML = actions.map(([action, label, icon]) =>
+          `<button type="button" role="menuitem" data-menu-action="${action}" aria-label="${action === "toggle" ? `${label} ${escapeCategoryHtml(category.name)}` : `${label} category`}">${icon}<span>${label}</span></button>`,
+        ).join("");
+        categoryActionMenu.dataset.id = category.id;
+        categoryActionMenu.hidden = false;
+        activeCategoryMenuTrigger = trigger;
+        trigger.setAttribute("aria-expanded", "true");
+        positionCategoryActionMenu(trigger);
+        categoryActionMenu.querySelector('[role="menuitem"]').focus();
+      }
+
+      function performCategoryRowAction(action, id) {
+        const category = categoryState.categories.find((entry) => entry.id === id);
+        if (!category) {
+          showCategoryToast("This category is no longer available. The table has been refreshed.", "error");
+          return;
+        }
+        if (action === "view") openCategoryView(category);
+        else if (action === "edit") openCategoryForm(category);
+        else if (action === "toggle") void toggleCategoryStatus(category);
+        else if (action === "delete") openDeleteConfirmation(category);
+      }
+
+      categoryActionMenu.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-menu-action]");
+        if (!button) return;
+        const { id } = categoryActionMenu.dataset;
+        const { menuAction } = button.dataset;
+        closeCategoryActionMenu(true);
+        performCategoryRowAction(menuAction, id);
+      });
+
+      categoryActionMenu.addEventListener("keydown", (event) => {
+        const items = [...categoryActionMenu.querySelectorAll('[role="menuitem"]')];
+        const currentIndex = items.indexOf(document.activeElement);
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeCategoryActionMenu(true);
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          items[(currentIndex + direction + items.length) % items.length].focus();
+        } else if (event.key === "Home" || event.key === "End") {
+          event.preventDefault();
+          items[event.key === "Home" ? 0 : items.length - 1].focus();
+        } else if (event.key === "Tab") {
+          closeCategoryActionMenu(true);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          !categoryActionMenu.hidden &&
+          !categoryActionMenu.contains(event.target) &&
+          !event.target.closest("[data-category-menu-trigger]")
+        ) {
+          closeCategoryActionMenu();
+        }
+      });
+      document.addEventListener("scroll", () => {
+        if (!categoryActionMenu.hidden) closeCategoryActionMenu();
+      }, true);
+      window.addEventListener("resize", () => {
+        if (!categoryActionMenu.hidden) closeCategoryActionMenu();
+      });
+
       function renderCategoryRows() {
+        closeCategoryActionMenu();
         const loading = !categoryState.categoriesLoaded && !categoryState.categoriesError;
         categoryLoading.hidden = !loading;
         categoryError.hidden = !categoryState.categoriesError;
@@ -9206,24 +9603,35 @@
           }
           const levelName = entry.level === "master" ? "Master Category" : entry.level === "category" ? "Category" : "Subcategory";
           const selected = categoryState.selected.has(entry.id);
+          const imageUrl = safeCategoryImageUrl(entry.imageUrl);
           return `<tr>
             <td><input type="checkbox" data-select-category="${escapeCategoryHtml(entry.id)}" aria-label="Select ${escapeCategoryHtml(entry.name)}"${selected ? " checked" : ""} /></td>
-            <td class="category-name">${escapeCategoryHtml(entry.name)}</td>
+            <td class="category-name"><span class="category-name-content">${imageUrl ? `<img class="category-image-thumbnail" data-category-image src="${escapeCategoryHtml(imageUrl)}" alt="" aria-hidden="true" />` : ""}<span>${escapeCategoryHtml(entry.name)}</span></span></td>
             <td><span class="category-level">${levelName}</span></td>
             <td>${parent ? escapeCategoryHtml(parent.name) : "—"}</td>
             <td>${count === null ? "Unavailable" : count}</td>
             <td><span class="category-status" data-active="${entry.active}">${entry.active ? "Active" : "Inactive"}</span></td>
             <td>${escapeCategoryHtml(formatCategoryDate(entry.updatedAt))}</td>
             <td>
-              <div class="category-row-actions">
-                <button class="category-icon-button" type="button" data-action="view" data-id="${escapeCategoryHtml(entry.id)}" aria-label="View ${escapeCategoryHtml(entry.name)}">View</button>
-                <button class="category-icon-button" type="button" data-action="edit" data-id="${escapeCategoryHtml(entry.id)}" aria-label="Edit ${escapeCategoryHtml(entry.name)}">Edit</button>
-                <button class="category-icon-button" type="button" data-action="toggle" data-id="${escapeCategoryHtml(entry.id)}" aria-label="${entry.active ? "Deactivate" : "Activate"} ${escapeCategoryHtml(entry.name)}">${entry.active ? "Deactivate" : "Activate"}</button>
-                <button class="category-icon-button" type="button" data-action="delete" data-id="${escapeCategoryHtml(entry.id)}" title="${escapeCategoryHtml(deleteReason)}" aria-label="Delete ${escapeCategoryHtml(entry.name)}">Delete</button>
+              <div class="product-row-actions">
+                <button
+                  class="product-actions-trigger"
+                  type="button"
+                  data-category-menu-trigger
+                  data-id="${escapeCategoryHtml(entry.id)}"
+                  aria-label="Actions for ${escapeCategoryHtml(entry.name)}"
+                  aria-haspopup="menu"
+                  aria-expanded="false"
+                  aria-controls="category-action-menu"
+                  title="${escapeCategoryHtml(deleteReason)}"
+                >⋮</button>
               </div>
             </td>
           </tr>`;
         }).join("");
+        categoryTableBody.querySelectorAll("img[data-category-image]").forEach((image) => {
+          image.addEventListener("error", () => image.remove(), { once: true });
+        });
         const categoryIds = new Set(categoryState.categories.map((entry) => entry.id));
         for (const id of categoryState.selected) {
           if (!categoryIds.has(id)) categoryState.selected.delete(id);
@@ -9311,9 +9719,14 @@
 
       function openCategoryForm(category = null) {
         categoryState.editingId = category?.id || null;
+        resetCategoryImageSelection();
         categoryForm.reset();
         categoryFormError.hidden = true;
         categoryFormError.textContent = "";
+        categoryImageProgress.hidden = true;
+        categoryImageProgress.value = 0;
+        categoryImageUploadStatus.textContent = "";
+        showCategoryImagePreview(category?.imageUrl || "");
         categoryLevelSelect.disabled = Boolean(category?.valid);
         document.querySelector("#category-form-title").textContent = category ? "Edit Category" : "Add Category";
         document.querySelector("#category-form-description").textContent = category
@@ -9328,13 +9741,26 @@
           categoryParentSelect.value = category.parentId;
         }
         updateMasterDisplay();
-        categoryFormDialog.showModal();
+        showDashboardDialog(categoryFormDialog);
         categoryNameInput.focus();
       }
 
       function openCategoryView(category) {
         const parent = parentForCategory(category);
         const master = masterForCategory(category);
+        const imageUrl = safeCategoryImageUrl(category.imageUrl);
+        categoryViewImage.hidden = !imageUrl;
+        categoryViewImage.removeAttribute("src");
+        categoryViewImage.alt = `${category.name} image`;
+        if (imageUrl) {
+          categoryViewImage.src = imageUrl;
+          categoryViewImage.onerror = () => {
+            categoryViewImage.hidden = true;
+            categoryViewImage.removeAttribute("src");
+          };
+        } else {
+          categoryViewImage.onerror = null;
+        }
         const details = [
           ["Name", category.name],
           ["Level", category.level === "master" ? "Master Category" : category.level === "category" ? "Category" : "Subcategory"],
@@ -9354,7 +9780,7 @@
           description.textContent = String(value);
           list.append(term, description);
         }
-        categoryViewDialog.showModal();
+        showDashboardDialog(categoryViewDialog);
       }
 
       function duplicateCategoryName(name, parentId, exceptId = null) {
@@ -9424,6 +9850,14 @@
       async function saveCategoryInternal(event) {
         event.preventDefault();
         categoryFormError.hidden = true;
+        const imageFile = categoryImageInput.files?.[0] || null;
+        const imageValidationError = await categoryImageValidationError(imageFile);
+        if (imageValidationError) {
+          categoryFormError.textContent = imageValidationError;
+          categoryFormError.hidden = false;
+          categoryImageInput.focus();
+          return;
+        }
         const level = categoryLevelSelect.value;
         const name = categoryNameInput.value.trim();
         const status = categoryStatusSelect.value;
@@ -9515,7 +9949,7 @@
 
         categorySaveButton.disabled = true;
         categorySaveButton.setAttribute("aria-busy", "true");
-        categorySaveButton.textContent = "Saving…";
+        categorySaveButton.textContent = imageFile ? "Uploading image…" : "Saving…";
         const now = Date.now();
         const parent = categoryState.categories.find((entry) => entry.id === parentId);
         const master = level === "master"
@@ -9544,12 +9978,37 @@
           fields.parentCategoryId = parentId;
           fields.masterCategoryId = master?.id || "";
         }
+        const categoryRef = existing
+          ? ref(database, `categories/${existing.id}`)
+          : push(ref(database, "categories"));
+        const categoryId = existing?.id || categoryRef.key;
+        if (!categoryId) {
+          categoryFormError.textContent = "Could not allocate a category ID. Retry.";
+          categoryFormError.hidden = false;
+          categorySaveButton.disabled = false;
+          categorySaveButton.removeAttribute("aria-busy");
+          categorySaveButton.textContent = existing ? "Save Changes" : "Save Category";
+          return;
+        }
+        let uploadedImageUrl = "";
+        let uploadedImagePath = "";
+        let imageUploadCompleted = false;
+        let databaseSaved = false;
         try {
+          if (imageFile) {
+            uploadedImagePath = newCategoryImagePath(imageFile, categoryId);
+            uploadedImageUrl = await uploadCategoryImage(
+              imageFile,
+              uploadedImagePath,
+              level,
+              () => { imageUploadCompleted = true; },
+            );
+            fields.imageUrl = uploadedImageUrl;
+            categorySaveButton.textContent = "Saving…";
+          }
           if (existing) {
-            await update(ref(database, `categories/${existing.id}`), categoryPatch(existing, fields));
-            showCategoryToast("Category updated.");
+            await update(categoryRef, categoryPatch(existing, fields));
           } else {
-            const categoryRef = push(ref(database, "categories"));
             await set(categoryRef, {
               ...fields,
               ...(level === "master"
@@ -9562,16 +10021,33 @@
               isActive: status === "active",
               createdAt: now,
             });
-            showCategoryToast("Category created.");
           }
+          databaseSaved = true;
+          if (uploadedImageUrl && existing?.imageUrl && existing.imageUrl !== uploadedImageUrl) {
+            const cleanup = await removeManagedCategoryImage(existing.imageUrl, categoryId, latestCategories);
+            if (cleanup === "failed") {
+              showCategoryToast("Category saved, but its previous image could not be removed from Firebase Storage.", "error");
+            }
+          }
+          resetCategoryImageSelection();
           categoryFormDialog.close();
+          showCategoryToast(existing ? "Category updated." : "Category created.");
         } catch (error) {
-          categoryFormError.textContent = reportFirebaseError("Saving category", error);
+          let cleanupNotice = "";
+          if (uploadedImagePath && imageUploadCompleted && !databaseSaved) {
+            const cleanup = await removeCategoryImageAtPath(uploadedImagePath, categoryId);
+            if (cleanup === "failed") cleanupNotice = " The uploaded image could not be cleaned up; contact an administrator.";
+          }
+          const errorMessage = imageFile && !uploadedImageUrl
+            ? reportCategoryImageError(error)
+            : reportFirebaseError("Saving category", error);
+          categoryFormError.textContent = `${errorMessage}${cleanupNotice}`;
           categoryFormError.hidden = false;
         } finally {
           categorySaveButton.disabled = false;
           categorySaveButton.removeAttribute("aria-busy");
           categorySaveButton.textContent = existing ? "Save Changes" : "Save Category";
+          categoryImageProgress.hidden = true;
         }
       }
 
@@ -9611,7 +10087,7 @@
         categoryConfirmDelete.textContent = "Delete";
         document.querySelector("#category-confirm-message").textContent =
           `Delete “${category.name}”? It has ${children} child categories and is referenced by ${count} products. This action cannot be undone.`;
-        categoryConfirmDialog.showModal();
+        showDashboardDialog(categoryConfirmDialog);
       }
 
       function categoryStatusFields(category, active, updatedAt) {
@@ -9683,7 +10159,7 @@
         categoryConfirmDelete.textContent = "Delete selected";
         document.querySelector("#category-confirm-message").textContent =
           `Delete ${categories.length} selected categor${categories.length === 1 ? "y" : "ies"}? This action cannot be undone.`;
-        categoryConfirmDialog.showModal();
+        showDashboardDialog(categoryConfirmDialog);
       }
 
       async function deleteConfirmedCategory() {
@@ -9851,20 +10327,51 @@
 
       document.querySelector("#category-add-button").addEventListener("click", () => openCategoryForm());
       document.querySelector("#category-retry").addEventListener("click", startCategoryListeners);
+      categoryImageInput.addEventListener("change", async () => {
+        const file = categoryImageInput.files?.[0] || null;
+        const validationError = await categoryImageValidationError(file);
+        if (categoryImageInput.files?.[0] !== file) return;
+        if (validationError) {
+          const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+          showCategoryImagePreview(existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = validationError;
+          return;
+        }
+        if (!file) {
+          const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+          showCategoryImagePreview(existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = existing?.imageUrl ? "Existing image will be kept." : "";
+          return;
+        }
+        const objectUrl = URL.createObjectURL(file);
+        showCategoryImagePreview(objectUrl, true);
+        categoryImageUploadStatus.textContent = "Image ready to upload.";
+      });
+      categoryImagePreview.addEventListener("error", () => {
+        categoryImagePreview.hidden = true;
+        categoryImageUploadStatus.textContent = "Image preview could not be displayed.";
+      });
       categoryForm.addEventListener("submit", saveCategory);
       categoryLevelSelect.addEventListener("change", rebuildParentOptions);
       categoryParentSelect.addEventListener("change", updateMasterDisplay);
       categoryConfirmDelete.addEventListener("click", deleteConfirmedCategory);
       for (const dialog of [categoryFormDialog, categoryViewDialog, categoryConfirmDialog]) {
         dialog.querySelectorAll("[data-close-dialog]").forEach((button) => {
-          button.addEventListener("click", () => dialog.close());
+          button.addEventListener("click", () => {
+            if (dialog !== categoryFormDialog || !categoryState.saving) {
+              if (dialog === categoryFormDialog) resetCategoryImageSelection();
+              dialog.close();
+            }
+          });
         });
       }
+      categoryFormDialog.addEventListener("close", resetCategoryImageSelection);
       categoryViewDialog.addEventListener("click", (event) => {
         if (event.target === categoryViewDialog) categoryViewDialog.close();
       });
       categoryFormDialog.addEventListener("cancel", (event) => {
         if (categoryState.saving) event.preventDefault();
+        else resetCategoryImageSelection();
       });
       categoryTableBody.addEventListener("change", (event) => {
         const checkbox = event.target.closest("input[data-select-category]");
@@ -9892,24 +10399,15 @@
         }
       });
       categoryTableBody.addEventListener("click", (event) => {
-        const button = event.target.closest("button[data-action]");
-        if (!button || button.disabled) {
-          return;
-        }
-        const category = categoryState.categories.find((entry) => entry.id === button.dataset.id);
-        if (!category) {
-          showCategoryToast("This category is no longer available. The table has been refreshed.", "error");
-          return;
-        }
-        if (button.dataset.action === "view") {
-          openCategoryView(category);
-        } else if (button.dataset.action === "edit") {
-          openCategoryForm(category);
-        } else if (button.dataset.action === "toggle") {
-          void toggleCategoryStatus(category);
-        } else if (button.dataset.action === "delete") {
-          openDeleteConfirmation(category);
-        }
+        const trigger = event.target.closest("button[data-category-menu-trigger]");
+        if (!trigger || trigger.disabled) return;
+        openCategoryActionMenu(trigger);
+      });
+      categoryTableBody.addEventListener("keydown", (event) => {
+        const trigger = event.target.closest("button[data-category-menu-trigger]");
+        if (!trigger || !["ArrowDown", "Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        openCategoryActionMenu(trigger);
       });
       for (const filter of [categorySearch, categoryParentFilter, categoryStatusFilter]) {
         filter.addEventListener("input", () => {
@@ -10460,6 +10958,12 @@
         activeProductMenuTrigger = null;
       }
 
+      function restoreProductViewFocus() {
+        const trigger = productViewReturnFocus;
+        productViewReturnFocus = null;
+        if (trigger?.isConnected) trigger.focus();
+      }
+
       function positionProductActionMenu(trigger) {
         const anchor = trigger.getBoundingClientRect();
         const menu = productActionMenu.getBoundingClientRect();
@@ -10522,6 +11026,20 @@
         if (!button) return;
         const { key } = productActionMenu.dataset;
         const { menuAction } = button.dataset;
+        if (menuAction === "view") {
+          productViewReturnFocus = activeProductMenuTrigger;
+          closeProductActionMenu();
+          requestAnimationFrame(() => {
+            const product = categoryState.products[key];
+            if (!product) {
+              restoreProductViewFocus();
+              showCategoryToast("This product is no longer available. The list has been refreshed.", "error");
+              return;
+            }
+            openProductView(product, key, null, productViewDialog);
+          });
+          return;
+        }
         closeProductActionMenu(true);
         void performProductAction(menuAction, key);
       });
@@ -10740,7 +11258,7 @@
           }));
         }
         syncFormBarcodePreview();
-        document.querySelector("#product-form-dialog").showModal();
+        showDashboardDialog(document.querySelector("#product-form-dialog"));
         document.querySelector("#product-id").focus();
       }
 
@@ -11335,23 +11853,24 @@
           .replace(/\b\w/g, (character) => character.toUpperCase());
       }
 
-      function openProductView(product, key, record = null) {
+      function openProductView(product, key, record = null, targetDialog = null) {
         if (!product || typeof product !== "object") {
           showCategoryToast("This product record has no readable product details.", "error");
           return;
         }
-        const title = document.querySelector("#product-view-title");
+        const dialog = targetDialog || document.querySelector("#product-view-dialog");
+        const title = dialog.querySelector("[data-product-view-title]");
         title.textContent = productName(product) || "Unnamed product";
         const context = [
           `Product ID: ${productId(product, key)}`,
           `Firebase record: ${key}`,
           record?.variantName ? `Barcode label: ${record.variantName}` : "",
         ].filter(Boolean);
-        document.querySelector("#product-view-context").textContent = context.join(" · ");
+        dialog.querySelector("[data-product-view-context]").textContent = context.join(" · ");
 
-        const gallery = document.querySelector("#product-view-main-image");
-        const empty = document.querySelector("#product-view-gallery-empty");
-        const thumbnails = document.querySelector("#product-view-gallery-thumbnails");
+        const gallery = dialog.querySelector("[data-product-view-main-image]");
+        const empty = dialog.querySelector("[data-product-view-gallery-empty]");
+        const thumbnails = dialog.querySelector("[data-product-view-gallery-thumbnails]");
         gallery.replaceChildren();
         thumbnails.replaceChildren();
         const urls = productImageUrls(product);
@@ -11428,7 +11947,7 @@
           ["Updated At", formatReadableDate(product.updatedAt) || "—"],
           ["Firebase Record Key", key || "—"],
         ];
-        const list = document.querySelector("#product-view-details");
+        const list = dialog.querySelector("[data-product-view-details]");
         list.replaceChildren();
         for (const [label, value] of fields) {
           const term = document.createElement("dt");
@@ -11437,14 +11956,23 @@
           description.textContent = String(value);
           list.append(term, description);
         }
-        const dialog = document.querySelector("#product-view-dialog");
         try {
-          if (dialog.open) dialog.close();
-          dialog.showModal();
+          showProductDetailDialog(dialog);
         } catch (error) {
+          restoreProductViewFocus();
           console.error("Opening product details failed.", error);
           showCategoryToast("Product details could not be opened. Close other dialogs and retry.", "error");
         }
+      }
+
+      function showProductDetailDialog(dialog) {
+        for (const otherDialog of [productViewDialog, inventoryProductViewDialog]) {
+          if (otherDialog !== dialog && otherDialog.open) {
+            productViewReturnFocus = null;
+            otherDialog.close();
+          }
+        }
+        showDashboardDialog(dialog);
       }
 
       async function performProductAction(action, key) {
@@ -11454,7 +11982,7 @@
           return;
         }
         if (action === "view") {
-          openProductView(product, key);
+          openProductView(product, key, null, productViewDialog);
           return;
         }
         if (action === "edit") {
@@ -11534,7 +12062,7 @@
           document.querySelector("#product-confirm-title").textContent = "Delete product";
           document.querySelector("#product-confirm-message").textContent = `Delete “${productName(product)}” (Firebase record ${key})? This cannot be undone.`;
           document.querySelector("#product-confirm-action").textContent = "Delete";
-          document.querySelector("#product-confirm-dialog").showModal();
+          showDashboardDialog(document.querySelector("#product-confirm-dialog"));
         }
       }
 
@@ -11665,13 +12193,17 @@
       document.querySelector("#product-category-retry").addEventListener("click", startCategoryListeners);
       const productFormDialog = document.querySelector("#product-form-dialog");
       const productViewDialog = document.querySelector("#product-view-dialog");
+      const inventoryProductViewDialog = document.querySelector("#inventory-product-view-dialog");
       const productConfirmDialog = document.querySelector("#product-confirm-dialog");
-      for (const dialog of [productFormDialog, productViewDialog, productConfirmDialog]) {
+      for (const dialog of [productFormDialog, productViewDialog, inventoryProductViewDialog, productConfirmDialog]) {
         dialog.querySelectorAll("[data-product-close]").forEach((button) => button.addEventListener("click", () => dialog.close()));
       }
-      productViewDialog.addEventListener("click", (event) => {
-        if (event.target === productViewDialog) productViewDialog.close();
-      });
+      productViewDialog.addEventListener("close", restoreProductViewFocus);
+      for (const dialog of [productViewDialog, inventoryProductViewDialog]) {
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) dialog.close();
+        });
+      }
       productFormDialog.addEventListener("cancel", (event) => {
         if (productState.saving) event.preventDefault();
       });
@@ -11714,7 +12246,7 @@
           document.querySelector("#product-confirm-title").textContent = "Delete selected products";
           document.querySelector("#product-confirm-message").textContent = `Delete ${keys.length} selected product${keys.length === 1 ? "" : "s"}? This cannot be undone.`;
           document.querySelector("#product-confirm-action").textContent = "Delete selected";
-          document.querySelector("#product-confirm-dialog").showModal();
+          showDashboardDialog(document.querySelector("#product-confirm-dialog"));
         }
       });
       for (const id of [
@@ -11780,7 +12312,7 @@
           return;
         }
         if (button.dataset.barcodeAction === "view") {
-          openProductView(record.product, record.key, record);
+          openProductView(record.product, record.key, record, inventoryProductViewDialog);
         } else if (button.dataset.barcodeAction === "generate") void generateBarcodeForRecord(record);
         else {
           const downloadRecord = async () => {
@@ -12636,7 +13168,7 @@
         }
         logoutStatus.hidden = true;
         logoutStatus.textContent = "";
-        logoutConfirmDialog.showModal();
+        showDashboardDialog(logoutConfirmDialog);
         logoutConfirmDialog.querySelector("[data-logout-cancel]").focus();
       });
       logoutConfirmDialog.querySelectorAll("[data-logout-cancel]").forEach((button) => {
