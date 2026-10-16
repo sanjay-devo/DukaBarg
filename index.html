@@ -1277,8 +1277,18 @@
         gap: var(--space-3);
       }
 
-      .category-image-preview {
+      .category-image-preview-wrap {
+        position: relative;
         width: min(100%, 240px);
+      }
+
+      .category-image-preview-wrap[hidden] {
+        display: none;
+      }
+
+      .category-image-preview {
+        display: block;
+        width: 100%;
         max-height: 180px;
         object-fit: contain;
         background: var(--color-surface-raised);
@@ -1286,8 +1296,29 @@
         border-radius: var(--radius-md);
       }
 
-      .category-image-preview[hidden] {
-        display: none;
+      .category-image-remove {
+        position: absolute;
+        top: var(--space-2);
+        right: var(--space-2);
+        width: 32px;
+        min-height: 32px;
+        padding: 0;
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: var(--font-size-lg);
+        line-height: 1;
+      }
+
+      .category-image-remove:hover {
+        border-color: var(--color-border-strong);
+      }
+
+      .category-image-remove:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
       }
 
       .category-image-progress {
@@ -4975,7 +5006,10 @@
             <div class="category-image-editor">
               <input id="category-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="category-image-hint category-image-upload-status" />
               <span class="category-field-hint" id="category-image-hint">JPEG, PNG, WebP, or GIF. Maximum file size: 5 MB. Existing image is kept unless replaced.</span>
-              <img class="category-image-preview" id="category-image-preview" alt="Selected category image preview" hidden />
+              <div class="category-image-preview-wrap" id="category-image-preview-wrap" hidden>
+                <img class="category-image-preview" id="category-image-preview" alt="Selected category image preview" />
+                <button class="category-image-remove" id="category-image-remove" type="button" aria-label="Remove Image" title="Remove Image">×</button>
+              </div>
               <progress class="category-image-progress" id="category-image-progress" max="100" value="0" aria-label="Category image upload progress" hidden></progress>
               <span class="category-field-hint" id="category-image-upload-status" role="status" aria-live="polite"></span>
             </div>
@@ -5392,10 +5426,13 @@
       const categorySaveButton = document.querySelector("#category-save-button");
       const categoryImageInput = document.querySelector("#category-image-input");
       const categoryImagePreview = document.querySelector("#category-image-preview");
+      const categoryImagePreviewWrap = document.querySelector("#category-image-preview-wrap");
+      const categoryImageRemoveButton = document.querySelector("#category-image-remove");
       const categoryImageProgress = document.querySelector("#category-image-progress");
       const categoryImageUploadStatus = document.querySelector("#category-image-upload-status");
       const categoryViewImage = document.querySelector("#category-view-image");
       let categoryImagePreviewObjectUrl = null;
+      let categoryImageRemovalRequested = false;
       const categoryImageMimeExtensions = {
         "image/jpeg": "jpg",
         "image/png": "png",
@@ -5474,7 +5511,7 @@
       productActionMenu.hidden = true;
       document.body.append(productActionMenu);
       let activeProductMenuTrigger = null;
-      let productViewReturnFocus = null;
+      const productViewReturnFocus = new WeakMap();
 
       function showCategoryToast(message, kind = "success") {
         const toast = document.createElement("div");
@@ -9208,19 +9245,20 @@
 
       function showCategoryImagePreview(value = "", isLocalObjectUrl = false) {
         clearCategoryImagePreviewObjectUrl();
-        categoryImagePreview.hidden = true;
+        categoryImagePreviewWrap.hidden = true;
         categoryImagePreview.removeAttribute("src");
         const url = isLocalObjectUrl ? value : safeCategoryImageUrl(value);
         if (!url) return;
         categoryImagePreview.src = url;
-        categoryImagePreview.hidden = false;
+        categoryImagePreviewWrap.hidden = false;
         if (isLocalObjectUrl) categoryImagePreviewObjectUrl = url;
       }
 
       function resetCategoryImageSelection() {
         clearCategoryImagePreviewObjectUrl();
+        categoryImageRemovalRequested = false;
         categoryImageInput.value = "";
-        categoryImagePreview.hidden = true;
+        categoryImagePreviewWrap.hidden = true;
         categoryImagePreview.removeAttribute("src");
         categoryImageProgress.hidden = true;
         categoryImageProgress.value = 0;
@@ -10005,6 +10043,8 @@
             );
             fields.imageUrl = uploadedImageUrl;
             categorySaveButton.textContent = "Saving…";
+          } else if (existing && categoryImageRemovalRequested) {
+            fields.imageUrl = null;
           }
           if (existing) {
             await update(categoryRef, categoryPatch(existing, fields));
@@ -10023,7 +10063,11 @@
             });
           }
           databaseSaved = true;
-          if (uploadedImageUrl && existing?.imageUrl && existing.imageUrl !== uploadedImageUrl) {
+          if (
+            existing?.imageUrl &&
+            ((uploadedImageUrl && existing.imageUrl !== uploadedImageUrl) ||
+              (!imageFile && categoryImageRemovalRequested))
+          ) {
             const cleanup = await removeManagedCategoryImage(existing.imageUrl, categoryId, latestCategories);
             if (cleanup === "failed") {
               showCategoryToast("Category saved, but its previous image could not be removed from Firebase Storage.", "error");
@@ -10333,22 +10377,48 @@
         if (categoryImageInput.files?.[0] !== file) return;
         if (validationError) {
           const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
-          showCategoryImagePreview(existing?.imageUrl || "");
+          showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
           categoryImageUploadStatus.textContent = validationError;
           return;
         }
         if (!file) {
           const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
-          showCategoryImagePreview(existing?.imageUrl || "");
-          categoryImageUploadStatus.textContent = existing?.imageUrl ? "Existing image will be kept." : "";
+          showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = categoryImageRemovalRequested
+            ? "Existing image will be removed when you save."
+            : existing?.imageUrl
+              ? "Existing image will be kept."
+              : "";
           return;
         }
         const objectUrl = URL.createObjectURL(file);
         showCategoryImagePreview(objectUrl, true);
         categoryImageUploadStatus.textContent = "Image ready to upload.";
       });
+      categoryImageRemoveButton.addEventListener("click", () => {
+        const selectedFile = categoryImageInput.files?.[0] || null;
+        const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        if (selectedFile) {
+          categoryImageInput.value = "";
+          showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = categoryImageRemovalRequested
+            ? "Selected replacement removed. Existing image will be removed when you save."
+            : existing?.imageUrl
+              ? "Selected replacement removed. Existing image will be kept."
+              : "Selected image removed. Choose another image if needed.";
+          return;
+        }
+        if (existing?.imageUrl) {
+          categoryImageRemovalRequested = true;
+          showCategoryImagePreview();
+          categoryImageUploadStatus.textContent = "Existing image will be removed when you save.";
+          return;
+        }
+        showCategoryImagePreview();
+        categoryImageUploadStatus.textContent = "Image removed. Choose another image if needed.";
+      });
       categoryImagePreview.addEventListener("error", () => {
-        categoryImagePreview.hidden = true;
+        categoryImagePreviewWrap.hidden = true;
         categoryImageUploadStatus.textContent = "Image preview could not be displayed.";
       });
       categoryForm.addEventListener("submit", saveCategory);
@@ -10958,9 +11028,10 @@
         activeProductMenuTrigger = null;
       }
 
-      function restoreProductViewFocus() {
-        const trigger = productViewReturnFocus;
-        productViewReturnFocus = null;
+      function restoreProductViewFocus(dialog) {
+        if (dialog.open) return;
+        const trigger = productViewReturnFocus.get(dialog);
+        productViewReturnFocus.delete(dialog);
         if (trigger?.isConnected) trigger.focus();
       }
 
@@ -11027,12 +11098,12 @@
         const { key } = productActionMenu.dataset;
         const { menuAction } = button.dataset;
         if (menuAction === "view") {
-          productViewReturnFocus = activeProductMenuTrigger;
+          productViewReturnFocus.set(productViewDialog, activeProductMenuTrigger);
           closeProductActionMenu();
           requestAnimationFrame(() => {
             const product = categoryState.products[key];
             if (!product) {
-              restoreProductViewFocus();
+              restoreProductViewFocus(productViewDialog);
               showCategoryToast("This product is no longer available. The list has been refreshed.", "error");
               return;
             }
@@ -11889,7 +11960,7 @@
                 gallery.append(empty);
               }
             }, { once: true });
-            gallery.replaceChildren(image);
+            gallery.replaceChildren(image, empty);
             empty.hidden = true;
             thumbnails.querySelectorAll("button").forEach((button) => {
               button.setAttribute("aria-pressed", String(button.dataset.imageUrl === url));
@@ -11959,7 +12030,7 @@
         try {
           showProductDetailDialog(dialog);
         } catch (error) {
-          restoreProductViewFocus();
+          restoreProductViewFocus(dialog);
           console.error("Opening product details failed.", error);
           showCategoryToast("Product details could not be opened. Close other dialogs and retry.", "error");
         }
@@ -11968,7 +12039,7 @@
       function showProductDetailDialog(dialog) {
         for (const otherDialog of [productViewDialog, inventoryProductViewDialog]) {
           if (otherDialog !== dialog && otherDialog.open) {
-            productViewReturnFocus = null;
+            productViewReturnFocus.delete(otherDialog);
             otherDialog.close();
           }
         }
@@ -12198,8 +12269,8 @@
       for (const dialog of [productFormDialog, productViewDialog, inventoryProductViewDialog, productConfirmDialog]) {
         dialog.querySelectorAll("[data-product-close]").forEach((button) => button.addEventListener("click", () => dialog.close()));
       }
-      productViewDialog.addEventListener("close", restoreProductViewFocus);
       for (const dialog of [productViewDialog, inventoryProductViewDialog]) {
+        dialog.addEventListener("close", () => restoreProductViewFocus(dialog));
         dialog.addEventListener("click", (event) => {
           if (event.target === dialog) dialog.close();
         });
@@ -12312,6 +12383,7 @@
           return;
         }
         if (button.dataset.barcodeAction === "view") {
+          productViewReturnFocus.set(inventoryProductViewDialog, button);
           openProductView(record.product, record.key, record, inventoryProductViewDialog);
         } else if (button.dataset.barcodeAction === "generate") void generateBarcodeForRecord(record);
         else {
