@@ -709,7 +709,7 @@
       .inventory-page[hidden],
       .customers-page[hidden],
       .orders-page[hidden],
-      .support-page[hidden],
+      #support-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -2896,7 +2896,17 @@
         display: none;
       }
 
-      .support-page .category-pagination[hidden] {
+      .support-date-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @media (max-width: 480px) {
+        .support-date-filters {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      #support-page .category-pagination[hidden] {
         display: none;
       }
     </style>
@@ -3573,9 +3583,8 @@
                 </div>
               </div>
           </section>
-        </section>
 
-        <section class="category-page support-page" id="support-page" aria-labelledby="support-section-title" hidden>
+        <section class="customers-page" id="support-page" aria-labelledby="support-section-title" hidden>
           <div class="category-heading-row">
             <div>
               <h2 id="support-section-title">Customer Support</h2>
@@ -3601,31 +3610,19 @@
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
               </select>
-              <label class="visually-hidden" for="support-date-from">Requested from date</label>
-              <input id="support-date-from" type="date" aria-label="Requested from date" />
-              <label class="visually-hidden" for="support-date-to">Requested to date</label>
-              <input id="support-date-to" type="date" aria-label="Requested to date" />
               <button class="category-secondary-button" id="support-clear-filters" type="button">Clear filters</button>
             </div>
-            <p class="category-feedback" id="support-filter-error" data-kind="error" role="alert" hidden></p>
           </div>
 
-          <section class="support-tab-panel" id="support-active-panel" role="tabpanel" aria-labelledby="support-active-tab">
-            <div class="category-heading-row">
-              <div>
-                <h3>Active callback requests</h3>
-                <p id="support-live-state" role="status" aria-live="polite">Waiting for Firebase…</p>
-              </div>
-              <button class="category-secondary-button" id="support-refresh" type="button">Refresh</button>
-            </div>
-
+          <div class="support-tab-panel" id="support-active-panel" role="tabpanel" aria-labelledby="support-active-tab">
             <div class="category-table-card">
-              <div class="category-feedback" id="support-loading" aria-live="polite">Loading active callback requests…</div>
+              <div class="category-feedback" id="support-loading" aria-live="polite">Loading callbacks…</div>
+              <div class="category-feedback" id="support-warning" role="status" hidden></div>
               <div class="category-feedback" id="support-error" data-kind="error" role="alert" hidden>
                 <span id="support-error-message"></span>
                 <button class="category-secondary-button" id="support-retry" type="button">Retry</button>
               </div>
-              <div class="category-feedback" id="support-empty" hidden>No active callback requests match these filters.</div>
+              <div class="category-feedback" id="support-empty" hidden>No callbacks match these filters.</div>
               <div class="category-table-wrap" id="support-table-wrap" hidden>
                 <table class="category-table">
                   <thead>
@@ -3641,24 +3638,39 @@
                   <tbody id="support-table-body"></tbody>
                 </table>
               </div>
-              <div class="category-pagination" id="support-pagination" hidden>
-                <div class="pagination-summary"><span id="support-page-summary"></span></div>
+              <div class="category-pagination customers-pagination" id="support-pagination" hidden>
+                <div class="pagination-summary">
+                  <span id="support-page-summary"></span>
+                  <label class="pagination-size" for="support-page-size">Rows per page
+                    <select id="support-page-size" aria-label="Active callback rows per page"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+                  </label>
+                </div>
                 <div class="category-pagination-controls">
                   <button type="button" id="support-previous">Previous</button>
-                  <span id="support-page-count" aria-live="polite"></span>
+                  <div class="pagination-pages" id="support-page-buttons" aria-label="Active callback pages"></div>
+                  <label class="pagination-page-input" for="support-page-input">Page
+                    <input id="support-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to active callback page" />
+                    <span>of <span id="support-page-count">1</span></span>
+                  </label>
                   <button type="button" id="support-next">Next</button>
+                </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <section class="support-tab-panel" id="support-all-panel" role="tabpanel" aria-labelledby="support-all-tab" hidden>
-          <div class="category-heading-row">
-            <div><h3>All callback requests</h3></div>
-            <button class="category-secondary-button" id="support-all-refresh" type="button">Refresh</button>
+        <div class="support-tab-panel" id="support-all-panel" role="tabpanel" aria-labelledby="support-all-tab" hidden>
+          <div class="category-table-card">
+            <div class="category-filters support-date-filters" aria-label="Filter callbacks by requested date">
+              <label class="visually-hidden" for="support-date-from">Requested from date</label>
+              <input id="support-date-from" type="date" aria-label="Requested from date" />
+              <label class="visually-hidden" for="support-date-to">Requested to date</label>
+              <input id="support-date-to" type="date" aria-label="Requested to date" />
+            </div>
+            <p class="category-feedback" id="support-filter-error" data-kind="error" role="alert" hidden></p>
           </div>
           <div class="category-table-card">
-            <p id="support-all-live-state" class="category-feedback" role="status" aria-live="polite">Waiting for Firebase…</p>
+            <div class="category-feedback" id="support-all-loading" aria-live="polite">Loading callbacks…</div>
+            <div class="category-feedback" id="support-all-warning" role="status" hidden></div>
             <div class="category-feedback" id="support-all-error" data-kind="error" role="alert" hidden>
               <span id="support-all-error-message"></span>
               <button class="category-secondary-button" id="support-all-retry" type="button">Retry</button>
@@ -3679,15 +3691,25 @@
                 <tbody id="support-all-table-body"></tbody>
               </table>
             </div>
-            <div class="category-pagination" id="support-all-pagination" hidden>
-              <div class="pagination-summary"><span id="support-all-page-summary"></span></div>
+            <div class="category-pagination customers-pagination" id="support-all-pagination" hidden>
+              <div class="pagination-summary">
+                <span id="support-all-page-summary"></span>
+                <label class="pagination-size" for="support-all-page-size">Rows per page
+                  <select id="support-all-page-size" aria-label="All callback rows per page"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+                </label>
+              </div>
               <div class="category-pagination-controls">
                 <button type="button" id="support-all-previous">Previous</button>
-                <span id="support-all-page-count" aria-live="polite"></span>
+                <div class="pagination-pages" id="support-all-page-buttons" aria-label="All callback pages"></div>
+                <label class="pagination-page-input" for="support-all-page-input">Page
+                  <input id="support-all-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to all callback page" />
+                  <span>of <span id="support-all-page-count">1</span></span>
+                </label>
                 <button type="button" id="support-all-next">Next</button>
               </div>
             </div>
           </div>
+        </div>
         </section>
       </main>
     </div>
@@ -3717,9 +3739,11 @@
           <label for="support-next-status">New status</label>
           <select id="support-next-status" required>
             <option value="PENDING">Pending</option>
+            <option value="CONNECTING">Connecting</option>
             <option value="CONNECTED">Connected</option>
             <option value="ENDED">Ended</option>
             <option value="EXPIRED">Expired</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
         <p id="support-status-error" role="alert" hidden></p>
@@ -4214,7 +4238,7 @@
         activeTimeout: null,
         allTimeout: null,
         page: 1,
-        pageSize: 25,
+        pageSize: 10,
         currentView: "active",
         detailRequestId: 0,
         activeDetailKey: null,
@@ -4426,7 +4450,14 @@
 
       function supportStatusLabel(value) {
         const normalized = typeof value === "string" ? value.trim().toUpperCase() : "";
-        const labels = { PENDING: "Pending", CONNECTED: "Connected", ENDED: "Ended", EXPIRED: "Expired" };
+        const labels = {
+          PENDING: "Pending",
+          CONNECTING: "Connecting",
+          CONNECTED: "Connected",
+          ENDED: "Ended",
+          EXPIRED: "Expired",
+          CANCELLED: "Cancelled",
+        };
         return labels[normalized] || (normalized || "Not available");
       }
 
@@ -4517,7 +4548,7 @@
           ? supportState.allCallbacks
           : supportState.activeCallbacks;
         return supportState.currentView === "active"
-          ? callbacks.filter(({ raw }) => ["PENDING", "CONNECTED"].includes(
+          ? callbacks.filter(({ raw }) => ["PENDING", "CONNECTING", "CONNECTED"].includes(
             typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
           ))
           : callbacks;
@@ -4526,12 +4557,15 @@
       function getFilteredSupportCallbacks() {
         const search = document.querySelector("#support-search").value.trim().toLocaleLowerCase();
         const status = document.querySelector("#support-status-filter").value;
-        const from = document.querySelector("#support-date-from").value;
-        const to = document.querySelector("#support-date-to").value;
-        const filterError = document.querySelector("#support-filter-error");
-        const invalidRange = Boolean(from && to && from > to);
-        filterError.hidden = !invalidRange;
-        filterError.textContent = invalidRange ? "The requested-to date must be the same as or later than the requested-from date." : "";
+        const isAll = supportState.currentView === "all";
+        const from = isAll ? document.querySelector("#support-date-from").value : "";
+        const to = isAll ? document.querySelector("#support-date-to").value : "";
+        const filterError = isAll ? document.querySelector("#support-filter-error") : null;
+        const invalidRange = isAll && Boolean(from && to && from > to);
+        if (filterError) {
+          filterError.hidden = !invalidRange;
+          filterError.textContent = invalidRange ? "The requested-to date must be the same as or later than the requested-from date." : "";
+        }
 
         const filtered = getCurrentSupportCallbacks().filter((callback) => {
           const { key, raw } = callback;
@@ -4571,15 +4605,36 @@
       }
 
       function renderSupportPagination(total, pageCount) {
+        const prefix = supportState.currentView === "all" ? "#support-all-" : "#support-";
+        const pageButtons = document.querySelector(`${prefix}page-buttons`);
+        pageButtons.replaceChildren();
+        const startPage = Math.max(1, Math.min(supportState.page - 3, pageCount - 6));
+        const endPage = Math.min(pageCount, startPage + 6);
+        for (let page = startPage; page <= endPage; page += 1) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to callback page ${page}`);
+          if (page === supportState.page) button.setAttribute("aria-current", "page");
+          button.addEventListener("click", () => {
+            supportState.page = page;
+            renderSupportCallbacks();
+          });
+          pageButtons.append(button);
+        }
         const start = total ? (supportState.page - 1) * supportState.pageSize + 1 : 0;
         const end = total ? Math.min(total, supportState.page * supportState.pageSize) : 0;
-        const prefix = supportState.currentView === "all" ? "#support-all-" : "#support-";
         document.querySelector(`${prefix}page-summary`).textContent =
-          `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${total.toLocaleString("en-IN")} requests`;
-        document.querySelector(`${prefix}page-count`).textContent = `Page ${supportState.page} of ${pageCount}`;
+          `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${total.toLocaleString("en-IN")} callbacks`;
+        document.querySelector(`${prefix}page-count`).textContent = String(pageCount);
+        const pageInput = document.querySelector(`${prefix}page-input`);
+        pageInput.max = String(pageCount);
+        pageInput.value = String(supportState.page);
+        document.querySelector("#support-page-size").value = String(supportState.pageSize);
+        document.querySelector("#support-all-page-size").value = String(supportState.pageSize);
         document.querySelector(`${prefix}previous`).disabled = supportState.page <= 1;
         document.querySelector(`${prefix}next`).disabled = supportState.page >= pageCount;
-        document.querySelector(`${prefix}pagination`).hidden = total === 0 || pageCount <= 1;
+        document.querySelector(`${prefix}pagination`).hidden = total === 0;
       }
 
       function addSupportTextCell(row, value) {
@@ -4596,19 +4651,19 @@
         const currentError = isAll ? supportState.allError : supportState.activeError;
         const malformedCount = isAll ? supportState.allMalformedCount : supportState.activeMalformedCount;
         const callbacks = getCurrentSupportCallbacks();
-        const loading = document.querySelector(isAll ? "#support-all-live-state" : "#support-loading");
+        const loading = document.querySelector(isAll ? "#support-all-loading" : "#support-loading");
         const error = document.querySelector(`#${panel}error`);
+        const warning = document.querySelector(`#${panel}warning`);
         const table = document.querySelector(`#${panel}table-wrap`);
         const empty = document.querySelector(`#${panel}empty`);
         const body = document.querySelector(`#${panel}table-body`);
         const errorMessage = document.querySelector(`#${panel}error-message`);
-        const liveState = document.querySelector(isAll ? "#support-all-live-state" : "#support-live-state");
 
         if (supportState.activeActionKey &&
             !getCurrentSupportCallbacks().some(({ key }) => key === supportState.activeActionKey)) {
           closeSupportActionMenu();
         }
-        const activeRecords = supportState.activeCallbacks.filter(({ raw }) => ["PENDING", "CONNECTED"].includes(
+        const activeRecords = supportState.activeCallbacks.filter(({ raw }) => ["PENDING", "CONNECTING", "CONNECTED"].includes(
           typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
         ));
         document.querySelector("#support-active-count").textContent = supportState.activeLoaded
@@ -4619,26 +4674,19 @@
           : "—";
         error.hidden = !currentError;
         errorMessage.textContent = currentError || "";
-        if (!isAll) loading.hidden = loaded || Boolean(currentError);
-        liveState.textContent = !navigator.onLine
-          ? "Browser is offline; displayed records may be stale."
-          : currentError
-            ? isAll ? "Live updates for all callbacks are unavailable." : "Live updates for active callbacks are unavailable."
-            : loaded
-              ? `Live updates active · ${callbacks.length.toLocaleString("en-IN")} ${isAll ? "all" : "active"} callback${callbacks.length === 1 ? "" : "s"}`
-              : isAll ? "Connecting to /support_callbacks…" : "Connecting to /active_callbacks…";
+        loading.hidden = loaded || Boolean(currentError);
+        warning.hidden = !loaded || malformedCount === 0;
+        warning.textContent = malformedCount
+          ? `${malformedCount.toLocaleString("en-IN")} unrecognized record${malformedCount === 1 ? " was" : "s were"} ignored.`
+          : "";
         renderSupportStatusFilter();
         body.replaceChildren();
 
         if (!loaded) {
           table.hidden = true;
           empty.hidden = true;
-          if (isAll) empty.hidden = true;
+          document.querySelector(`#${panel}pagination`).hidden = true;
           return;
-        }
-
-        if (malformedCount) {
-          liveState.textContent += ` ${malformedCount.toLocaleString("en-IN")} unrecognized record${malformedCount === 1 ? " was" : "s were"} ignored.`;
         }
 
         const filtered = getFilteredSupportCallbacks();
@@ -4697,7 +4745,7 @@
         empty.hidden = visible.length > 0;
         empty.textContent = callbacks.length
           ? "No callback requests match these filters. Adjust or clear the filters."
-          : isAll ? "No callback requests are available." : "No active callback requests are available.";
+          : "No callback requests are available.";
         renderSupportPagination(filtered.length, pageCount);
       }
 
@@ -4783,7 +4831,14 @@
         supportState.activeStatusKey = key;
         supportState.originalStatus = currentStatus;
         supportState.savingStatus = false;
-        select.value = ["PENDING", "CONNECTED", "ENDED", "EXPIRED"].includes(currentStatus) ? currentStatus : "PENDING";
+        select.value = [
+          "PENDING",
+          "CONNECTING",
+          "CONNECTED",
+          "ENDED",
+          "EXPIRED",
+          "CANCELLED",
+        ].includes(currentStatus) ? currentStatus : "PENDING";
         document.querySelector("#support-status-title").textContent = "Change callback status";
         document.querySelector("#support-status-description").textContent =
           `Request ${callback.raw.requestId || key} · Current status: ${supportStatusLabel(currentStatus)}`;
@@ -4816,7 +4871,7 @@
           error.hidden = false;
           return;
         }
-        if (!["PENDING", "CONNECTED", "ENDED", "EXPIRED"].includes(selectedStatus) ||
+        if (!["PENDING", "CONNECTING", "CONNECTED", "ENDED", "EXPIRED", "CANCELLED"].includes(selectedStatus) ||
             selectedStatus === supportState.originalStatus) {
           error.textContent = "Choose a different supported status before saving.";
           error.hidden = false;
@@ -5037,13 +5092,13 @@
             supportState.activeError = null;
             renderSupportCallbacks();
           } catch (error) {
-            supportState.activeError = reportFirebaseError("Reading active callback requests", error);
+            supportState.activeError = reportFirebaseError("Reading active callbacks", error);
             renderSupportCallbacks();
           }
         }, (error) => {
           if (generation !== supportState.generation) return;
           window.clearTimeout(supportState.activeTimeout);
-          supportState.activeError = reportFirebaseError("Reading active callback requests", error);
+          supportState.activeError = reportFirebaseError("Reading active callbacks", error);
           renderSupportCallbacks();
         });
         supportState.stopAll = onValue(ref(database, "support_callbacks"), (snapshot) => {
@@ -5058,13 +5113,13 @@
             supportState.allError = null;
             renderSupportCallbacks();
           } catch (error) {
-            supportState.allError = reportFirebaseError("Reading all callback requests", error);
+            supportState.allError = reportFirebaseError("Reading all callbacks", error);
             renderSupportCallbacks();
           }
         }, (error) => {
           if (generation !== supportState.generation) return;
           window.clearTimeout(supportState.allTimeout);
-          supportState.allError = reportFirebaseError("Reading all callback requests", error);
+          supportState.allError = reportFirebaseError("Reading all callbacks", error);
           renderSupportCallbacks();
         });
       }
@@ -7101,6 +7156,28 @@
         supportState.page = 1;
         renderSupportCallbacks();
       });
+      ["#support-page-size", "#support-all-page-size"].forEach((selector) => {
+        document.querySelector(selector).addEventListener("change", (event) => {
+          supportState.pageSize = Number(event.target.value);
+          supportState.page = 1;
+          renderSupportCallbacks();
+        });
+      });
+      ["#support-page-input", "#support-all-page-input"].forEach((selector) => {
+        document.querySelector(selector).addEventListener("change", (event) => {
+          const page = Number(event.target.value);
+          const count = Math.max(1, Math.ceil(
+            getFilteredSupportCallbacks().length / supportState.pageSize,
+          ));
+          if (!Number.isInteger(page) || page < 1 || page > count) {
+            event.target.value = String(supportState.page);
+            showCategoryToast(`Enter a page number from 1 to ${count}.`, "error");
+            return;
+          }
+          supportState.page = page;
+          renderSupportCallbacks();
+        });
+      });
       document.querySelector("#support-previous").addEventListener("click", () => {
         if (supportState.currentView !== "active") return;
         supportState.page = Math.max(1, supportState.page - 1);
@@ -7120,14 +7197,6 @@
         if (supportState.currentView !== "all") return;
         supportState.page += 1;
         renderSupportCallbacks();
-      });
-      document.querySelector("#support-refresh").addEventListener("click", () => {
-        stopSupportListeners();
-        startSupportListeners();
-      });
-      document.querySelector("#support-all-refresh").addEventListener("click", () => {
-        stopSupportListeners();
-        startSupportListeners();
       });
       document.querySelector("#support-retry").addEventListener("click", () => {
         stopSupportListeners();

@@ -36,7 +36,7 @@
       "$userId": {
         "status": {
           ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
-          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
         }
       }
     },
@@ -46,25 +46,25 @@
         ".write": false,
         "status": {
           ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
-          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
         },
         "$nestedKey": {
           ".write": false,
           "status": {
             ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
-            ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+            ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
           },
           "$deepKey": {
             ".write": false,
             "status": {
               ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
-              ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+              ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
             },
             "$leafKey": {
               ".write": false,
               "status": {
                 ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
-                ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+                ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
               }
             }
           }
