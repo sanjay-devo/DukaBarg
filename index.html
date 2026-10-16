@@ -402,6 +402,16 @@
         font-size: var(--font-size-sm);
       }
 
+      .category-bulk-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+
+      .category-bulk-actions[hidden] {
+        display: none;
+      }
+
       .breadcrumb strong {
         color: var(--color-text-primary);
         font-weight: 600;
@@ -1188,6 +1198,35 @@
         min-width: 830px;
         border-collapse: collapse;
         text-align: left;
+      }
+
+      .category-selection-toolbar {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-4) 0;
+        color: var(--color-text-inverse);
+        border-bottom: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+      }
+
+      .category-table th:first-child,
+      .category-table td:first-child {
+        width: 52px;
+        text-align: center;
+      }
+
+      .category-table input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--color-border-strong);
+        cursor: pointer;
+      }
+
+      .category-table input[type="checkbox"]:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
       }
 
       .category-table th {
@@ -3814,6 +3853,14 @@
                 <button class="category-tab" type="button" role="tab" data-level="category" aria-selected="false">Categories</button>
                 <button class="category-tab" type="button" role="tab" data-level="subcategory" aria-selected="false">Subcategories</button>
               </div>
+              <div class="category-selection-toolbar">
+                <span id="category-selection-summary" aria-live="polite">0 selected</span>
+                <div class="category-bulk-actions" id="category-bulk-actions" aria-label="Bulk category actions" hidden>
+                  <button class="category-secondary-button" type="button" data-category-bulk="activate">Activate</button>
+                  <button class="category-secondary-button" type="button" data-category-bulk="deactivate">Deactivate</button>
+                  <button class="category-danger-button" type="button" data-category-bulk="delete">Delete selected</button>
+                </div>
+              </div>
               <div class="category-feedback" id="category-loading" aria-live="polite">
                 <div class="category-skeleton" aria-hidden="true">
                   <span></span><span></span><span></span>
@@ -3829,6 +3876,7 @@
                 <table class="category-table">
                   <thead>
                     <tr>
+                      <th scope="col"><input id="category-select-all" type="checkbox" aria-label="Select all categories on this page" /></th>
                       <th scope="col">Name</th>
                       <th scope="col">Level</th>
                       <th scope="col">Parent Category</th>
@@ -3878,10 +3926,7 @@
                 <p>Manage product details, categories, stock, and barcodes.</p>
               </div>
               <div class="products-heading-actions">
-                <button class="category-secondary-button" id="product-import-button" type="button">Import CSV</button>
-                <button class="category-secondary-button" id="product-export-button" type="button">Export CSV</button>
                 <button class="category-primary-button" id="product-add-button" type="button">+ Add Product</button>
-                <input class="visually-hidden" id="product-import-file" type="file" accept=".csv,text/csv" />
               </div>
             </div>
             <p class="products-feedback" id="products-category-error" data-kind="error" role="alert" hidden><span id="products-category-error-message"></span> <button class="category-secondary-button" id="products-category-retry" type="button">Retry categories</button></p>
@@ -4295,10 +4340,6 @@
     <dialog class="product-dialog" id="product-confirm-dialog" aria-labelledby="product-confirm-title">
       <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-confirm-title">Confirm product action</h2><p id="product-confirm-message"></p></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close confirmation">×</button></div><div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-danger-button" id="product-confirm-action" type="button">Confirm</button></div></div>
     </dialog>
-    <dialog class="product-dialog" id="product-import-dialog" aria-labelledby="product-import-title">
-      <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-import-title">Preview CSV import</h2><p id="product-import-summary"></p></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close import preview">×</button></div><div id="product-import-errors" role="alert"></div><div class="products-table-wrap"><table class="products-table"><thead><tr><th>Row</th><th>Product ID</th><th>Name</th><th>SKU</th><th>Barcode</th><th>Validation</th></tr></thead><tbody id="product-import-preview"></tbody></table></div><div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-primary-button" id="product-import-confirm" type="button">Import valid rows</button></div></div>
-    </dialog>
-
     <dialog class="category-dialog" id="category-form-dialog" aria-labelledby="category-form-title">
       <form class="category-dialog-form" id="category-form" novalidate>
         <div class="category-dialog-heading">
@@ -4560,6 +4601,7 @@
       const categoryState = {
         categories: [],
         categoryDiagnostics: [],
+        selected: new Set(),
         products: {},
         categoriesLoaded: false,
         productsLoaded: false,
@@ -4573,7 +4615,7 @@
         page: 1,
         pageSize: 10,
         editingId: null,
-        deletingId: null,
+        deletingIds: [],
         saving: false,
         stopCategories: null,
         stopProducts: null,
@@ -4601,9 +4643,7 @@
         pendingAction: null,
         openingForm: false,
         saving: false,
-        importing: false,
         categoryNeedsCorrection: false,
-        importRows: [],
       };
       const inventoryState = {
         page: 1,
@@ -8534,6 +8574,11 @@
         categoryPagination.hidden = true;
         if (loading || categoryState.categoriesError) {
           categoryTableBody.replaceChildren();
+          document.querySelector("#category-select-all").checked = false;
+          document.querySelector("#category-select-all").indeterminate = false;
+          document.querySelector("#category-selection-summary").textContent =
+            `${categoryState.selected.size.toLocaleString("en-IN")} selected`;
+          document.querySelector("#category-bulk-actions").hidden = true;
           return;
         }
 
@@ -8571,7 +8616,9 @@
             deleteReason = "Reassign products to another category before deleting";
           }
           const levelName = entry.level === "master" ? "Master Category" : entry.level === "category" ? "Category" : "Subcategory";
+          const selected = categoryState.selected.has(entry.id);
           return `<tr>
+            <td><input type="checkbox" data-select-category="${escapeCategoryHtml(entry.id)}" aria-label="Select ${escapeCategoryHtml(entry.name)}"${selected ? " checked" : ""} /></td>
             <td class="category-name">${escapeCategoryHtml(entry.name)}</td>
             <td><span class="category-level">${levelName}</span></td>
             <td>${parent ? escapeCategoryHtml(parent.name) : "—"}</td>
@@ -8588,6 +8635,19 @@
             </td>
           </tr>`;
         }).join("");
+        const categoryIds = new Set(categoryState.categories.map((entry) => entry.id));
+        for (const id of categoryState.selected) {
+          if (!categoryIds.has(id)) categoryState.selected.delete(id);
+        }
+        const selectedCategories = [...categoryState.selected];
+        document.querySelector("#category-selection-summary").textContent =
+          `${selectedCategories.length.toLocaleString("en-IN")} selected`;
+        document.querySelector("#category-bulk-actions").hidden = selectedCategories.length === 0;
+        const selectAll = document.querySelector("#category-select-all");
+        const visibleIds = visible.map((entry) => entry.id);
+        const selectedVisible = visibleIds.filter((id) => categoryState.selected.has(id)).length;
+        selectAll.checked = visibleIds.length > 0 && selectedVisible === visibleIds.length;
+        selectAll.indeterminate = selectedVisible > 0 && selectedVisible < visibleIds.length;
 
         const warning = document.querySelector("#product-read-warning");
         warning.hidden = categoryState.productsReadable || !categoryState.categoriesLoaded;
@@ -8957,16 +9017,90 @@
           );
           return;
         }
-        categoryState.deletingId = category.id;
+        categoryState.deletingIds = [category.id];
+        document.querySelector("#category-confirm-title").textContent = "Delete category?";
+        categoryConfirmDelete.textContent = "Delete";
         document.querySelector("#category-confirm-message").textContent =
           `Delete “${category.name}”? It has ${children} child categories and is referenced by ${count} products. This action cannot be undone.`;
         categoryConfirmDialog.showModal();
       }
 
+      function categoryStatusFields(category, active, updatedAt) {
+        const status = active ? "active" : "inactive";
+        const fields = { status, updatedAt };
+        if (category.raw.active !== undefined) {
+          fields.active = active;
+        }
+        if (category.raw.isActive !== undefined) {
+          fields.isActive = active;
+        }
+        if (category.raw.status === undefined && category.raw.active === undefined && category.raw.isActive === undefined) {
+          fields.isActive = active;
+        }
+        return fields;
+      }
+
+      async function updateSelectedCategoryStatus(active) {
+        const categories = [...categoryState.selected]
+          .map((id) => categoryState.categories.find((entry) => entry.id === id))
+          .filter(Boolean);
+        if (!categories.length) return;
+        const updates = {};
+        const updatedAt = Date.now();
+        for (const category of categories) {
+          for (const [field, value] of Object.entries(categoryStatusFields(category, active, updatedAt))) {
+            updates[`${category.id}/${field}`] = value;
+          }
+        }
+        try {
+          await update(ref(database, "categories"), updates);
+          showCategoryToast(
+            `${categories.length} categor${categories.length === 1 ? "y" : "ies"} ${active ? "activated" : "deactivated"}.`,
+          );
+        } catch (error) {
+          showCategoryToast(reportFirebaseError("Updating selected categories", error), "error");
+        }
+      }
+
+      function openBulkCategoryDeleteConfirmation() {
+        if (!categoryState.productsReadable) {
+          showCategoryToast("Cannot verify product references. Deletion is blocked.", "error");
+          return;
+        }
+        const categories = [...categoryState.selected]
+          .map((id) => categoryState.categories.find((entry) => entry.id === id))
+          .filter(Boolean);
+        if (!categories.length) return;
+        for (const category of categories) {
+          const children = childrenOf(category.id).length;
+          const count = productCount(category.id);
+          if (children > 0) {
+            showCategoryToast(
+              `Cannot delete “${category.name}” while it has ${children} child categor${children === 1 ? "y" : "ies"}. Delete or reassign child categories first.`,
+              "error",
+            );
+            return;
+          }
+          if (count > 0) {
+            showCategoryToast(
+              `Cannot delete “${category.name}” while it is assigned to ${count} product${count === 1 ? "" : "s"}. Reassign those products first.`,
+              "error",
+            );
+            return;
+          }
+        }
+        categoryState.deletingIds = categories.map((category) => category.id);
+        document.querySelector("#category-confirm-title").textContent = "Delete selected categories?";
+        categoryConfirmDelete.textContent = "Delete selected";
+        document.querySelector("#category-confirm-message").textContent =
+          `Delete ${categories.length} selected categor${categories.length === 1 ? "y" : "ies"}? This action cannot be undone.`;
+        categoryConfirmDialog.showModal();
+      }
+
       async function deleteConfirmedCategory() {
-        const id = categoryState.deletingId;
-        const category = categoryState.categories.find((entry) => entry.id === id);
-        if (!id || !category || !categoryState.productsReadable) {
+        const ids = [...categoryState.deletingIds];
+        if (!ids.length || !categoryState.productsReadable) {
+          categoryState.deletingIds = [];
           categoryConfirmDialog.close();
           showCategoryToast("Deletion was cancelled because the category or product data could not be verified.", "error");
           return;
@@ -8981,22 +9115,36 @@
           ]);
           const categories = normalizeCategories(latestCategories.val());
           const products = latestProducts.val() || {};
-          const latestCategory = categories.find((entry) => entry.id === id);
-          if (!latestCategory) {
-            throw new Error("This category no longer exists. Refresh the page and try again.");
+          for (const id of ids) {
+            const latestCategory = categories.find((entry) => entry.id === id);
+            if (!latestCategory) {
+              throw new Error("A selected category no longer exists. Refresh the page and try again.");
+            }
+            if (childrenOf(id, categories).length > 0) {
+              throw new Error(`“${latestCategory.name}” now has child categories. Delete or reassign them first.`);
+            }
+            const references = productCount(id, products, categories);
+            if (references > 0) {
+              throw new Error(
+                `“${latestCategory.name}” is assigned to ${references} product${references === 1 ? "" : "s"}. Reassign those products before deleting.`,
+              );
+            }
           }
-          if (!categoryCanBeDeleted(id, categories, products) && childrenOf(id, categories).length > 0) {
-            throw new Error("This category now has child categories. Delete or reassign them first.");
-          }
-          const references = productCount(id, products, categories);
-          if (!categoryCanBeDeleted(id, categories, products) && references > 0) {
-            throw new Error(
-              `This category is assigned to ${references} product${references === 1 ? "" : "s"}. Reassign those products before deleting.`,
+          if (ids.length === 1) {
+            await remove(ref(database, `categories/${ids[0]}`));
+          } else {
+            await update(
+              ref(database, "categories"),
+              Object.fromEntries(ids.map((id) => [id, null])),
             );
           }
-          await remove(ref(database, `categories/${id}`));
+          ids.forEach((id) => categoryState.selected.delete(id));
           categoryConfirmDialog.close();
-          showCategoryToast("Category deleted.");
+          showCategoryToast(
+            ids.length === 1
+              ? "Category deleted."
+              : `${ids.length} categories deleted.`,
+          );
         } catch (error) {
           showCategoryToast(
             error?.code
@@ -9005,25 +9153,17 @@
             "error",
           );
         } finally {
-          categoryState.deletingId = null;
+          categoryState.deletingIds = [];
           categoryConfirmDelete.disabled = false;
           categoryConfirmDelete.removeAttribute("aria-busy");
-          categoryConfirmDelete.textContent = "Delete";
+          categoryConfirmDelete.textContent = ids.length > 1 ? "Delete selected" : "Delete";
         }
       }
 
       async function toggleCategoryStatus(category) {
-        const status = category.active ? "inactive" : "active";
-        const fields = { status, updatedAt: Date.now() };
-        if (category.raw.active !== undefined) {
-          fields.active = status === "active";
-        }
-        if (category.raw.isActive !== undefined) {
-          fields.isActive = status === "active";
-        }
-        if (category.raw.status === undefined && category.raw.active === undefined && category.raw.isActive === undefined) {
-          fields.isActive = status === "active";
-        }
+        const active = !category.active;
+        const status = active ? "active" : "inactive";
+        const fields = categoryStatusFields(category, active, Date.now());
         try {
           await update(ref(database, `categories/${category.id}`), fields);
           showCategoryToast(`Category ${status === "active" ? "activated" : "deactivated"}.`);
@@ -9136,6 +9276,31 @@
           }
         });
       }
+      categoryTableBody.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-select-category]");
+        if (!checkbox) return;
+        if (checkbox.checked) categoryState.selected.add(checkbox.dataset.selectCategory);
+        else categoryState.selected.delete(checkbox.dataset.selectCategory);
+        renderCategoryRows();
+      });
+      document.querySelector("#category-select-all").addEventListener("change", (event) => {
+        categoryTableBody.querySelectorAll("input[data-select-category]").forEach((checkbox) => {
+          if (event.target.checked) categoryState.selected.add(checkbox.dataset.selectCategory);
+          else categoryState.selected.delete(checkbox.dataset.selectCategory);
+        });
+        renderCategoryRows();
+      });
+      document.querySelector("#category-bulk-actions").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-category-bulk]");
+        if (!button) return;
+        if (button.dataset.categoryBulk === "activate") {
+          void updateSelectedCategoryStatus(true);
+        } else if (button.dataset.categoryBulk === "deactivate") {
+          void updateSelectedCategoryStatus(false);
+        } else if (button.dataset.categoryBulk === "delete") {
+          openBulkCategoryDeleteConfirmation();
+        }
+      });
       categoryTableBody.addEventListener("click", (event) => {
         const button = event.target.closest("button[data-action]");
         if (!button || button.disabled) {
@@ -9844,7 +10009,7 @@
           `${[...productState.selected].filter((key) => Boolean(categoryState.products[key])).length} selected`;
         const bulk = document.querySelector("#products-bulk-actions");
         bulk.innerHTML = productState.selected.size
-          ? `<button class="category-secondary-button" type="button" data-bulk="activate">Activate</button><button class="category-secondary-button" type="button" data-bulk="deactivate">Deactivate</button><button class="category-secondary-button" type="button" data-bulk="export">Export selected</button><button class="category-danger-button" type="button" data-bulk="delete">Delete selected</button>`
+          ? `<button class="category-secondary-button" type="button" data-bulk="activate">Activate</button><button class="category-secondary-button" type="button" data-bulk="deactivate">Deactivate</button><button class="category-danger-button" type="button" data-bulk="delete">Delete selected</button>`
           : "";
         if (!visible.length) {
           empty.hidden = false;
@@ -10212,11 +10377,6 @@
         }
       }
 
-      function csvCell(value) {
-        const text = value == null ? "" : String(value);
-        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-      }
-
       function downloadBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
@@ -10226,326 +10386,6 @@
         anchor.click();
         anchor.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
-
-      function productCsvRows(entries) {
-        const headers = [
-          "productId", "name", "sku", "barcode", "brand", "shortDescription", "longDescription",
-          "mainImageUrl", "additionalImageUrls", "masterCategoryId", "categoryId", "subcategoryId",
-          "mrp", "sellingPrice", "discountedPrice", "costPrice", "stockQuantity",
-          "lowStockThreshold", "unit", "weight", "status", "tags", "variants",
-        ];
-        const lines = [headers.map(csvCell).join(",")];
-        for (const [, product] of entries) {
-          const record = {
-            productId: productId(product, ""),
-            name: productName(product),
-            sku: productSku(product),
-            barcode: productBarcode(product),
-            brand: product.brand ?? "",
-            shortDescription: product.shortDescription ?? "",
-            longDescription: product.longDescription ?? product.description ?? "",
-            mainImageUrl: product.mainImageUrl ?? product.imageUrl ?? "",
-            additionalImageUrls: Array.isArray(product.additionalImageUrls ?? product.images)
-              ? (product.additionalImageUrls ?? product.images).join("|")
-              : String(product.additionalImageUrls ?? product.images ?? ""),
-            masterCategoryId: productCategoryReference(product, "masterCategoryId", "master_category_id"),
-            categoryId: productCategoryReference(product, "categoryId", "category_id"),
-            subcategoryId: productCategoryReference(product, "subcategoryId", "subcategory_id"),
-            mrp: product.mrp ?? "",
-            sellingPrice: product.sellingPrice ?? product.price ?? "",
-            discountedPrice: product.discountedPrice ?? "",
-            costPrice: product.costPrice ?? "",
-            stockQuantity: productStock(product),
-            lowStockThreshold: product.lowStockThreshold ?? 5,
-            unit: product.unit ?? "",
-            weight: product.weight ?? "",
-            status: productStatus(product) ? "active" : "inactive",
-            tags: Array.isArray(product.tags) ? product.tags.join("|") : product.tags ?? "",
-            variants: JSON.stringify(productVariants(product)),
-          };
-          lines.push(headers.map((header) => csvCell(record[header])).join(","));
-        }
-        return lines.join("\r\n");
-      }
-
-      function exportProducts(entries) {
-        if (!entries.length) {
-          showCategoryToast("There are no products to export.", "error");
-          return;
-        }
-        downloadBlob(new Blob(["\uFEFF", productCsvRows(entries)], { type: "text/csv;charset=utf-8" }), "dukabarg-products.csv");
-        showCategoryToast(`Exported ${entries.length} product${entries.length === 1 ? "" : "s"}.`);
-      }
-
-      function parseCsv(text) {
-        const rows = [];
-        let row = [];
-        let cell = "";
-        let quoted = false;
-        for (let index = 0; index < text.length; index += 1) {
-          const character = text[index];
-          if (quoted) {
-            if (character === '"' && text[index + 1] === '"') {
-              cell += '"';
-              index += 1;
-            } else if (character === '"') {
-              quoted = false;
-            } else {
-              cell += character;
-            }
-          } else if (character === '"' && cell === "") {
-            quoted = true;
-          } else if (character === ",") {
-            row.push(cell);
-            cell = "";
-          } else if (character === "\n" || character === "\r") {
-            if (character === "\r" && text[index + 1] === "\n") index += 1;
-            row.push(cell);
-            if (row.some((value) => value.trim())) rows.push(row);
-            row = [];
-            cell = "";
-          } else {
-            cell += character;
-          }
-        }
-        if (quoted) throw new Error("The CSV contains an unclosed quoted field.");
-        if (cell !== "" || row.length) {
-          row.push(cell);
-          if (row.some((value) => value.trim())) rows.push(row);
-        }
-        return rows;
-      }
-
-      function csvImportPreview(text) {
-        const rows = parseCsv(text);
-        if (rows.length < 2) throw new Error("CSV must include a header and at least one product row.");
-        const headers = rows[0].map((header) => header.trim().replace(/^\uFEFF/, "").toLowerCase());
-        const indexOf = (...names) => names.map((name) => headers.indexOf(name.toLowerCase())).find((index) => index >= 0) ?? -1;
-        const columns = {
-          id: indexOf("productid", "product_id", "id"),
-          name: indexOf("name", "productname", "product_name"),
-          sellingPrice: indexOf("sellingprice", "selling_price", "price"),
-          stock: indexOf("stockquantity", "stock_quantity", "stock"),
-          threshold: indexOf("lowstockthreshold", "low_stock_threshold"),
-          mrp: indexOf("mrp"),
-          discountedPrice: indexOf("discountedprice", "discounted_price"),
-          costPrice: indexOf("costprice", "cost_price"),
-          weight: indexOf("weight"),
-          categoryId: indexOf("categoryid", "category_id"),
-          masterCategoryId: indexOf("mastercategoryid", "master_category_id"),
-          subcategoryId: indexOf("subcategoryid", "subcategory_id"),
-        };
-        if (columns.id < 0 || columns.name < 0 || columns.sellingPrice < 0) {
-          throw new Error("CSV headers must include Product ID, Name, and Selling Price.");
-        }
-        const optionalIndex = Object.fromEntries(
-          ["sku", "barcode", "brand", "shortdescription", "longdescription", "mainimageurl", "additionalimageurls", "unit", "status", "tags", "variants"]
-            .map((name) => [name, indexOf(name, name.replace(/[a-z]/, (c) => c.toUpperCase()))]),
-        );
-        const read = (values, index) => index < 0 ? "" : String(values[index] ?? "").trim();
-        const knownBarcodes = new Set(
-          allBarcodeRecords()
-            .map((record) => record.barcode)
-            .filter((barcode) => isValidBarcode(barcode)),
-        );
-        return rows.slice(1).map((values, offset) => {
-          const rowNumber = offset + 2;
-          const errors = [];
-          if (values.length !== headers.length) errors.push("Column count does not match the header.");
-          const productIdValue = read(values, columns.id);
-          const name = read(values, columns.name);
-          if (!productIdValue) errors.push("Product ID is required.");
-          if (!name) errors.push("Product name is required.");
-          const numeric = {};
-          for (const [field, label, integer] of [
-            ["sellingPrice", "Selling price", false], ["stock", "Stock quantity", true],
-            ["threshold", "Low-stock threshold", true], ["mrp", "MRP", false],
-            ["discountedPrice", "Discounted price", false], ["costPrice", "Cost price", false],
-            ["weight", "Weight", false],
-          ]) {
-            const value = read(values, columns[field]);
-            if (!value) {
-              if (field === "sellingPrice") errors.push(`${label} is required.`);
-              continue;
-            }
-            const number = Number(value);
-            if (!Number.isFinite(number) || number < 0 || (integer && !Number.isInteger(number))) errors.push(`${label} must be a valid non-negative ${integer ? "whole number" : "number"}.`);
-            else numeric[field] = number;
-          }
-          const masterId = read(values, columns.masterCategoryId);
-          const categoryId = read(values, columns.categoryId);
-          const subcategoryId = read(values, columns.subcategoryId);
-          const rowBarcode = read(values, optionalIndex.barcode);
-          if (rowBarcode && /[\u0000-\u001f\u007f]/.test(rowBarcode)) errors.push("Barcode value contains unsupported control characters.");
-          if (rowBarcode && !isValidBarcode(rowBarcode)) errors.push("Barcode must contain exactly 13 digits.");
-          if (rowBarcode && knownBarcodes.has(rowBarcode)) errors.push("Barcode is already assigned to another product.");
-          if (isValidBarcode(rowBarcode)) knownBarcodes.add(rowBarcode);
-          for (const url of [read(values, optionalIndex.mainimageurl), ...read(values, optionalIndex.additionalimageurls).split("|")].map((item) => item.trim()).filter(Boolean)) {
-            let parsedUrl;
-            try { parsedUrl = new URL(url); } catch { errors.push("Image URL must be an absolute HTTP or HTTPS URL."); break; }
-            if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-              errors.push("Image URL must use HTTP or HTTPS.");
-              break;
-            }
-          }
-          const hierarchy = productCategoryPath({ masterCategoryId: masterId, categoryId, subcategoryId });
-          const master = hierarchy.master;
-          const category = hierarchy.category;
-          const subcategory = hierarchy.subcategory;
-          if ((masterId || categoryId || subcategoryId) && hierarchy.error) {
-            errors.push(`Category hierarchy is invalid: ${hierarchy.error}`);
-          }
-          if ([master, category, subcategory].some((entry) => entry && !entry.active)) {
-            errors.push("Inactive categories cannot be assigned to imported products.");
-          }
-          const rowStatus = read(values, optionalIndex.status).toLowerCase();
-          if (rowStatus && !["active", "inactive"].includes(rowStatus)) errors.push("Status must be active or inactive.");
-          let variants = [];
-          const variantText = read(values, optionalIndex.variants);
-          if (variantText) {
-            try {
-              const parsed = JSON.parse(variantText);
-              if (!Array.isArray(parsed) || parsed.some((variant) => !variant || typeof variant !== "object")) throw new Error();
-              variants = parsed;
-              for (const variant of variants) {
-                const variantBarcode = String(variant.barcode ?? variant.barcodeValue ?? "");
-                if (variantBarcode && !isValidBarcode(variantBarcode)) errors.push("Variant barcode must contain exactly 13 digits.");
-                if (variantBarcode && knownBarcodes.has(variantBarcode)) errors.push("Variant barcode is already assigned to another product or variant.");
-                if (isValidBarcode(variantBarcode)) knownBarcodes.add(variantBarcode);
-              }
-            } catch {
-              if (!errors.some((message) => message.startsWith("Variant barcode") || message.startsWith("Variant barcode is"))) {
-                errors.push("Variants must be a JSON array of variant objects.");
-              }
-            }
-          }
-          return {
-            rowNumber,
-            errors,
-            product: {
-              productId: productIdValue,
-              name,
-              sku: read(values, optionalIndex.sku),
-              barcode: rowBarcode,
-              brand: read(values, optionalIndex.brand),
-              shortDescription: read(values, optionalIndex.shortdescription),
-              longDescription: read(values, optionalIndex.longdescription),
-              mainImageUrl: read(values, optionalIndex.mainimageurl),
-              additionalImageUrls: read(values, optionalIndex.additionalimageurls).split("|").map((url) => url.trim()).filter(Boolean),
-              masterCategoryId: master?.id || "",
-              masterCategoryName: master?.name || "",
-              categoryId: category?.id || "",
-              categoryName: category?.name || "",
-              subcategoryId: subcategory?.id || "",
-              subcategoryName: subcategory?.name || "",
-              sellingPrice: numeric.sellingPrice,
-              stockQuantity: numeric.stock ?? 0,
-              lowStockThreshold: numeric.threshold ?? 5,
-              ...(numeric.mrp == null ? {} : { mrp: numeric.mrp }),
-              ...(numeric.discountedPrice == null ? {} : { discountedPrice: numeric.discountedPrice }),
-              ...(numeric.costPrice == null ? {} : { costPrice: numeric.costPrice }),
-              ...(numeric.weight == null ? {} : { weight: numeric.weight }),
-              unit: read(values, optionalIndex.unit),
-              status: rowStatus === "inactive" ? "inactive" : "active",
-              isActive: rowStatus !== "inactive",
-              tags: read(values, optionalIndex.tags).split("|").map((tag) => tag.trim()).filter(Boolean),
-              variants,
-            },
-          };
-        });
-      }
-
-      function showImportPreview(rows) {
-        productState.importRows = rows;
-        const validCount = rows.filter((row) => !row.errors.length).length;
-        document.querySelector("#product-import-summary").textContent =
-          `${validCount} valid row${validCount === 1 ? "" : "s"} of ${rows.length}; invalid rows will not be imported. Duplicate product IDs and SKUs are allowed; barcodes must be unique 13-digit values.`;
-        document.querySelector("#product-import-errors").textContent =
-          rows.some((row) => row.errors.length) ? "Rows with errors are excluded from import; review each row below." : "All rows passed validation.";
-        document.querySelector("#product-import-preview").innerHTML = rows.map((row) =>
-          `<tr><td>${row.rowNumber}</td><td>${escapeProductHtml(row.product.productId)}</td><td>${escapeProductHtml(row.product.name)}</td><td>${escapeProductHtml(row.product.sku)}</td><td>${escapeProductHtml(row.product.barcode)}</td><td>${escapeProductHtml(row.errors.join(" ")) || "Ready"}</td></tr>`,
-        ).join("");
-        const confirmButton = document.querySelector("#product-import-confirm");
-        confirmButton.disabled = validCount === 0;
-        confirmButton.textContent = `Import ${validCount} valid row${validCount === 1 ? "" : "s"}`;
-        document.querySelector("#product-import-dialog").showModal();
-      }
-
-      async function importProducts() {
-        const button = document.querySelector("#product-import-confirm");
-        if (productState.importing) return;
-        const rows = productState.importRows.filter((row) => row.errors.length === 0);
-        if (!rows.length) return;
-        productState.importing = true;
-        button.disabled = true;
-        button.setAttribute("aria-busy", "true");
-        try {
-          await waitForCategories();
-          const latestCategories = await get(ref(database, "categories"));
-          categoryState.categories = normalizeCategories(latestCategories.val());
-          categoryState.categoriesLoaded = true;
-          categoryState.categoriesError = null;
-          reportProductCategoryDiagnostics();
-          for (const row of rows) {
-            const hierarchy = productCategoryPath(row.product);
-            if (hierarchy.error) {
-              throw new Error(`Import cancelled: product "${row.product.productId}" has an invalid category hierarchy. ${hierarchy.error}`);
-            }
-            if ([hierarchy.master, hierarchy.category, hierarchy.subcategory].some((entry) => entry && !entry.active)) {
-              throw new Error(`Import cancelled: product "${row.product.productId}" references an inactive category.`);
-            }
-          }
-        } catch (error) {
-          showCategoryToast(
-            error?.code ? reportFirebaseError("Checking imported categories", error) : error.message,
-            "error",
-          );
-          productState.importing = false;
-          button.disabled = false;
-          button.removeAttribute("aria-busy");
-          return;
-        }
-        productState.reservedBarcodes = new Set(
-          rows.flatMap((row) => [
-            row.product.barcode,
-            ...row.product.variants.map((variant) => String(variant.barcode ?? variant.barcodeValue ?? "")),
-          ]).filter((barcode) => isValidBarcode(barcode)),
-        );
-        try {
-          const patch = {};
-          for (const row of rows) {
-            const key = push(ref(database, "products")).key;
-            if (!key) throw new Error("Could not allocate a Firebase record key for an imported row.");
-            patch[key] = {
-              ...row.product,
-              barcode: row.product.barcode || generateUniqueBarcode(),
-              variants: row.product.variants.map((variant, index) => ({
-                ...variant,
-                id: String(variant.id ?? `variant-${index + 1}`),
-                sku: String(variant.sku ?? ""),
-                barcode: /^\d{13}$/.test(String(variant.barcode || ""))
-                  ? String(variant.barcode)
-                  : generateUniqueBarcode(),
-              })),
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            };
-          }
-          await update(ref(database, "products"), patch);
-          Object.assign(categoryState.products, patch);
-          document.querySelector("#product-import-dialog").close();
-          renderCategoryRows();
-          renderProducts();
-          renderBarcodeManager();
-          showCategoryToast(`Imported ${rows.length} product${rows.length === 1 ? "" : "s"}.`);
-        } catch (error) {
-          showCategoryToast(reportFirebaseError("Importing products", error), "error");
-        } finally {
-          productState.importing = false;
-          button.disabled = false;
-          button.removeAttribute("aria-busy");
-        }
       }
 
       async function barcodePngBlob(value) {
@@ -10957,7 +10797,6 @@
         document.querySelector("#product-form-dialog"),
         document.querySelector("#product-view-dialog"),
         document.querySelector("#product-confirm-dialog"),
-        document.querySelector("#product-import-dialog"),
       ]) {
         dialog.querySelectorAll("[data-product-close]").forEach((button) => button.addEventListener("click", () => dialog.close()));
         dialog.addEventListener("click", (event) => {
@@ -10996,7 +10835,6 @@
         if (!button) return;
         if (button.dataset.bulk === "activate") void performBulkStatus(true);
         else if (button.dataset.bulk === "deactivate") void performBulkStatus(false);
-        else if (button.dataset.bulk === "export") exportProducts([...productState.selected].filter((key) => categoryState.products[key]).map((key) => [key, categoryState.products[key]]));
         else if (button.dataset.bulk === "delete") {
           const keys = [...productState.selected].filter((key) => categoryState.products[key]);
           if (!keys.length) return;
@@ -11040,28 +10878,6 @@
         renderBarcodeManager();
       });
       bindPaginationControls("products", productState, renderProducts);
-      document.querySelector("#product-export-button").addEventListener("click", () => {
-        const selected = [...productState.selected].filter((key) => categoryState.products[key]);
-        const entries = selected.length
-          ? selected.map((key) => [key, categoryState.products[key]])
-          : filteredProducts();
-        exportProducts(entries);
-      });
-      document.querySelector("#product-import-button").addEventListener("click", () => document.querySelector("#product-import-file").click());
-      document.querySelector("#product-import-file").addEventListener("change", async (event) => {
-        const [file] = event.target.files;
-        if (!file) return;
-        try {
-          showImportPreview(csvImportPreview(await file.text()));
-        } catch (error) {
-          showCategoryToast(error.message || "Could not read this CSV file.", "error");
-        } finally {
-          event.target.value = "";
-        }
-      });
-      document.querySelector("#product-import-confirm").addEventListener("click", () => {
-        void importProducts().catch((error) => showCategoryToast(error.message || "CSV import failed.", "error"));
-      });
       for (const id of [
         "barcode-search", "barcode-master-filter", "barcode-category-filter",
         "barcode-subcategory-filter", "barcode-status-filter",
