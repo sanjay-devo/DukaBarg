@@ -710,6 +710,7 @@
       .customers-page[hidden],
       .orders-page[hidden],
       #support-page[hidden],
+      .payment-settings-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -727,6 +728,277 @@
 
       .category-page {
         margin-top: var(--space-7);
+      }
+
+      .payment-settings-page {
+        margin-top: var(--space-7);
+      }
+
+      .payment-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-6);
+        margin-bottom: var(--space-7);
+      }
+
+      .payment-settings-section {
+        margin-bottom: var(--space-7);
+      }
+
+      #payment-methods-section > .payment-restrictions-heading {
+        margin-bottom: var(--space-6);
+      }
+
+      .payment-charges-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--space-6);
+      }
+
+      .payment-charges-grid--form {
+        margin-top: var(--space-6);
+      }
+
+      .payment-charge-field {
+        display: grid;
+        min-width: 0;
+        gap: var(--space-2);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .payment-charge-field input {
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .payment-charge-field input:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .payment-charge-field input:disabled {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        cursor: not-allowed;
+      }
+
+      .payment-method-card {
+        min-width: 0;
+        padding: var(--space-6);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .payment-method-heading,
+      .payment-method-toggle,
+      .payment-settings-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-5);
+      }
+
+      .payment-method-heading {
+        margin-bottom: var(--space-5);
+      }
+
+      .payment-method-heading h3,
+      .payment-restrictions-heading h3 {
+        margin: 0;
+        font-size: var(--font-size-md);
+        font-weight: 600;
+      }
+
+      .payment-method-heading p,
+      .payment-restrictions-heading p {
+        margin: var(--space-2) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .payment-method-toggle {
+        justify-content: flex-start;
+        margin-bottom: var(--space-6);
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .payment-method-toggle input,
+      .payment-restriction-check {
+        cursor: pointer;
+      }
+
+      .payment-method-toggle input {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        flex: 0 0 auto;
+        margin: 0;
+        appearance: none;
+        background: var(--color-border-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-xl);
+        transition: background-color var(--motion-instant) ease;
+      }
+
+      .payment-method-toggle input::before {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        content: "";
+        background: var(--color-surface-muted);
+        border-radius: 50%;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+        transition: transform var(--motion-instant) ease;
+      }
+
+      .payment-method-toggle input:checked {
+        background: var(--color-border-strong);
+        border-color: var(--color-border-strong);
+      }
+
+      .payment-method-toggle input:checked::before {
+        transform: translateX(18px);
+      }
+
+      .payment-method-toggle input:disabled,
+      .payment-restriction-check:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .payment-restriction-check {
+        width: 24px;
+        height: 24px;
+        accent-color: var(--color-border-strong);
+      }
+
+      .payment-method-toggle input:focus-visible,
+      .payment-restriction-check:focus-visible,
+      .payment-product-search:focus-visible,
+      .payment-display-name input:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .payment-display-name {
+        display: grid;
+        gap: var(--space-2);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .payment-display-name input,
+      .payment-product-search {
+        width: 100%;
+        min-height: 40px;
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+      }
+
+      .payment-display-name input:disabled {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        cursor: not-allowed;
+      }
+
+      .payment-restrictions-card {
+        padding: var(--space-6);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .payment-restrictions-toolbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: var(--space-6);
+        margin: var(--space-6) 0 var(--space-5);
+      }
+
+      .payment-product-search-wrap {
+        display: grid;
+        width: min(100%, 360px);
+        gap: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .payment-restrictions-table {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .payment-restrictions-table th,
+      .payment-restrictions-table td {
+        padding: var(--space-5) var(--space-6);
+        border: 1px solid var(--color-border-muted);
+      }
+
+      .payment-restrictions-table th {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .payment-restrictions-table td {
+        font-size: var(--font-size-sm);
+      }
+
+      .payment-product-id {
+        display: block;
+        margin-top: var(--space-2);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .payment-restrictions-table td:not(:first-child),
+      .payment-restrictions-table th:not(:first-child) {
+        width: 150px;
+        text-align: center;
+      }
+
+      .payment-settings-actions {
+        justify-content: flex-end;
+        margin-top: var(--space-6);
+      }
+
+      .payment-settings-status {
+        margin: var(--space-5) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .payment-settings-status[data-kind="error"] {
+        color: var(--color-text-primary);
+        font-weight: 600;
+      }
+
+      .payment-settings-feedback[hidden] {
+        display: none;
       }
 
       .category-toolbar,
@@ -1258,6 +1530,31 @@
 
         .category-filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .payment-settings-grid {
+          grid-template-columns: 1fr;
+        }
+        .payment-charges-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .payment-restrictions-toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .payment-product-search-wrap {
+          width: 100%;
+        }
+        .payment-settings-actions .category-primary-button {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .payment-charges-grid {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -3167,6 +3464,127 @@
             </span>
           </div>
 
+          <section class="payment-settings-page" id="payment-settings-page" aria-labelledby="payment-settings-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="payment-settings-title">Payment Settings</h2>
+                <p>Choose which checkout methods are available and how they appear to customers.</p>
+              </div>
+            </div>
+
+            <div class="payment-settings-feedback category-feedback" id="payment-settings-loading" aria-live="polite">
+              Loading payment settings…
+            </div>
+            <div class="payment-settings-feedback category-feedback" id="payment-settings-error" data-kind="error" role="alert" hidden>
+              <span id="payment-settings-error-message"></span>
+              <button class="category-secondary-button" id="payment-settings-retry" type="button">Retry loading</button>
+            </div>
+
+            <section class="payment-settings-section payment-restrictions-card" id="payment-charges-section" hidden>
+              <div class="payment-restrictions-heading">
+                <h3>Charges</h3>
+                <p>Set delivery and platform charges and discounts.</p>
+              </div>
+              <div class="payment-charges-grid payment-charges-grid--form">
+                <label class="payment-charge-field" for="payment-delivery-charge">
+                  Delivery charge
+                  <input id="payment-delivery-charge" name="deliveryCharge" type="number" min="0" step="any" inputmode="decimal" required />
+                </label>
+                <label class="payment-charge-field" for="payment-delivery-discount">
+                  Delivery discount (%)
+                  <input id="payment-delivery-discount" name="deliveryDiscountPercent" type="number" min="0" max="100" step="any" inputmode="decimal" required />
+                </label>
+                <label class="payment-charge-field" for="payment-platform-fee">
+                  Platform fee
+                  <input id="payment-platform-fee" name="platformFee" type="number" min="0" step="any" inputmode="decimal" required />
+                </label>
+                <label class="payment-charge-field" for="payment-platform-discount">
+                  Platform discount (%)
+                  <input id="payment-platform-discount" name="platformDiscountPercent" type="number" min="0" max="100" step="any" inputmode="decimal" required />
+                </label>
+              </div>
+            </section>
+
+            <section class="payment-settings-section" id="payment-methods-section" hidden>
+              <div class="payment-restrictions-heading">
+                <h3>Payment Methods</h3>
+                <p>Manage the methods customers can use at checkout.</p>
+              </div>
+              <section class="payment-settings-grid" aria-label="Payment methods">
+                <article class="payment-method-card">
+                  <div class="payment-method-heading">
+                    <div>
+                      <h3>Cash on Delivery</h3>
+                      <p>Accept payment when the order is delivered.</p>
+                    </div>
+                  </div>
+                  <label class="payment-method-toggle" for="payment-cod-enabled">
+                    <input id="payment-cod-enabled" name="codEnabled" type="checkbox" role="switch" />
+                    <span>Enable Cash on Delivery</span>
+                  </label>
+                  <label class="payment-display-name" for="payment-cod-name">
+                    Checkout display name
+                    <input id="payment-cod-name" name="codDisplayName" type="text" maxlength="60" required />
+                  </label>
+                </article>
+
+                <article class="payment-method-card">
+                  <div class="payment-method-heading">
+                    <div>
+                      <h3>UPI (Razorpay)</h3>
+                      <p>Accept UPI payments through your Razorpay checkout.</p>
+                    </div>
+                  </div>
+                  <label class="payment-method-toggle" for="payment-upi-enabled">
+                    <input id="payment-upi-enabled" name="upiEnabled" type="checkbox" role="switch" />
+                    <span>Enable UPI (Razorpay)</span>
+                  </label>
+                  <label class="payment-display-name" for="payment-upi-name">
+                    Checkout display name
+                    <input id="payment-upi-name" name="upiDisplayName" type="text" maxlength="60" required />
+                  </label>
+                </article>
+              </section>
+
+              <section class="payment-restrictions-card" aria-labelledby="payment-restrictions-title">
+                <div class="payment-restrictions-heading">
+                  <h3 id="payment-restrictions-title">Product-specific availability</h3>
+                  <p>Clear a checkbox to hide that payment method for the selected product.</p>
+                </div>
+                <div class="payment-restrictions-toolbar">
+                  <label class="payment-product-search-wrap" for="payment-product-search">
+                    Find a product
+                    <input class="payment-product-search" id="payment-product-search" type="search" placeholder="Search name, product ID, SKU, or barcode" />
+                  </label>
+                  <span id="payment-product-count" aria-live="polite"></span>
+                </div>
+                <div class="payment-settings-feedback category-feedback" id="payment-products-empty" hidden>
+                  No products are available to configure.
+                </div>
+                <div class="category-table-wrap" id="payment-products-table-wrap">
+                  <table class="payment-restrictions-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Cash on Delivery</th>
+                        <th scope="col">UPI (Razorpay)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="payment-products-table-body"></tbody>
+                  </table>
+                </div>
+                <p class="payment-settings-feedback category-feedback" id="payment-products-no-match" hidden>
+                  No products match your search.
+                </p>
+              </section>
+
+            </section>
+            <p class="payment-settings-status" id="payment-settings-status" role="status" aria-live="polite"></p>
+            <div class="payment-settings-actions">
+              <button class="category-primary-button" id="payment-settings-save" type="button">Save</button>
+            </div>
+          </section>
+
           <section class="customers-page" id="customers-page" aria-labelledby="customers-section-title" hidden>
             <div class="category-heading-row customers-heading-row">
               <div>
@@ -3987,6 +4405,7 @@
       const customersPage = document.querySelector("#customers-page");
       const ordersPage = document.querySelector("#orders-page");
       const supportPage = document.querySelector("#support-page");
+      const paymentSettingsPage = document.querySelector("#payment-settings-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -4037,6 +4456,7 @@
         const isCustomersPage = activeLink.hash === "#customers";
         const isOrdersPage = activeLink.hash === "#orders";
         const isSupportPage = activeLink.hash === "#customer-support";
+        const isPaymentSettingsPage = activeLink.hash === "#payment-settings";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -4047,7 +4467,8 @@
         customersPage.hidden = !isCustomersPage;
         ordersPage.hidden = !isOrdersPage;
         supportPage.hidden = !isSupportPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isSupportPage;
+        paymentSettingsPage.hidden = !isPaymentSettingsPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isSupportPage || isPaymentSettingsPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -4156,6 +4577,17 @@
         saving: false,
         stopCategories: null,
         stopProducts: null,
+      };
+      const paymentSettingsState = {
+        authorized: false,
+        loaded: false,
+        loading: false,
+        saving: false,
+        generation: 0,
+        loadPromise: null,
+        charges: {},
+        payment: {},
+        products: {},
       };
       const productState = {
         loaded: false,
@@ -4360,6 +4792,322 @@
           ? `${action} failed (${code}): ${error?.message || String(error)}`
           : `${action} failed. Please retry.`;
       }
+
+      function paymentSettingsControls() {
+        return document.querySelectorAll(
+          "#payment-charges-section input, #payment-methods-section input, #payment-settings-save",
+        );
+      }
+
+      function setPaymentSettingsStatus(message, kind = "status") {
+        const status = document.querySelector("#payment-settings-status");
+        status.textContent = message;
+        status.dataset.kind = kind === "error" ? "error" : "status";
+      }
+
+      function renderPaymentProducts() {
+        const body = document.querySelector("#payment-products-table-body");
+        const query = document.querySelector("#payment-product-search").value.trim().toLocaleLowerCase();
+        const entries = Object.entries(paymentSettingsState.products)
+          .filter(([key, product]) => {
+            const searchable = [
+              productName(product),
+              productId(product, key),
+              productSku(product),
+              productBarcode(product),
+            ].join(" ").toLocaleLowerCase();
+            return searchable.includes(query);
+          })
+          .sort(([, left], [, right]) => {
+            const leftName = productName(left) || "Unnamed product";
+            const rightName = productName(right) || "Unnamed product";
+            return leftName.localeCompare(rightName);
+          });
+        const tableWrap = document.querySelector("#payment-products-table-wrap");
+        const empty = document.querySelector("#payment-products-empty");
+        const noMatch = document.querySelector("#payment-products-no-match");
+        const count = document.querySelector("#payment-product-count");
+
+        body.replaceChildren();
+        tableWrap.hidden = entries.length === 0;
+        empty.hidden = Object.keys(paymentSettingsState.products).length > 0;
+        noMatch.hidden = Object.keys(paymentSettingsState.products).length === 0 || entries.length > 0;
+        count.textContent = `${entries.length} ${entries.length === 1 ? "product" : "products"}`;
+
+        entries.forEach(([key, product]) => {
+          const name = productName(product) || "Unnamed product";
+          const id = productId(product, key);
+          const row = document.createElement("tr");
+          const nameCell = document.createElement("td");
+          const productNameText = document.createElement("strong");
+          const productIdText = document.createElement("span");
+          productNameText.textContent = name;
+          productIdText.textContent = `ID: ${id}${productSku(product) ? ` · SKU: ${productSku(product)}` : ""}`;
+          productIdText.className = "payment-product-id";
+          nameCell.append(productNameText, productIdText);
+          row.append(nameCell);
+
+          for (const [method, label, recordKey] of [
+            ["cod", "Cash on Delivery", "cashOnDelivery"],
+            ["upi", "UPI (Razorpay)", "upi"],
+          ]) {
+            const cell = document.createElement("td");
+            const checkbox = document.createElement("input");
+            checkbox.className = "payment-restriction-check";
+            checkbox.type = "checkbox";
+            const disabledForProducts = paymentSettingsState.payment[recordKey]?.disabledForProducts || {};
+            checkbox.checked = disabledForProducts[key] !== true;
+            checkbox.dataset.paymentProduct = key;
+            checkbox.dataset.paymentMethod = method;
+            checkbox.setAttribute("aria-label", `${label} available for ${name}`);
+            cell.append(checkbox);
+            row.append(cell);
+          }
+          body.append(row);
+        });
+      }
+
+      function normalizePaymentSettings(value) {
+        if (value !== null && (typeof value !== "object" || Array.isArray(value))) {
+          throw new Error("Payment settings have an unexpected data structure.");
+        }
+        const raw = value || {};
+        const normalizeMethod = (methodKey, fallbackName) => {
+          const method = raw[methodKey];
+          if (method !== undefined && (method === null || typeof method !== "object" || Array.isArray(method))) {
+            throw new Error(`The ${methodKey} payment settings have an unexpected data structure.`);
+          }
+          const record = method || {};
+          if (record.enabled !== undefined && typeof record.enabled !== "boolean") {
+            throw new Error(`The ${methodKey} enabled setting must be true or false.`);
+          }
+          if (record.displayName !== undefined && typeof record.displayName !== "string") {
+            throw new Error(`The ${methodKey} display name must be text.`);
+          }
+          const disabledForProducts = record.disabledForProducts;
+          if (disabledForProducts !== undefined &&
+            (disabledForProducts === null || typeof disabledForProducts !== "object" || Array.isArray(disabledForProducts))) {
+            throw new Error(`The ${methodKey} product restrictions have an unexpected data structure.`);
+          }
+          for (const [productKey, disabled] of Object.entries(disabledForProducts || {})) {
+            if (typeof disabled !== "boolean") {
+              throw new Error(`The ${methodKey} restriction for product ${productKey} must be true or false.`);
+            }
+          }
+          return {
+            ...record,
+            enabled: record.enabled ?? true,
+            displayName: record.displayName ?? fallbackName,
+            disabledForProducts: { ...(disabledForProducts || {}) },
+          };
+        };
+        const cod = normalizeMethod("cashOnDelivery", "Cash on Delivery");
+        const upi = normalizeMethod("upi", "UPI (Razorpay)");
+        return {
+          raw,
+          cashOnDelivery: cod,
+          upi,
+        };
+      }
+
+      function normalizeCharges(value) {
+        if (value !== null && (typeof value !== "object" || Array.isArray(value))) {
+          throw new Error("Charge settings have an unexpected data structure.");
+        }
+        const raw = value || {};
+        const normalized = {};
+        for (const key of [
+          "deliveryCharge",
+          "deliveryDiscountPercent",
+          "platformDiscountPercent",
+          "platformFee",
+        ]) {
+          const entry = raw[key];
+          if (entry !== undefined && (typeof entry !== "number" || !Number.isFinite(entry) || entry < 0)) {
+            throw new Error(`${key} must be a non-negative number.`);
+          }
+          if (entry !== undefined && key.endsWith("Percent") && entry > 100) {
+            throw new Error(`${key} must be between 0 and 100.`);
+          }
+          normalized[key] = entry === undefined ? "" : String(entry);
+        }
+        return { raw, values: normalized };
+      }
+
+      function setPaymentSettingsBusy(busy) {
+        paymentSettingsState.saving = busy;
+        paymentSettingsControls().forEach((control) => {
+          control.disabled = busy;
+        });
+        document.querySelector("#payment-settings-save").textContent = busy ? "Saving…" : "Save";
+      }
+
+      async function loadPaymentSettings(force = false) {
+        if (!paymentSettingsState.authorized || paymentSettingsState.loading) return paymentSettingsState.loadPromise;
+        if (paymentSettingsState.loaded && !force) return;
+        const generation = ++paymentSettingsState.generation;
+        paymentSettingsState.loading = true;
+        document.querySelector("#payment-settings-loading").hidden = false;
+        document.querySelector("#payment-settings-error").hidden = true;
+        document.querySelector("#payment-charges-section").hidden = true;
+        document.querySelector("#payment-methods-section").hidden = true;
+        document.querySelector("#payment-settings-retry").disabled = true;
+
+        paymentSettingsState.loadPromise = (async () => {
+          try {
+            const [chargesSnapshot, paymentSnapshot, productsSnapshot] = await Promise.all([
+              get(ref(database, "settings/charges")),
+              get(ref(database, "settings/payment")),
+              get(ref(database, "products")),
+            ]);
+            if (generation !== paymentSettingsState.generation || !paymentSettingsState.authorized) return;
+            const charges = normalizeCharges(chargesSnapshot.val());
+            const payment = normalizePaymentSettings(paymentSnapshot.val());
+            const products = productsSnapshot.val() || {};
+            if (typeof products !== "object" || Array.isArray(products)) {
+              throw new Error("The product catalog has an unexpected data structure.");
+            }
+
+            paymentSettingsState.charges = charges.raw;
+            paymentSettingsState.payment = payment.raw;
+            paymentSettingsState.products = Object.fromEntries(
+              Object.entries(products)
+                .filter(([, product]) => product !== null)
+                .map(([key, product]) => [
+                  key,
+                  product && typeof product === "object" && !Array.isArray(product)
+                    ? product
+                    : { name: "", key },
+                ]),
+            );
+            document.querySelector("#payment-delivery-charge").value = charges.values.deliveryCharge;
+            document.querySelector("#payment-delivery-discount").value = charges.values.deliveryDiscountPercent;
+            document.querySelector("#payment-platform-discount").value = charges.values.platformDiscountPercent;
+            document.querySelector("#payment-platform-fee").value = charges.values.platformFee;
+            document.querySelector("#payment-cod-enabled").checked = payment.cashOnDelivery.enabled;
+            document.querySelector("#payment-cod-name").value = payment.cashOnDelivery.displayName;
+            document.querySelector("#payment-upi-enabled").checked = payment.upi.enabled;
+            document.querySelector("#payment-upi-name").value = payment.upi.displayName;
+            document.querySelector("#payment-product-search").value = "";
+            renderPaymentProducts();
+            setPaymentSettingsStatus("");
+            document.querySelector("#payment-charges-section").hidden = false;
+            document.querySelector("#payment-methods-section").hidden = false;
+            paymentSettingsState.loaded = true;
+          } catch (error) {
+            if (generation !== paymentSettingsState.generation || !paymentSettingsState.authorized) return;
+            const message = error?.code
+              ? reportFirebaseError("Loading payment settings", error)
+              : error.message || "Could not load payment settings. Retry.";
+            document.querySelector("#payment-settings-error-message").textContent = message;
+            document.querySelector("#payment-settings-error").hidden = false;
+          } finally {
+            if (generation === paymentSettingsState.generation) {
+              paymentSettingsState.loading = false;
+              document.querySelector("#payment-settings-loading").hidden = true;
+              document.querySelector("#payment-settings-retry").disabled = false;
+            }
+          }
+        })();
+        return paymentSettingsState.loadPromise;
+      }
+
+      async function savePaymentSettings() {
+        if (!paymentSettingsState.authorized || !paymentSettingsState.loaded || paymentSettingsState.saving) return;
+
+        const charges = { ...paymentSettingsState.charges };
+        for (const [field, inputId] of [
+          ["deliveryCharge", "payment-delivery-charge"],
+          ["deliveryDiscountPercent", "payment-delivery-discount"],
+          ["platformDiscountPercent", "payment-platform-discount"],
+          ["platformFee", "payment-platform-fee"],
+        ]) {
+          const input = document.querySelector(`#${inputId}`);
+          const value = input.value.trim();
+          const number = Number(value);
+          if (!value || !Number.isFinite(number) || number < 0 ||
+            (field.endsWith("Percent") && number > 100)) {
+            setPaymentSettingsStatus(
+              field.endsWith("Percent")
+                ? "Enter a valid percentage from 0 to 100."
+                : "Enter a valid non-negative amount for each charge.",
+              "error",
+            );
+            input.focus();
+            return;
+          }
+          charges[field] = number;
+        }
+
+        const codName = document.querySelector("#payment-cod-name").value.trim();
+        const upiName = document.querySelector("#payment-upi-name").value.trim();
+        if (!codName || !upiName) {
+          setPaymentSettingsStatus("Enter a display name for both payment methods.", "error");
+          return;
+        }
+        if (codName.length > 60 || upiName.length > 60) {
+          setPaymentSettingsStatus("Payment display names must be 60 characters or fewer.", "error");
+          return;
+        }
+
+        const payment = { ...paymentSettingsState.payment };
+        for (const [recordKey, inputId, enabledId] of [
+          ["cashOnDelivery", "payment-cod-name", "payment-cod-enabled"],
+          ["upi", "payment-upi-name", "payment-upi-enabled"],
+        ]) {
+          const name = document.querySelector(`#${inputId}`).value.trim();
+          const existing = payment[recordKey] || {};
+          payment[recordKey] = {
+            ...existing,
+            enabled: document.querySelector(`#${enabledId}`).checked,
+            displayName: name,
+            disabledForProducts: { ...(existing.disabledForProducts || {}) },
+          };
+        }
+
+        setPaymentSettingsBusy(true);
+        setPaymentSettingsStatus("Saving…");
+        try {
+          await update(ref(database), {
+            "settings/charges": charges,
+            "settings/payment": payment,
+          });
+          paymentSettingsState.charges = charges;
+          paymentSettingsState.payment = payment;
+          setPaymentSettingsStatus("");
+        } catch (error) {
+          const message = error?.code
+            ? reportFirebaseError("Saving payment settings", error)
+            : error.message || "Could not save payment settings. Retry.";
+          setPaymentSettingsStatus(message, "error");
+          showCategoryToast(message, "error");
+        } finally {
+          setPaymentSettingsBusy(false);
+        }
+      }
+
+      document.querySelector("#payment-settings-save").addEventListener("click", () => {
+        void savePaymentSettings();
+      });
+      document.querySelector("#payment-settings-retry").addEventListener("click", () => {
+        paymentSettingsState.loaded = false;
+        void loadPaymentSettings(true);
+      });
+      document.querySelector("#payment-product-search").addEventListener("input", renderPaymentProducts);
+      document.querySelector("#payment-products-table-body").addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-payment-product][data-payment-method]");
+        if (!checkbox) return;
+        const { paymentProduct, paymentMethod } = checkbox.dataset;
+        const recordKey = paymentMethod === "cod" ? "cashOnDelivery" : "upi";
+        const method = paymentSettingsState.payment[recordKey] || {};
+        const disabledForProducts = { ...(method.disabledForProducts || {}) };
+        if (checkbox.checked) delete disabledForProducts[paymentProduct];
+        else disabledForProducts[paymentProduct] = true;
+        paymentSettingsState.payment[recordKey] = { ...method, disabledForProducts };
+      });
+      window.addEventListener("hashchange", () => {
+        if (window.location.hash === "#payment-settings") void loadPaymentSettings();
+      });
 
       function parseActiveCallbacks(value) {
         if (value === null) return { callbacks: [], malformedCount: 0 };
@@ -10417,6 +11165,8 @@
 
       function checkAdminAccess(user) {
         if (!user) {
+          paymentSettingsState.authorized = false;
+          paymentSettingsState.generation += 1;
           stopSupportListeners();
           showUnauthenticatedState();
           return Promise.resolve();
@@ -10425,6 +11175,8 @@
         if (existingCheck) {
           return existingCheck;
         }
+        paymentSettingsState.authorized = false;
+        paymentSettingsState.generation += 1;
 
         authGate.dataset.state = "loading";
         gateTitle.textContent = "Verifying admin access…";
@@ -10441,6 +11193,8 @@
               return;
             }
             if (!profile.exists() || profile.child("role").val() !== "admin") {
+              paymentSettingsState.authorized = false;
+              paymentSettingsState.generation += 1;
               stopSupportListeners();
               showGateError(
                 "Admin access required",
@@ -10460,6 +11214,7 @@
 
             document.body.classList.add("is-admin-authorized");
             authGate.hidden = true;
+            paymentSettingsState.authorized = true;
             if (!categoryState.stopCategories) {
               startCategoryListeners();
             }
@@ -10472,6 +11227,9 @@
             }
             if (window.location.hash === "#customer-support") {
               startSupportListeners();
+            }
+            if (window.location.hash === "#payment-settings") {
+              void loadPaymentSettings();
             }
           } catch (error) {
             if (auth.currentUser?.uid !== user.uid) {
