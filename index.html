@@ -1104,36 +1104,6 @@
         opacity: 0.55;
       }
 
-      .category-stats {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: var(--space-5);
-        margin-bottom: var(--space-6);
-      }
-
-      .category-stat {
-        min-width: 0;
-        padding: var(--space-6);
-        background: var(--color-surface-muted);
-        border: 1px solid var(--color-border-muted);
-        border-radius: var(--radius-lg);
-      }
-
-      .category-stat-label {
-        display: block;
-        color: var(--color-text-inverse);
-        font-size: var(--font-size-xs);
-        font-weight: 500;
-      }
-
-      .category-stat-value {
-        display: block;
-        margin-top: var(--space-3);
-        font-size: var(--font-size-2xl);
-        font-weight: 600;
-        line-height: 1.25;
-      }
-
       .category-tabs {
         display: flex;
         gap: var(--space-6);
@@ -1652,10 +1622,6 @@
       }
 
       @media (max-width: 760px) {
-        .category-stats {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
         .category-filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -1700,10 +1666,6 @@
           grid-template-columns: 1fr;
         }
 
-        .category-stat {
-          padding: var(--space-5);
-        }
-
         .category-dialog-form {
           padding: var(--space-6);
         }
@@ -1722,15 +1684,6 @@
 
       .orders-page {
         margin-top: var(--space-7);
-      }
-
-      .orders-stats {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-
-      .orders-stat-value {
-        overflow-wrap: anywhere;
-        font-size: var(--font-size-xl);
       }
 
       .orders-toolbar {
@@ -2223,12 +2176,6 @@
         }
       }
 
-      @media (max-width: 760px) {
-        .orders-stats {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
-
       @media (max-width: 480px) {
         .orders-toolbar {
           grid-template-columns: 1fr;
@@ -2272,19 +2219,8 @@
         margin-top: var(--space-7);
       }
 
-      .customers-stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .customer-stat-note {
-        display: block;
-        margin-top: var(--space-2);
-        color: var(--color-text-inverse);
-        font-size: var(--font-size-xs);
-      }
-
       .customers-order-data-error {
-        margin: calc(-1 * var(--space-3)) 0 var(--space-5);
+        margin: 0 0 var(--space-5);
         color: var(--color-border-strong);
         font-size: var(--font-size-sm);
       }
@@ -2718,10 +2654,6 @@
       }
 
       @media (max-width: 760px) {
-        .customers-stats {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
         .customers-filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -2732,7 +2664,6 @@
       }
 
       @media (max-width: 480px) {
-        .customers-stats,
         .customers-filters,
         .customer-detail-grid {
           grid-template-columns: 1fr;
@@ -4228,14 +4159,6 @@
               </div>
             </div>
 
-            <div class="category-stats customers-stats" aria-label="Customer summary">
-              <article class="category-stat"><span class="category-stat-label">Total Customers</span><strong class="category-stat-value" id="customers-stat-total">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Active Customers</span><strong class="category-stat-value" id="customers-stat-active">—</strong><span class="customer-stat-note" id="customers-stat-active-note">Unavailable: no account status field</span></article>
-              <article class="category-stat"><span class="category-stat-label">New Customers (30 days)</span><strong class="category-stat-value" id="customers-stat-new">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Customers With Orders</span><strong class="category-stat-value" id="customers-stat-with-orders">—</strong><span class="customer-stat-note" id="customers-stat-orders-note">Waiting for order data</span></article>
-              <article class="category-stat"><span class="category-stat-label">Total Customer Orders</span><strong class="category-stat-value" id="customers-stat-orders">—</strong><span class="customer-stat-note" id="customers-stat-count-note">Waiting for order data</span></article>
-              <article class="category-stat"><span class="category-stat-label">Total Customer Spend</span><strong class="category-stat-value" id="customers-stat-spend">—</strong><span class="customer-stat-note" id="customers-stat-spend-note">Waiting for verified payment data</span></article>
-            </div>
             <div class="customers-order-data-error" id="customers-order-data-error" role="alert" hidden>
               <span id="customers-order-data-error-message"></span>
               <button class="category-secondary-button" id="customers-order-retry" type="button">Retry order data</button>
@@ -4300,17 +4223,6 @@
                 <h2 id="orders-section-title">Orders</h2>
                 <p>Review order details, payment information, and fulfillment status.</p>
               </div>
-            </div>
-
-            <div class="category-stats orders-stats" aria-label="Order summary">
-              <article class="category-stat"><span class="category-stat-label">Total Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-total">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Pending Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-pending">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Confirmed Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-confirmed">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Processing Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-processing">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Shipped Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-shipped">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Delivered Orders</span><strong class="category-stat-value orders-stat-value" id="orders-stat-delivered">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Cancelled / Failed</span><strong class="category-stat-value orders-stat-value" id="orders-stat-cancelled">—</strong></article>
-              <article class="category-stat"><span class="category-stat-label">Total Order Value</span><strong class="category-stat-value orders-stat-value" id="orders-stat-value">—</strong><span class="customer-stat-note" id="orders-stat-value-note">Based on stored final totals</span></article>
             </div>
 
             <div class="category-table-card">
@@ -4404,25 +4316,6 @@
               <button class="category-primary-button" id="category-add-button" type="button">
                 <span aria-hidden="true">+</span> Add Category
               </button>
-            </div>
-
-            <div class="category-stats" aria-label="Category summary">
-              <article class="category-stat">
-                <span class="category-stat-label">Total Master Categories</span>
-                <strong class="category-stat-value" id="stat-masters">—</strong>
-              </article>
-              <article class="category-stat">
-                <span class="category-stat-label">Categories</span>
-                <strong class="category-stat-value" id="stat-categories">—</strong>
-              </article>
-              <article class="category-stat">
-                <span class="category-stat-label">Subcategories</span>
-                <strong class="category-stat-value" id="stat-subcategories">—</strong>
-              </article>
-              <article class="category-stat">
-                <span class="category-stat-label">Active Categories</span>
-                <strong class="category-stat-value" id="stat-active">—</strong>
-              </article>
             </div>
 
             <div class="category-table-card">
@@ -6769,73 +6662,13 @@
         return { customers, malformedCount };
       }
 
-      function customerHasStatusSupport() {
-        return customerState.customers.length > 0 &&
-          customerState.customers.every((customer) => Boolean(customer.status));
-      }
-
-      function renderCustomerStats() {
+      function renderCustomerOrderStatus() {
         const orderSortsAvailable = customerState.ordersLoaded && !customerState.ordersError;
         document.querySelector("#customers-sort").querySelector('option[value="orders-desc"]').disabled = !orderSortsAvailable;
         document.querySelector("#customers-sort").querySelector('option[value="spend-desc"]').disabled = !orderSortsAvailable;
-        const customers = customerState.customers;
-        document.querySelector("#customers-stat-total").textContent = customers.length.toLocaleString("en-IN");
-        const statusComplete = customerHasStatusSupport();
-        const activeCount = customers.filter((customer) => customer.status.toLowerCase() === "active").length;
-        document.querySelector("#customers-stat-active").textContent = statusComplete ? activeCount.toLocaleString("en-IN") : "—";
-        document.querySelector("#customers-stat-active-note").textContent = statusComplete
-          ? "Based on the stored account status"
-          : customers.length
-            ? "Unavailable: account status is missing for some customers"
-            : "Unavailable: no customer status data";
-        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const newCount = customers.filter((customer) =>
-          customer.registeredAt && customer.registeredAt.getTime() >= thirtyDaysAgo && customer.registeredAt.getTime() <= Date.now(),
-        ).length;
-        document.querySelector("#customers-stat-new").textContent = newCount.toLocaleString("en-IN");
-        const withOrders = document.querySelector("#customers-stat-with-orders");
-        const orderCount = document.querySelector("#customers-stat-orders");
-        const spend = document.querySelector("#customers-stat-spend");
-        const ordersNote = document.querySelector("#customers-stat-orders-note");
-        const countNote = document.querySelector("#customers-stat-count-note");
-        const spendNote = document.querySelector("#customers-stat-spend-note");
         const ordersError = document.querySelector("#customers-order-data-error");
         ordersError.hidden = !customerState.ordersError;
         document.querySelector("#customers-order-data-error-message").textContent = customerState.ordersError || "";
-        if (customerState.ordersError) {
-          withOrders.textContent = "—";
-          orderCount.textContent = "—";
-          spend.textContent = "—";
-          ordersNote.textContent = "Order data unavailable";
-          countNote.textContent = "Order data unavailable";
-          spendNote.textContent = "Verified payment data unavailable";
-          return;
-        }
-        if (!customerState.ordersLoaded) {
-          withOrders.textContent = "—";
-          orderCount.textContent = "—";
-          spend.textContent = "—";
-          ordersNote.textContent = "Loading orders…";
-          countNote.textContent = "Loading orders…";
-          spendNote.textContent = "Loading verified payments…";
-          return;
-        }
-        const perCustomer = customers.map((customer) =>
-          summarizeCustomerOrders(customerState.ordersByCustomer[customer.uid] || []),
-        );
-        const customerSpendIncomplete = perCustomer.some((summary) => summary.incompletePaidAmounts);
-        const totalOrders = perCustomer.reduce((sum, summary) => sum + summary.total, 0);
-        const totalSpend = perCustomer.reduce((sum, summary) => sum + summary.paidTotal, 0);
-        withOrders.textContent = perCustomer.filter((summary) => summary.total > 0).length.toLocaleString("en-IN");
-        orderCount.textContent = totalOrders.toLocaleString("en-IN");
-        spend.textContent = customerSpendIncomplete ? "Unavailable" : formatCustomerCurrency(totalSpend);
-        ordersNote.textContent = customerState.ordersMalformedCount
-          ? `${customerState.ordersMalformedCount} malformed order record${customerState.ordersMalformedCount === 1 ? "" : "s"} excluded`
-          : "Matched by customer Firebase UID";
-        countNote.textContent = `${totalOrders.toLocaleString("en-IN")} records under customer order paths`;
-        spendNote.textContent = customerSpendIncomplete
-          ? "Some COMPLETED payments have invalid grandTotal amounts"
-          : "COMPLETED payments excluding CANCELLED orders";
       }
 
       function getFilteredCustomers() {
@@ -6920,7 +6753,7 @@
         }
         if (!customerState.loaded) return;
 
-        renderCustomerStats();
+        renderCustomerOrderStatus();
         const filtered = getFilteredCustomers();
         const pageCount = Math.max(1, customerState.pageSize === Infinity ? 1 : Math.ceil(filtered.length / customerState.pageSize));
         customerState.page = Math.min(customerState.page, pageCount);
@@ -7896,35 +7729,6 @@
         method.value = methods.includes(selectedMethod) ? selectedMethod : "";
       }
 
-      function renderOrderStats() {
-        if (!orderState.loaded || orderState.error) {
-          for (const id of ["orders-stat-total", "orders-stat-pending", "orders-stat-confirmed", "orders-stat-processing", "orders-stat-shipped", "orders-stat-delivered", "orders-stat-cancelled", "orders-stat-value"]) {
-            document.querySelector(`#${id}`).textContent = "—";
-          }
-          document.querySelector("#orders-stat-value-note").textContent = orderState.error ? "Order value unavailable" : "Loading orders…";
-          return;
-        }
-        const counts = { pending: 0, confirmed: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
-        let totalValue = 0;
-        let amountCount = 0;
-        for (const order of orderState.orders) {
-          const category = orderStatusCategory(order);
-          if (Object.prototype.hasOwnProperty.call(counts, category)) counts[category] += 1;
-          if (order.amount !== null) { totalValue += order.amount; amountCount += 1; }
-        }
-        document.querySelector("#orders-stat-total").textContent = orderState.orders.length.toLocaleString("en-IN");
-        for (const category of Object.keys(counts)) {
-          const id = category === "cancelled" ? "orders-stat-cancelled" : `orders-stat-${category}`;
-          document.querySelector(`#${id}`).textContent = counts[category].toLocaleString("en-IN");
-        }
-        document.querySelector("#orders-stat-value").textContent = orderState.orders.length && amountCount === 0
-          ? "Not available"
-          : formatCustomerCurrency(totalValue);
-        document.querySelector("#orders-stat-value-note").textContent = amountCount === orderState.orders.length
-          ? "Sum of stored final totals"
-          : `${amountCount} of ${orderState.orders.length} orders have a stored final total`;
-      }
-
       function getSelectedOrderRecords() {
         const ordersByKey = new Map(orderState.orders.map((order) => [order.key, order]));
         return [...orderState.selected].map((key) => ordersByKey.get(key)).filter(Boolean);
@@ -8011,7 +7815,6 @@
           updateOrderSelectionUi();
           return;
         }
-        renderOrderStats();
         const filtered = getFilteredOrders();
         const pageCount = Math.max(1, Math.ceil(filtered.length / orderState.pageSize));
         orderState.page = Math.min(orderState.page, pageCount);
@@ -8061,7 +7864,6 @@
       }
 
       function renderOrders() {
-        renderOrderStats();
         renderOrdersTable();
       }
 
@@ -9379,16 +9181,6 @@
         );
       }
 
-      function updateCategorySummary() {
-        if (!categoryState.categoriesLoaded || categoryState.categoriesError) {
-          return;
-        }
-        document.querySelector("#stat-masters").textContent = categoryState.categories.filter((entry) => entry.level === "master").length;
-        document.querySelector("#stat-categories").textContent = categoryState.categories.filter((entry) => entry.level === "category").length;
-        document.querySelector("#stat-subcategories").textContent = categoryState.categories.filter((entry) => entry.level === "subcategory").length;
-        document.querySelector("#stat-active").textContent = categoryState.categories.filter((entry) => entry.active).length;
-      }
-
       function updateCategoryParentFilter() {
         const selected = categoryParentFilter.value;
         const options = ['<option value="">All parents</option>'];
@@ -9606,7 +9398,6 @@
           return;
         }
 
-        updateCategorySummary();
         updateCategoryParentFilter();
         const query = categorySearch.value.trim().toLocaleLowerCase();
         const selectedLevel = categoryLevelFilter.value || categoryState.level;
