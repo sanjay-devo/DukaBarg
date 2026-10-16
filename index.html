@@ -2165,6 +2165,143 @@
         font: inherit;
       }
 
+      .orders-cancellation-dialog {
+        width: min(560px, calc(100vw - 24px));
+      }
+
+      .orders-cancellation-warning {
+        margin: 0 0 var(--space-5);
+        padding: var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-left: 3px solid var(--color-border-strong);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-cancellation-list {
+        display: grid;
+        gap: var(--space-3);
+        max-height: min(28vh, 220px);
+        margin: 0;
+        padding: 0 var(--space-2) 0 0;
+        overflow-y: auto;
+        list-style: none;
+      }
+
+      .orders-cancellation-list li {
+        display: grid;
+        gap: var(--space-2);
+        padding: var(--space-4);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+        overflow-wrap: anywhere;
+      }
+
+      .orders-cancellation-order-title {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+      }
+
+      .orders-cancellation-order-context {
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-cancellation-field {
+        display: grid;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+      }
+
+      .orders-cancellation-field[hidden],
+      .orders-cancellation-suggestions[hidden] {
+        display: none;
+      }
+
+      .orders-cancellation-field > label {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+      }
+
+      .orders-cancellation-field textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 92px;
+        padding: var(--space-4);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: var(--font-size-sm);
+        resize: vertical;
+      }
+
+      .orders-cancellation-field textarea:focus-visible,
+      .orders-cancellation-suggestions button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .orders-cancellation-field textarea:disabled {
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        cursor: not-allowed;
+      }
+
+      .orders-cancellation-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+
+      .orders-cancellation-suggestions button {
+        min-height: 34px;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-xl);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--font-size-xs);
+        text-align: left;
+      }
+
+      .orders-cancellation-suggestions button:hover:not(:disabled) {
+        border-color: var(--color-border-strong);
+      }
+
+      .orders-cancellation-suggestions button:active:not(:disabled) {
+        background: var(--color-surface-raised);
+      }
+
+      .orders-cancellation-suggestions button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .orders-cancellation-feedback {
+        margin: var(--space-4) 0 0;
+        color: #8c321b;
+        font-size: var(--font-size-sm);
+      }
+
+      .orders-cancellation-feedback[hidden] {
+        display: none;
+      }
+
+      .orders-cancellation-skipped {
+        margin: var(--space-4) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .orders-cancellation-form .category-danger-button[aria-busy="true"] {
+        cursor: progress;
+      }
+
       @media (max-width: 900px) {
         .orders-toolbar {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4731,6 +4868,28 @@
         </div>
       </form>
     </dialog>
+    <dialog class="orders-dialog orders-cancellation-dialog" id="orders-cancellation-dialog" aria-labelledby="orders-cancellation-title">
+      <form class="orders-dialog-content orders-cancellation-form" id="orders-cancellation-form" novalidate>
+        <div class="orders-dialog-heading">
+          <div><h2 id="orders-cancellation-title">Cancel Order</h2><p id="orders-cancellation-description"></p></div>
+          <button class="category-dialog-close" type="button" data-orders-cancellation-close aria-label="Keep order and close cancellation">×</button>
+        </div>
+        <p class="orders-cancellation-warning">Cancellation cannot be casually reversed. The order and its payment information will be preserved.</p>
+        <ul class="orders-cancellation-list" id="orders-cancellation-orders" aria-label="Orders to cancel"></ul>
+        <p class="orders-cancellation-skipped" id="orders-cancellation-skipped" hidden></p>
+        <div class="orders-cancellation-field" id="orders-cancellation-single-reason-field">
+          <label for="orders-cancellation-reason">Cancellation Reason (Optional)</label>
+          <div class="orders-cancellation-suggestions" id="orders-cancellation-suggestions" aria-label="Suggested cancellation reasons"></div>
+          <textarea id="orders-cancellation-reason" maxlength="500" aria-describedby="orders-cancellation-hint" placeholder="Choose a suggestion or enter your own explanation"></textarea>
+          <span class="category-field-hint" id="orders-cancellation-hint">Suggestions fill this field and can be edited. Leave it empty if no reason is provided.</span>
+        </div>
+        <p class="orders-cancellation-feedback" id="orders-cancellation-error" role="alert" hidden></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-orders-cancellation-close>Keep Order</button>
+          <button class="category-danger-button" id="orders-cancellation-confirm" type="submit">Cancel Order</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog class="customer-dialog" id="customer-view-dialog" aria-labelledby="customer-view-title">
       <div class="customer-dialog-content">
@@ -5233,6 +5392,7 @@
         saving: false,
         searchTimer: null,
         activeOrder: null,
+        pendingCancellation: null,
       };
       const reportsState = {
         generation: 0,
@@ -5348,6 +5508,7 @@
       const ordersTableBody = document.querySelector("#orders-table-body");
       const ordersDetailsDialog = document.querySelector("#orders-details-dialog");
       const ordersStatusDialog = document.querySelector("#orders-status-dialog");
+      const ordersCancellationDialog = document.querySelector("#orders-cancellation-dialog");
       const ordersActionMenu = document.createElement("div");
       ordersActionMenu.className = "orders-action-menu";
       ordersActionMenu.id = "orders-action-menu";
@@ -7079,6 +7240,8 @@
               normalizeOrderTimestamp(raw.transactionTime) ||
               normalizeOrderTimestamp(raw.createdAt),
             paymentMethod: firstNonEmptyString(raw.paymentMethod, raw.paymentMode, raw.method),
+            cancellationReason: typeof raw.cancellationReason === "string" ? raw.cancellationReason : "",
+            cancelledFromStatus: typeof raw.cancelledFromStatus === "string" ? raw.cancelledFromStatus : "",
             items,
             itemCount: items.length && items.every((item) => item.quantity !== null)
               ? items.reduce((sum, item) => sum + (item.quantity ?? 0), 0)
@@ -7132,6 +7295,7 @@
               <span class="customer-order-status-badge" data-status="${escapeCustomerText(order.paymentStatus)}">Payment: ${escapeCustomerText(paymentStatusLabel(order.paymentStatus))}</span>
               <span>${escapeCustomerText(itemSummary)}</span>
               <span>${escapeCustomerText(order.paymentMethod || "Payment method not provided")}</span>
+              ${order.orderStatus === customerOrderStatuses.cancelled && order.cancellationReason ? `<span>Cancellation reason: ${escapeCustomerText(order.cancellationReason)}</span>` : ""}
             </div>
             ${items}
             <div class="customer-order-card-actions">
@@ -7152,6 +7316,7 @@
             <div class="customer-detail-item"><dt>Order ID</dt><dd>${escapeCustomerText(order.id)}</dd></div>
             <div class="customer-detail-item"><dt>Date</dt><dd>${escapeCustomerText(order.date ? formatCustomerDate(order.date, true) : "Not provided")}</dd></div>
             <div class="customer-detail-item"><dt>Order status</dt><dd>${escapeCustomerText(order.orderStatus)}</dd></div>
+            ${order.orderStatus === customerOrderStatuses.cancelled ? `<div class="customer-detail-item"><dt>Cancelled from status</dt><dd>${escapeCustomerText(order.cancelledFromStatus || "Not provided")}</dd></div><div class="customer-detail-item"><dt>Cancellation reason</dt><dd>${escapeCustomerText(order.cancellationReason || "Not provided")}</dd></div>` : ""}
             <div class="customer-detail-item"><dt>Payment status</dt><dd>${escapeCustomerText(paymentStatusLabel(order.paymentStatus))}</dd></div>
             <div class="customer-detail-item"><dt>Amount</dt><dd>${escapeCustomerText(order.amount === null ? "Not provided" : formatCustomerCurrency(order.amount))}</dd></div>
             <div class="customer-detail-item"><dt>Payment method</dt><dd>${escapeCustomerText(order.paymentMethod || "Not provided")}</dd></div>
@@ -7486,7 +7651,7 @@
         PLACED: ["CONFIRMED", "CANCELLED"],
         CONFIRMED: ["PROCESSING", "CANCELLED"],
         PROCESSING: ["READY_TO_SHIP", "CANCELLED"],
-        READY_TO_SHIP: ["OUT_FOR_DELIVERY"],
+        READY_TO_SHIP: ["OUT_FOR_DELIVERY", "CANCELLED"],
         OUT_FOR_DELIVERY: ["DELIVERED", "CANCELLED"],
       };
 
@@ -7506,17 +7671,58 @@
         DELIVERED: "deliveredAt",
         CANCELLED: "cancelledAt",
       };
+      const cancellationReasonSuggestions = {
+        PLACED: [
+          "Customer requested cancellation",
+          "Order placed by mistake",
+          "Duplicate order",
+          "Customer unreachable",
+        ],
+        CONFIRMED: [
+          "Customer requested cancellation",
+          "Item unavailable",
+          "Incorrect order details",
+          "Customer unreachable",
+        ],
+        PROCESSING: [
+          "Customer requested cancellation",
+          "Item out of stock",
+          "Order preparation issue",
+          "Delivery unavailable",
+        ],
+        READY_TO_SHIP: [
+          "Customer requested cancellation",
+          "Stock discrepancy",
+          "Packaging issue",
+          "Delivery unavailable",
+        ],
+        OUT_FOR_DELIVERY: [
+          "Customer unreachable",
+          "Customer requested cancellation",
+          "Delivery address issue",
+          "Delivery attempt unsuccessful",
+        ],
+      };
+
+      function canCancelOrder(order) {
+        return Boolean(order?.path) &&
+          (orderStatusTransitions[String(order.orderStatus || "").trim().toUpperCase()] || []).includes("CANCELLED");
+      }
 
       function getOrderStatusTimeline(order) {
         const currentStatus = String(order.orderStatus || "").trim().toUpperCase();
-        const currentIndex = currentStatus === "COMPLETED"
+        const cancelled = currentStatus === "CANCELLED";
+        const timelineStatus = cancelled
+          ? String(order.raw.cancelledFromStatus || "").trim().toUpperCase()
+          : currentStatus;
+        const currentIndex = timelineStatus === "COMPLETED"
           ? orderStatusTimelineSteps.length - 1
-          : orderStatusTimelineSteps.findIndex((step) => step.status === currentStatus);
+          : orderStatusTimelineSteps.findIndex((step) => step.status === timelineStatus);
         return orderStatusTimelineSteps.map((step, index) => {
           const timestampValue = orderFieldFirstValue(order.raw, step.timestampFields);
           const timestamp = normalizeOrderTimestamp(timestampValue);
-          const completedByStatus = currentIndex > index;
-          const isCurrent = currentIndex === index;
+          const completedByStatus = cancelled ? currentIndex >= index : currentIndex > index;
+          const isCurrent = !cancelled && currentIndex === index;
           const state = isCurrent ? "current" : (timestamp || completedByStatus) ? "completed" : "upcoming";
           return {
             label: step.label,
@@ -7539,7 +7745,6 @@
             <span class="orders-status-timeline-meta">${escapeCustomerText(timeLabel)}</span></span>
           </li>`;
         });
-        const cancelled = String(order.orderStatus || "").trim().toUpperCase() === "CANCELLED";
         if (cancelled) {
           const cancelledAt = normalizeOrderTimestamp(order.raw.cancelledAt);
           items.push(`<li class="orders-status-timeline-step" data-state="current">
@@ -7739,6 +7944,7 @@
         const selectionCount = selectedOrders.length;
         const available = new Map();
         for (const order of selectedOrders) {
+          if (!order.path) continue;
           for (const status of orderStatusTransitions[order.orderStatus.toUpperCase()] || []) {
             available.set(status, (available.get(status) || 0) + 1);
           }
@@ -7984,6 +8190,12 @@
           ["Payment status", paymentStatusLabel(order.paymentStatus)],
           ["Transaction / reference ID", orderFieldText(source, ["transactionId", "referenceId", "transactionReference", "paymentId", "transaction_id"])],
         ];
+        if (String(order.orderStatus || "").trim().toUpperCase() === "CANCELLED") {
+          fields.push(
+            ["Cancelled from status", source.cancelledFromStatus],
+            ["Cancellation reason", source.cancellationReason],
+          );
+        }
         const products = order.items.length
           ? `<div class="orders-detail-table-wrap"><table class="orders-detail-table"><thead><tr><th>Product</th><th>Product ID</th><th>Quantity</th><th>Unit price</th><th>Subtotal</th></tr></thead><tbody>${order.items.map((item) => `<tr><td>${escapeCustomerText(item.name || "Not provided")}</td><td>${escapeCustomerText(item.productId || "Not provided")}</td><td>${escapeCustomerText(item.quantity ?? "Not provided")}</td><td>${escapeCustomerText(item.unitPrice === null ? "Not provided" : formatCustomerCurrency(item.unitPrice))}</td><td>${escapeCustomerText(item.subtotal === null ? "Not provided" : formatCustomerCurrency(item.subtotal))}</td></tr>`).join("")}</tbody></table></div>`
           : "<p>No product items are stored on this order.</p>";
@@ -8048,6 +8260,9 @@
         if (order.path && order.paymentStatus.toUpperCase() === "PENDING") {
           ordersActionMenu.append(orderMenuItem("Mark as Paid", "paid", order));
         }
+        if (canCancelOrder(order)) {
+          ordersActionMenu.append(orderMenuItem("Cancel Order", "cancel", order));
+        }
         if (order.path && (orderStatusTransitions[order.orderStatus.toUpperCase()] || []).length) {
           ordersActionMenu.append(orderMenuItem("Update Order Status", "status", order));
         }
@@ -8074,14 +8289,147 @@
         showDashboardDialog(ordersStatusDialog);
       }
 
-      async function commitOrderStatus(order, status) {
+      function openOrderCancellationDialog(orders) {
+        const selectedOrders = orders.map((order) => getOrderByKey(order.key) || order);
+        const eligibleOrders = selectedOrders.filter(canCancelOrder);
+        const skippedCount = selectedOrders.length - eligibleOrders.length;
+        if (orderState.saving) return false;
+        if (!eligibleOrders.length) {
+          showCategoryToast("No selected order currently supports cancellation. Refresh the orders and try again.", "error");
+          return false;
+        }
+        const isBulk = selectedOrders.length > 1;
+        const pendingOrders = eligibleOrders.map((order, index) => ({
+          key: order.key,
+          id: order.id,
+          status: String(order.orderStatus).trim().toUpperCase(),
+          reasonFieldId: isBulk ? `orders-cancellation-reason-${index}` : "orders-cancellation-reason",
+        }));
+        orderState.pendingCancellation = { orders: pendingOrders, skippedCount };
+
+        document.querySelector("#orders-cancellation-title").textContent = isBulk ? "Cancel selected orders" : "Cancel Order";
+        document.querySelector("#orders-cancellation-description").textContent = isBulk
+          ? "Review the selected orders below. Each eligible order has its own optional reason field."
+          : "Review the order before confirming cancellation.";
+        const list = document.querySelector("#orders-cancellation-orders");
+        list.replaceChildren();
+        const suggestions = new Set();
+        const pendingByKey = new Map(pendingOrders.map((pending) => [pending.key, pending]));
+        for (const order of selectedOrders) {
+          const pending = pendingByKey.get(order.key);
+          const eligible = Boolean(pending);
+          const customer = getOrderCustomer(order);
+          const item = document.createElement("li");
+          const title = document.createElement("span");
+          title.className = "orders-cancellation-order-title";
+          title.textContent = `Order ${order.id}`;
+          const context = document.createElement("span");
+          context.className = "orders-cancellation-order-context";
+          context.textContent = `${customer.name || "Customer name not provided"} · ${customer.mobile || "Mobile not provided"} · Current status: ${order.orderStatus}${eligible ? "" : " · Not eligible; will not be changed"}`;
+          item.append(title, context);
+          if (eligible) {
+            const reasons = cancellationReasonSuggestions[pending.status] || [];
+            if (isBulk) {
+              const field = document.createElement("div");
+              field.className = "orders-cancellation-field";
+              const label = document.createElement("label");
+              label.htmlFor = pending.reasonFieldId;
+              label.textContent = `Cancellation Reason for Order ${order.id} (Optional)`;
+              const reasonButtons = document.createElement("div");
+              reasonButtons.className = "orders-cancellation-suggestions";
+              reasonButtons.setAttribute("aria-label", `Suggested reasons for order ${order.id}`);
+              for (const reasonText of reasons) {
+                const suggestion = document.createElement("button");
+                suggestion.type = "button";
+                suggestion.textContent = reasonText;
+                suggestion.dataset.cancellationReason = reasonText;
+                suggestion.dataset.reasonTarget = pending.reasonFieldId;
+                suggestion.setAttribute("aria-label", `Use suggested reason for order ${order.id}: ${reasonText}`);
+                reasonButtons.append(suggestion);
+              }
+              const textarea = document.createElement("textarea");
+              textarea.id = pending.reasonFieldId;
+              textarea.maxLength = 500;
+              textarea.dataset.reasonOrderKey = pending.key;
+              textarea.setAttribute("aria-describedby", "orders-cancellation-hint");
+              textarea.placeholder = "Choose a suggestion or enter your own explanation";
+              field.append(label, reasonButtons, textarea);
+              item.append(field);
+            } else {
+              for (const reasonText of reasons) suggestions.add(reasonText);
+            }
+          }
+          list.append(item);
+        }
+        const skipped = document.querySelector("#orders-cancellation-skipped");
+        skipped.hidden = skippedCount === 0;
+        skipped.textContent = skippedCount
+          ? `${skippedCount.toLocaleString("en-IN")} selected order${skippedCount === 1 ? " was" : "s were"} not eligible and will not be changed.`
+          : "";
+        const suggestionList = document.querySelector("#orders-cancellation-suggestions");
+        suggestionList.replaceChildren(...[...suggestions].map((reason) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = reason;
+          button.dataset.cancellationReason = reason;
+          button.dataset.reasonTarget = "orders-cancellation-reason";
+          button.setAttribute("aria-label", `Use suggested reason: ${reason}`);
+          return button;
+        }));
+        const singleReasonField = document.querySelector("#orders-cancellation-reason");
+        singleReasonField.value = "";
+        document.querySelector("#orders-cancellation-single-reason-field").hidden = isBulk;
+        suggestionList.hidden = isBulk;
+        document.querySelector("#orders-cancellation-error").hidden = true;
+        const confirmButton = document.querySelector("#orders-cancellation-confirm");
+        confirmButton.textContent = isBulk
+          ? `Cancel ${pendingOrders.length.toLocaleString("en-IN")} Eligible Order${pendingOrders.length === 1 ? "" : "s"}`
+          : "Cancel Order";
+        if (ordersStatusDialog.open) ordersStatusDialog.close();
+        showDashboardDialog(ordersCancellationDialog);
+        document.getElementById(pendingOrders[0].reasonFieldId).focus();
+        return true;
+      }
+
+      function closeOrderCancellationDialog() {
+        if (orderState.saving) return;
+        const focusKey = orderState.pendingCancellation?.orders[0]?.key;
+        orderState.pendingCancellation = null;
+        if (ordersCancellationDialog.open) ordersCancellationDialog.close();
+        if (focusKey) {
+          [...ordersTableBody.querySelectorAll('button[data-order-action="view"]')]
+            .find((button) => button.dataset.orderKey === focusKey)
+            ?.focus();
+        }
+      }
+
+      function selectOrderCancellationReason(suggestion) {
+        if (orderState.saving) return;
+        const reason = document.getElementById(suggestion.dataset.reasonTarget);
+        if (!reason) return;
+        reason.value = suggestion.dataset.cancellationReason;
+        reason.focus();
+        reason.setSelectionRange(reason.value.length, reason.value.length);
+      }
+
+      async function commitOrderStatus(order, status, cancellationReason = "", expectedStatus = order.orderStatus) {
         if (!order.path) throw new Error("This order has no verified Firebase path, so its status cannot be safely updated.");
         if (!(orderStatusTransitions[order.orderStatus.toUpperCase()] || []).includes(status)) {
           throw new Error("That status transition is not available for this order.");
         }
+        if (order.orderStatus.toUpperCase() !== String(expectedStatus).toUpperCase()) {
+          throw new Error(`Order ${order.id} changed status before cancellation. Reload orders and try again.`);
+        }
         const timestampField = orderStatusTimestampFields[status];
         if (!timestampField) throw new Error("No timestamp field is configured for that order status.");
         const patch = { orderStatus: status };
+        if (status === "CANCELLED") {
+          if (typeof cancellationReason !== "string" || cancellationReason.length > 500) {
+            throw new Error("Cancellation reason must be text no longer than 500 characters.");
+          }
+          patch.cancelledFromStatus = order.orderStatus.toUpperCase();
+          patch.cancellationReason = cancellationReason;
+        }
         if (order.raw[timestampField] === undefined || order.raw[timestampField] === null || order.raw[timestampField] === "") {
           patch[timestampField] = Date.now();
         }
@@ -8091,7 +8439,29 @@
         await update(ref(database), atomicPatch);
         order.raw.orderStatus = status;
         order.orderStatus = status;
-        if (patch[timestampField] !== undefined) order.raw[timestampField] = patch[timestampField];
+        for (const [field, value] of Object.entries(patch)) {
+          if (field !== "orderStatus") order.raw[field] = value;
+        }
+        const customerRecordPatch = Object.fromEntries(
+          Object.entries(patch).filter(([field]) => field !== "orderStatus"),
+        );
+        if (status === "CANCELLED") orderState.selected.delete(order.key);
+        for (const customerOrder of customerState.ordersByCustomer[order.uid] || []) {
+          if (customerOrder.id === order.id) {
+            customerOrder.raw.orderStatus = status;
+            customerOrder.orderStatus = status;
+            Object.assign(customerOrder.raw, customerRecordPatch);
+            Object.assign(customerOrder, customerRecordPatch);
+          }
+        }
+        for (const customerOrder of customerState.detailOrders) {
+          if (customerOrder.id === order.id && customerState.selectedCustomerId === order.uid) {
+            customerOrder.raw.orderStatus = status;
+            customerOrder.orderStatus = status;
+            Object.assign(customerOrder.raw, customerRecordPatch);
+            Object.assign(customerOrder, customerRecordPatch);
+          }
+        }
       }
 
       async function commitOrderPayment(order) {
@@ -8137,12 +8507,15 @@
           error.hidden = false;
           return;
         }
+        if (status === "CANCELLED") {
+          openOrderCancellationDialog([order]);
+          return;
+        }
         orderState.saving = true;
         updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
         button.disabled = true;
         button.setAttribute("aria-busy", "true");
         try {
-          if (status === "CANCELLED" && !window.confirm(`Cancel order ${order.id}? This cannot be undone from this dashboard.`)) return;
           await commitOrderStatus(order, status);
           renderOrders();
           ordersStatusDialog.close();
@@ -8156,6 +8529,94 @@
           orderState.saving = false;
           button.disabled = false;
           button.removeAttribute("aria-busy");
+          renderOrders();
+        }
+      }
+
+      async function saveOrderCancellation(event) {
+        event.preventDefault();
+        if (orderState.saving) return;
+        const pending = orderState.pendingCancellation;
+        const error = document.querySelector("#orders-cancellation-error");
+        const confirmButton = document.querySelector("#orders-cancellation-confirm");
+        if (!pending?.orders.length) {
+          error.textContent = "No eligible orders are waiting for confirmation. Close this dialog and reload orders.";
+          error.hidden = false;
+          return;
+        }
+        const orders = pending.orders.map(({ key }) => getOrderByKey(key));
+        const staleOrder = pending.orders.find((pendingOrder, index) => {
+          const order = orders[index];
+          return !order || !canCancelOrder(order) ||
+            String(order.orderStatus).trim().toUpperCase() !== pendingOrder.status;
+        });
+        if (staleOrder) {
+          error.textContent = `Order ${staleOrder.id} is no longer at the status shown. Keep the order, refresh the Orders page, and try again.`;
+          error.hidden = false;
+          return;
+        }
+
+        const reasons = pending.orders.map(({ reasonFieldId }) =>
+          document.getElementById(reasonFieldId).value.trim(),
+        );
+        const fields = document.querySelector("#orders-cancellation-form").querySelectorAll("button, textarea");
+        orderState.saving = true;
+        error.hidden = true;
+        confirmButton.disabled = true;
+        confirmButton.setAttribute("aria-busy", "true");
+        fields.forEach((field) => { field.disabled = true; });
+        updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
+        let updated = 0;
+        const failures = [];
+        try {
+          for (let index = 0; index < orders.length; index += 1) {
+            const order = orders[index];
+            try {
+              await commitOrderStatus(order, "CANCELLED", reasons[index], pending.orders[index].status);
+              updated += 1;
+              renderOrders();
+            } catch (saveError) {
+              const message = saveError?.code
+                ? reportFirebaseError(`Canceling order ${order.id}`, saveError)
+                : saveError.message || "Could not cancel this order.";
+              failures.push(`${order.id}: ${message}`);
+            }
+          }
+          renderOrders();
+          if (customerState.loaded) renderCustomers();
+          if (customerViewDialog.open && customerState.selectedCustomerId) {
+            const customer = customerState.customers.find((entry) => entry.uid === customerState.selectedCustomerId);
+            if (customer) {
+              const requestId = ++customerState.orderRequestId;
+              void loadCustomerOrders(customer, requestId);
+            }
+          }
+          if (!updated) {
+            error.textContent = failures.length
+              ? `No orders were cancelled. ${failures.join("; ")}`
+              : "No orders were cancelled. Try again.";
+            error.hidden = false;
+            return;
+          }
+
+          const skippedText = pending.skippedCount
+            ? ` ${pending.skippedCount} selected order${pending.skippedCount === 1 ? " was" : "s were"} skipped because cancellation was not eligible.`
+            : "";
+          const failureText = failures.length ? ` ${failures.length} failed: ${failures.join("; ")}` : "";
+          const summary = `${updated} order${updated === 1 ? "" : "s"} cancelled.${skippedText}${failureText}`;
+          orderState.pendingCancellation = null;
+          ordersCancellationDialog.close();
+          showCategoryToast(summary, pending.skippedCount || failures.length ? "error" : undefined);
+        } catch (saveError) {
+          error.textContent = saveError?.code
+            ? reportFirebaseError("Canceling orders", saveError)
+            : saveError.message || "Could not cancel the selected orders. Retry.";
+          error.hidden = false;
+        } finally {
+          orderState.saving = false;
+          fields.forEach((field) => { field.disabled = false; });
+          confirmButton.disabled = false;
+          confirmButton.removeAttribute("aria-busy");
           renderOrders();
         }
       }
@@ -8231,8 +8692,10 @@
           showCategoryToast("The selected orders do not support that status transition.", "error");
           return;
         }
-        if (status === "CANCELLED" &&
-          !window.confirm(`Cancel ${eligible.length} selected order${eligible.length === 1 ? "" : "s"}? This cannot be undone from this dashboard.`)) return;
+        if (status === "CANCELLED") {
+          openOrderCancellationDialog(selectedOrders);
+          return;
+        }
 
         orderState.saving = true;
         updateOrderSelectionUi(getFilteredOrders().slice((orderState.page - 1) * orderState.pageSize, orderState.page * orderState.pageSize));
@@ -8351,6 +8814,7 @@
         if (!order) return;
         if (action.dataset.orderAction === "view") openOrderDetails(order);
         if (action.dataset.orderAction === "status") openOrderStatusDialog(order);
+        if (action.dataset.orderAction === "cancel") openOrderCancellationDialog([order]);
         if (action.dataset.orderAction === "customer") openOrderCustomer(order);
         if (action.dataset.orderAction === "paid") void markOrderAsPaid(order);
       });
@@ -8377,6 +8841,26 @@
       ordersDetailsDialog.addEventListener("click", (event) => { if (event.target === ordersDetailsDialog) ordersDetailsDialog.close(); });
       document.querySelector("#orders-status-form").addEventListener("cancel", (event) => {
         if (orderState.saving) event.preventDefault();
+      });
+      document.querySelector("#orders-cancellation-form").addEventListener("submit", (event) => {
+        void saveOrderCancellation(event);
+      });
+      document.querySelector("#orders-cancellation-suggestions").addEventListener("click", (event) => {
+        const suggestion = event.target.closest("button[data-cancellation-reason]");
+        if (suggestion) selectOrderCancellationReason(suggestion);
+      });
+      document.querySelectorAll("[data-orders-cancellation-close]").forEach((button) => {
+        button.addEventListener("click", closeOrderCancellationDialog);
+      });
+      ordersCancellationDialog.addEventListener("click", (event) => {
+        if (event.target === ordersCancellationDialog) closeOrderCancellationDialog();
+      });
+      ordersCancellationDialog.addEventListener("cancel", (event) => {
+        if (orderState.saving) {
+          event.preventDefault();
+          return;
+        }
+        orderState.pendingCancellation = null;
       });
 
       window.addEventListener("hashchange", () => {
