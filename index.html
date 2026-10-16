@@ -2682,6 +2682,10 @@
         gap: var(--space-3);
       }
 
+      .barcode-card-actions {
+        justify-content: center;
+      }
+
       .products-heading-actions {
         justify-content: flex-end;
       }
@@ -3122,6 +3126,69 @@
         min-width: 0;
         margin: 0;
         overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .product-view-gallery {
+        margin: 0 0 var(--space-7);
+      }
+
+      .product-view-main-image {
+        display: grid;
+        min-height: 220px;
+        max-height: 440px;
+        place-items: center;
+        overflow: hidden;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .product-view-main-image img {
+        display: block;
+        width: 100%;
+        max-height: 440px;
+        object-fit: contain;
+      }
+
+      .product-view-image-empty {
+        padding: var(--space-7);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+        text-align: center;
+      }
+
+      .product-view-gallery-thumbnails {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+      }
+
+      .product-view-gallery-thumbnails button {
+        width: 72px;
+        height: 72px;
+        padding: 2px;
+        overflow: hidden;
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+      }
+
+      .product-view-gallery-thumbnails button[aria-pressed="true"] {
+        border: 2px solid var(--color-border-strong);
+      }
+
+      .product-view-gallery-thumbnails button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .product-view-gallery-thumbnails img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .barcode-grid {
@@ -3468,7 +3535,7 @@
               />
             </svg>
           </button>
-          <span class="mobile-brand">DUKANS</span>
+          <span class="mobile-brand">DUKABARG</span>
           <div class="breadcrumb">Store / <strong id="breadcrumb-current">Dashboard</strong></div>
         </header>
 
@@ -4335,7 +4402,19 @@
       </form>
     </dialog>
     <dialog class="product-dialog" id="product-view-dialog" aria-labelledby="product-view-title">
-      <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-view-title">Product details</h2></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close product details">×</button></div><dl class="product-view-details" id="product-view-details"></dl></div>
+      <div class="product-dialog-content">
+        <div class="product-dialog-header">
+          <div><h2 id="product-view-title">Product details</h2><p id="product-view-context"></p></div>
+          <button class="product-dialog-close" type="button" data-product-close aria-label="Close product details">×</button>
+        </div>
+        <section class="product-view-gallery" aria-label="Product images">
+          <div class="product-view-main-image" id="product-view-main-image">
+            <span class="product-view-image-empty" id="product-view-gallery-empty">No product images available.</span>
+          </div>
+          <div class="product-view-gallery-thumbnails" id="product-view-gallery-thumbnails" aria-label="Select product image"></div>
+        </section>
+        <dl class="product-view-details" id="product-view-details"></dl>
+      </div>
     </dialog>
     <dialog class="product-dialog" id="product-confirm-dialog" aria-labelledby="product-confirm-title">
       <div class="product-dialog-content"><div class="product-dialog-header"><div><h2 id="product-confirm-title">Confirm product action</h2><p id="product-confirm-message"></p></div><button class="product-dialog-close" type="button" data-product-close aria-label="Close confirmation">×</button></div><div class="product-dialog-actions"><button class="category-secondary-button" type="button" data-product-close>Cancel</button><button class="category-danger-button" id="product-confirm-action" type="button">Confirm</button></div></div>
@@ -10507,6 +10586,7 @@
               ${isValidBarcode(record.barcode)
                 ? `<button class="category-secondary-button" type="button" data-barcode-action="download" data-uid="${escapeProductHtml(record.uid)}">Download PNG</button>`
                 : `<button class="category-primary-button" type="button" data-barcode-action="generate" data-uid="${escapeProductHtml(record.uid)}">Generate Barcode</button>`}
+              <button class="category-secondary-button" type="button" data-barcode-action="view" data-uid="${escapeProductHtml(record.uid)}">View product</button>
             </div>
           </article>`).join("");
           for (const record of visibleRecords) {
@@ -10555,6 +10635,307 @@
         }
       }
 
+      function productImageUrls(product) {
+        const candidates = [
+          product.mainImageUrl,
+          product.imageUrl,
+          product.image,
+          product.additionalImageUrls,
+          product.additionalImages,
+          product.imageUrls,
+          product.images,
+          product.gallery,
+        ];
+        const urls = [];
+        const addCandidate = (value) => {
+          if (typeof value === "string") {
+            const candidate = value.trim();
+            if (!candidate) return;
+            try {
+              const url = new URL(candidate);
+              if (["http:", "https:"].includes(url.protocol) && !urls.includes(url.href)) {
+                urls.push(url.href);
+              }
+            } catch {
+              return;
+            }
+            return;
+          }
+          if (Array.isArray(value)) {
+            value.forEach(addCandidate);
+            return;
+          }
+          if (value && typeof value === "object") {
+            const urlKeys = ["url", "imageUrl", "src", "downloadURL"];
+            const direct = urlKeys.filter((key) => Object.prototype.hasOwnProperty.call(value, key));
+            (direct.length ? direct.map((key) => value[key]) : Object.values(value)).forEach(addCandidate);
+          }
+        };
+        candidates.forEach(addCandidate);
+        return urls;
+      }
+
+      function formatBooleanLabel(value) {
+        if (typeof value === "boolean") return value ? "Active" : "Inactive";
+        if (typeof value === "string") {
+          const normalized = value.trim().toLowerCase();
+          if (["active", "enabled", "true", "yes"].includes(normalized)) return "Active";
+          if (["inactive", "disabled", "false", "no"].includes(normalized)) return "Inactive";
+        }
+        return null;
+      }
+
+      function isLikelyTimestamp(value) {
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return Math.abs(value) >= 1000000000;
+        }
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          if (!trimmed) return false;
+          const numeric = Number(trimmed);
+          if (Number.isFinite(numeric)) return Math.abs(numeric) >= 1000000000;
+        }
+        return false;
+      }
+
+      function formatReadableDate(value) {
+        if (value == null || value === "") return null;
+        const numericValue = typeof value === "number" ? value : Number(value);
+        let parsed;
+        if (Number.isFinite(numericValue)) {
+          if (!isLikelyTimestamp(numericValue) && numericValue !== 0) return null;
+          const timestamp = Math.abs(numericValue) < 1000000000000 ? numericValue * 1000 : numericValue;
+          parsed = new Date(timestamp);
+        } else {
+          parsed = new Date(String(value));
+        }
+        if (Number.isNaN(parsed.getTime())) return null;
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(parsed);
+      }
+
+      function isDateFieldName(fieldName) {
+        if (!fieldName) return false;
+        return /(createdat|updatedat|created|updated|timestamp|date|time)/i.test(String(fieldName));
+      }
+
+      function formatProductDetailValue(value, fieldName = "") {
+        if (value == null || value === "") return "—";
+        const booleanText = formatBooleanLabel(value);
+        if (booleanText) return booleanText;
+        if (typeof value === "number" && Number.isFinite(value)) {
+          if (!isDateFieldName(fieldName) && !isLikelyTimestamp(value)) return String(value);
+        }
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          if (!trimmed) return "—";
+          const numericValue = Number(trimmed);
+          if (Number.isFinite(numericValue) && !isDateFieldName(fieldName) && !isLikelyTimestamp(trimmed)) {
+            return trimmed;
+          }
+        }
+        const readableDate = isDateFieldName(fieldName) ? formatReadableDate(value) : null;
+        if (readableDate) return readableDate;
+        if (Array.isArray(value)) {
+          const parts = value.flatMap((item) => {
+            if (item == null || item === "") return [];
+            if (typeof item === "object") {
+              return [Object.entries(item).map(([key, nestedValue]) => `${productDetailFieldLabel(key)}: ${formatProductDetailValue(nestedValue, key)}`).join(" — ")];
+            }
+            return [String(item)];
+          }).filter(Boolean);
+          return parts.length ? parts.join(", ") : "—";
+        }
+        if (typeof value === "object") {
+          const parts = Object.entries(value).map(([key, nestedValue]) => `${productDetailFieldLabel(key)}: ${formatProductDetailValue(nestedValue, key)}`);
+          return parts.length ? parts.join(" | ") : "—";
+        }
+        return String(value);
+      }
+
+      function productDetailFieldLabel(key) {
+        const labels = {
+          productId: "Product ID",
+          product_id: "Product ID",
+          name: "Name",
+          productName: "Name",
+          product_name: "Name",
+          title: "Name",
+          sku: "SKU",
+          SKU: "SKU",
+          barcode: "Barcode",
+          barcodeValue: "Barcode",
+          barcode_value: "Barcode",
+          brand: "Brand",
+          masterCategoryId: "Master category ID",
+          master_category_id: "Master category ID",
+          masterCategoryName: "Master category",
+          master_category_name: "Master category",
+          categoryId: "Category ID",
+          category_id: "Category ID",
+          categoryName: "Category",
+          category_name: "Category",
+          subcategoryId: "Subcategory ID",
+          subcategory_id: "Subcategory ID",
+          subcategoryName: "Subcategory",
+          subcategory_name: "Subcategory",
+          mrp: "MRP",
+          sellingPrice: "Selling price",
+          selling_price: "Selling price",
+          price: "Price",
+          discountedPrice: "Discounted price",
+          discounted_price: "Discounted price",
+          costPrice: "Cost price",
+          cost_price: "Cost price",
+          stockQuantity: "Stock quantity",
+          stock_quantity: "Stock quantity",
+          stock: "Stock",
+          quantity: "Quantity",
+          lowStockThreshold: "Low-stock threshold",
+          low_stock_threshold: "Low-stock threshold",
+          unit: "Unit",
+          weight: "Weight",
+          status: "Status",
+          active: "Active",
+          isActive: "Active",
+          shortDescription: "Short description",
+          short_description: "Short description",
+          longDescription: "Description",
+          long_description: "Description",
+          description: "Description",
+          tags: "Tags",
+          variants: "Variants",
+          mainImageUrl: "Main image URL",
+          imageUrl: "Image URL",
+          image: "Image",
+          additionalImageUrls: "Additional image URLs",
+          additionalImages: "Additional images",
+          imageUrls: "Image URLs",
+          images: "Images",
+          gallery: "Image gallery",
+          createdAt: "Created at",
+          updatedAt: "Updated at",
+        };
+        return labels[key] || key
+          .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+          .replace(/[_-]+/g, " ")
+          .replace(/\b\w/g, (character) => character.toUpperCase());
+      }
+
+      function openProductView(product, key, record = null) {
+        if (!product || typeof product !== "object") {
+          showCategoryToast("This product record has no readable product details.", "error");
+          return;
+        }
+        const title = document.querySelector("#product-view-title");
+        title.textContent = productName(product) || "Unnamed product";
+        const context = [
+          `Product ID: ${productId(product, key)}`,
+          `Firebase record: ${key}`,
+          record?.variantName ? `Barcode label: ${record.variantName}` : "",
+        ].filter(Boolean);
+        document.querySelector("#product-view-context").textContent = context.join(" · ");
+
+        const gallery = document.querySelector("#product-view-main-image");
+        const empty = document.querySelector("#product-view-gallery-empty");
+        const thumbnails = document.querySelector("#product-view-gallery-thumbnails");
+        gallery.replaceChildren();
+        thumbnails.replaceChildren();
+        const urls = productImageUrls(product);
+        empty.hidden = urls.length > 0;
+        if (!urls.length) {
+          gallery.append(empty);
+        } else {
+          const showImage = (url, alt) => {
+            const image = document.createElement("img");
+            image.src = url;
+            image.alt = alt;
+            image.addEventListener("error", () => {
+              image.remove();
+              if (!gallery.querySelector("img")) {
+                empty.hidden = false;
+                gallery.append(empty);
+              }
+            }, { once: true });
+            gallery.replaceChildren(image);
+            empty.hidden = true;
+            thumbnails.querySelectorAll("button").forEach((button) => {
+              button.setAttribute("aria-pressed", String(button.dataset.imageUrl === url));
+            });
+          };
+          urls.forEach((url, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.dataset.imageUrl = url;
+            button.setAttribute("aria-label", `Show product image ${index + 1}`);
+            button.setAttribute("aria-pressed", String(index === 0));
+            const thumbnail = document.createElement("img");
+            thumbnail.src = url;
+            thumbnail.alt = "";
+            thumbnail.loading = "lazy";
+            thumbnail.addEventListener("error", () => button.remove(), { once: true });
+            button.append(thumbnail);
+            button.addEventListener("click", () => showImage(url, `Product image ${index + 1}`));
+            thumbnails.append(button);
+          });
+          showImage(urls[0], `${productName(product) || "Product"} image`);
+        }
+
+        const pathParts = [
+          productCategoryPath(product).master?.name,
+          productCategoryPath(product).category?.name,
+          productCategoryPath(product).subcategory?.name,
+        ].filter(Boolean);
+        const categoryPath = pathParts.length ? pathParts.join(" / ") : "—";
+        const fields = [
+          ["Product Name", productName(product) || "—"],
+          ["Short Description", product.shortDescription ?? product.short_description ?? "—"],
+          ["Long Description", product.longDescription ?? product.long_description ?? product.description ?? "—"],
+          ["Images & Gallery", urls.length ? `${urls.length} image${urls.length === 1 ? "" : "s"} available` : "No images available"],
+          ["Variants", formatProductDetailValue(product.variants) || "—"],
+          ["MRP", formatProductDetailValue(product.mrp ?? "—")],
+          ["Selling Price", formatProductDetailValue(product.sellingPrice ?? product.price ?? "—")],
+          ["Discounted Price", formatProductDetailValue(product.discountedPrice ?? "—")],
+          ["Cost Price", formatProductDetailValue(product.costPrice ?? "—")],
+          ["Category Path", categoryPath],
+          ["Master Category", productCategoryPath(product).master?.name || "—"],
+          ["Category", productCategoryPath(product).category?.name || "—"],
+          ["Subcategory", productCategoryPath(product).subcategory?.name || "—"],
+          ["Product ID", productId(product, key) || "—"],
+          ["SKU", productSku(product) || "—"],
+          ["Barcode", productBarcode(product) || "—"],
+          ["Brand", product.brand ?? "—"],
+          ["Stock Quantity", formatProductDetailValue(product.stockQuantity ?? product.stock ?? product.quantity ?? "—")],
+          ["Low-Stock Threshold", formatProductDetailValue(product.lowStockThreshold ?? "—")],
+          ["Unit", product.unit ?? "—"],
+          ["Weight", formatProductDetailValue(product.weight ?? "—")],
+          ["Tags", Array.isArray(product.tags) ? product.tags.join(", ") : (product.tags || "—")],
+          ["Status", formatBooleanLabel(productStatus(product)) || "—"],
+          ["Created At", formatReadableDate(product.createdAt) || "—"],
+          ["Updated At", formatReadableDate(product.updatedAt) || "—"],
+          ["Firebase Record Key", key || "—"],
+        ];
+        const list = document.querySelector("#product-view-details");
+        list.replaceChildren();
+        for (const [label, value] of fields) {
+          const term = document.createElement("dt");
+          const description = document.createElement("dd");
+          term.textContent = label;
+          description.textContent = String(value);
+          list.append(term, description);
+        }
+        const dialog = document.querySelector("#product-view-dialog");
+        try {
+          if (dialog.open) dialog.close();
+          dialog.showModal();
+        } catch (error) {
+          console.error("Opening product details failed.", error);
+          showCategoryToast("Product details could not be opened. Close other dialogs and retry.", "error");
+        }
+      }
+
       async function performProductAction(action, key) {
         const product = categoryState.products[key];
         if (!product) {
@@ -10562,29 +10943,7 @@
           return;
         }
         if (action === "view") {
-          const details = [
-            ["Product ID", productId(product, key)], ["Name", productName(product)], ["SKU", productSku(product)],
-            ["Barcode", productBarcode(product) || "Missing"], ["Brand", product.brand ?? "—"],
-            ["Category", productCategoryLabel(product)],
-            ["MRP", product.mrp ?? "—"], ["Selling price", product.sellingPrice ?? product.price ?? "—"],
-            ["Discounted price", product.discountedPrice ?? "—"], ["Cost price", product.costPrice ?? "—"],
-            ["Stock", productStock(product)], ["Low-stock threshold", product.lowStockThreshold ?? 5],
-            ["Unit", product.unit ?? "—"], ["Weight", product.weight ?? "—"],
-            ["Status", productStatus(product) ? "Active" : "Inactive"],
-            ["Variants", productVariants(product).map((variant) => `${variant.name || "Variant"} (SKU: ${variant.sku || "—"}, barcode: ${variant.barcode || "—"})`).join("; ") || "—"],
-            ["Short description", product.shortDescription ?? "—"], ["Description", product.longDescription ?? product.description ?? "—"],
-            ["Tags", Array.isArray(product.tags) ? product.tags.join(", ") : product.tags ?? "—"],
-          ];
-          const list = document.querySelector("#product-view-details");
-          list.replaceChildren();
-          for (const [label, value] of details) {
-            const term = document.createElement("dt");
-            const description = document.createElement("dd");
-            term.textContent = label;
-            description.textContent = String(value);
-            list.append(term, description);
-          }
-          document.querySelector("#product-view-dialog").showModal();
+          openProductView(product, key);
           return;
         }
         if (action === "edit") {
@@ -10907,7 +11266,9 @@
           showCategoryToast("This product or variant is no longer available. Retry after the list refreshes.", "error");
           return;
         }
-        if (button.dataset.barcodeAction === "generate") void generateBarcodeForRecord(record);
+        if (button.dataset.barcodeAction === "view") {
+          openProductView(record.product, record.key, record);
+        } else if (button.dataset.barcodeAction === "generate") void generateBarcodeForRecord(record);
         else {
           const downloadRecord = async () => {
             let value = record.barcode;
