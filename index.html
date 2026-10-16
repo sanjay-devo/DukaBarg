@@ -5936,13 +5936,17 @@
 
       function parseAllSupportCallbacks(value) {
         if (value === null) return { callbacks: [], malformedCount: 0 };
-        if (typeof value !== "object") {
+        if (typeof value !== "object" || Array.isArray(value)) {
           throw new Error("Unexpected /support_callbacks data structure.");
         }
         const callbacks = [];
         let malformedCount = 0;
         const visit = (record, path) => {
-          if (!record || typeof record !== "object") return;
+          if (record === null || record === undefined) return;
+          if (typeof record !== "object" || Array.isArray(record)) {
+            malformedCount += 1;
+            return;
+          }
           if (isSupportCallbackRecord(record)) {
             callbacks.push({
               key: ["support_callbacks", ...path].join("/"),
@@ -5964,10 +5968,19 @@
       }
 
       function supportTimestampValue(value) {
-        const timestamp = typeof value === "number"
+        const numericTimestamp = typeof value === "number"
           ? value
           : typeof value === "string" && value.trim() ? Number(value) : NaN;
-        return Number.isFinite(timestamp) && !Number.isNaN(new Date(timestamp).getTime()) ? timestamp : null;
+        if (Number.isFinite(numericTimestamp)) {
+          const timestamp = Math.abs(numericTimestamp) >= 100000000 &&
+            Math.abs(numericTimestamp) < 100000000000
+            ? numericTimestamp * 1000
+            : numericTimestamp;
+          return Number.isNaN(new Date(timestamp).getTime()) ? null : timestamp;
+        }
+        if (typeof value !== "string" || !value.trim()) return null;
+        const parsed = Date.parse(value);
+        return Number.isNaN(parsed) ? null : parsed;
       }
 
       function formatSupportTimestamp(value) {
@@ -5994,8 +6007,12 @@
         return String(value);
       }
 
+      function normalizeSupportStatus(value) {
+        return typeof value === "string" ? value.trim().toUpperCase() : "";
+      }
+
       function supportStatusLabel(value) {
-        const normalized = typeof value === "string" ? value.trim().toUpperCase() : "";
+        const normalized = normalizeSupportStatus(value);
         const labels = {
           PENDING: "Pending",
           CONNECTING: "Connecting",
@@ -6005,6 +6022,10 @@
           CANCELLED: "Cancelled",
         };
         return labels[normalized] || (normalized || "Not available");
+      }
+
+      function supportCountdownEligible(status) {
+        return ["PENDING", "CONNECTING"].includes(normalizeSupportStatus(status));
       }
 
       function supportCountdown(value, now = Date.now() + supportState.serverTimeOffset) {
@@ -6023,9 +6044,18 @@
       }
 
       function updateSupportCountdowns() {
-        for (const element of document.querySelectorAll("[data-support-countdown]")) {
+        const panel = document.querySelector(
+          supportState.currentView === "all" ? "#support-all-panel" : "#support-active-panel",
+        );
+        for (const element of panel.querySelectorAll("[data-support-countdown]")) {
+          if (!supportCountdownEligible(element.dataset.supportStatus)) {
+            element.textContent = "Not applicable";
+            element.dataset.state = "not-applicable";
+            element.setAttribute("aria-label", "Not applicable");
+            continue;
+          }
           const rawEstimate = element.dataset.supportCountdown;
-          const estimate = rawEstimate === "" ? null : Number(rawEstimate);
+          const estimate = rawEstimate === "" ? null : supportTimestampValue(rawEstimate);
           const countdown = supportCountdown(estimate);
           element.textContent = countdown.text;
           element.dataset.state = countdown.state;
@@ -6045,6 +6075,15 @@
           return storedId;
         }
         return callback.path[1] || "";
+      }
+
+      function supportRequestId(callback, raw = callback.raw) {
+        if (typeof raw.requestId === "string" && raw.requestId.trim()) {
+          return raw.requestId.trim();
+        }
+        return callback.source === "all" && callback.path.length >= 3
+          ? callback.path[callback.path.length - 1]
+          : "";
       }
 
       function supportCustomerName(profile) {
@@ -6137,14 +6176,14 @@
           : supportState.activeCallbacks;
         return supportState.currentView === "active"
           ? callbacks.filter(({ raw }) => ["PENDING", "CONNECTING", "CONNECTED"].includes(
-            typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
+            normalizeSupportStatus(raw.status),
           ))
           : callbacks;
       }
 
       function getFilteredSupportCallbacks() {
         const search = document.querySelector("#support-search").value.trim().toLocaleLowerCase();
-        const status = document.querySelector("#support-status-filter").value;
+        const status = normalizeSupportStatus(document.querySelector("#support-status-filter").value);
         const isAll = supportState.currentView === "all";
         const from = isAll ? document.querySelector("#support-date-from").value : "";
         const to = isAll ? document.querySelector("#support-date-to").value : "";
@@ -6159,10 +6198,12 @@
           const { key, raw } = callback;
           if (invalidRange) return false;
           const userId = supportProfileId(callback) || key;
-          const requestId = typeof raw.requestId === "string" ? raw.requestId : "";
+          const requestId = typeof raw.requestId === "string" || typeof raw.requestId === "number"
+            ? String(raw.requestId)
+            : "";
           const mobile = supportMobile(callback);
           if (search && ![key, userId, requestId, mobile].some((field) => field.toLocaleLowerCase().includes(search))) return false;
-          const actualStatus = typeof raw.status === "string" ? raw.status.trim() : "";
+          const actualStatus = normalizeSupportStatus(raw.status);
           if (status && actualStatus !== status) return false;
           const requestedDate = getSupportLocalDate(raw.requestedAt);
           if (from && (!requestedDate || requestedDate < from)) return false;
@@ -6172,8 +6213,8 @@
 
         const direction = document.querySelector("#support-sort").value === "oldest" ? 1 : -1;
         filtered.sort((a, b) => {
-          const aTime = typeof a.raw.requestedAt === "number" && Number.isFinite(a.raw.requestedAt) ? a.raw.requestedAt : null;
-          const bTime = typeof b.raw.requestedAt === "number" && Number.isFinite(b.raw.requestedAt) ? b.raw.requestedAt : null;
+          const aTime = supportTimestampValue(a.raw.requestedAt);
+          const bTime = supportTimestampValue(b.raw.requestedAt);
           if (aTime === null && bTime !== null) return 1;
           if (aTime !== null && bTime === null) return -1;
           return (aTime === null ? 0 : direction * (aTime - bTime)) || a.key.localeCompare(b.key);
@@ -6183,12 +6224,12 @@
 
       function renderSupportStatusFilter() {
         const select = document.querySelector("#support-status-filter");
-        const selectedStatus = select.value;
+        const selectedStatus = normalizeSupportStatus(select.value);
         const statuses = Array.from(new Set(getCurrentSupportCallbacks()
-          .map(({ raw }) => typeof raw.status === "string" ? raw.status.trim() : "")
+          .map(({ raw }) => normalizeSupportStatus(raw.status))
           .filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
         select.replaceChildren(new Option("All statuses", ""));
-        for (const status of statuses) select.add(new Option(status, status));
+        for (const status of statuses) select.add(new Option(supportStatusLabel(status), status));
         select.value = statuses.includes(selectedStatus) ? selectedStatus : "";
       }
 
@@ -6251,9 +6292,9 @@
             !getCurrentSupportCallbacks().some(({ key }) => key === supportState.activeActionKey)) {
           closeSupportActionMenu();
         }
-        const activeRecords = supportState.activeCallbacks.filter(({ raw }) => ["PENDING", "CONNECTING", "CONNECTED"].includes(
-          typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
-        ));
+        const activeRecords = supportState.activeCallbacks.filter(({ raw }) =>
+          ["PENDING", "CONNECTING", "CONNECTED"].includes(normalizeSupportStatus(raw.status)),
+        );
         document.querySelector("#support-active-count").textContent = supportState.activeLoaded
           ? activeRecords.length.toLocaleString("en-IN")
           : "—";
@@ -6301,6 +6342,7 @@
           const countdown = document.createElement("span");
           countdown.className = "support-countdown";
           const estimate = supportTimestampValue(raw.estimatedConnectTime);
+          countdown.dataset.supportStatus = normalizeSupportStatus(raw.status);
           countdown.dataset.supportCountdown = estimate === null ? "" : String(estimate);
           estimateCell.append(countdown);
           row.append(estimateCell);
@@ -6415,7 +6457,7 @@
         if (!callback || supportState.savingStatus) return;
         const dialog = document.querySelector("#support-status-dialog");
         const select = document.querySelector("#support-next-status");
-        const currentStatus = typeof callback.raw.status === "string" ? callback.raw.status.trim().toUpperCase() : "";
+        const currentStatus = normalizeSupportStatus(callback.raw.status);
         supportState.activeStatusKey = key;
         supportState.originalStatus = currentStatus;
         supportState.savingStatus = false;
@@ -6485,20 +6527,20 @@
           if (current.userId && userId && current.userId !== userId) {
             throw new Error("The callback user ID does not match the associated user. The status was not changed.");
           }
-          const currentStatus = typeof current.status === "string" ? current.status.trim().toUpperCase() : "";
+          const currentStatus = normalizeSupportStatus(current.status);
           if (currentStatus !== supportState.originalStatus) {
             throw new Error("The callback status changed while this dialog was open. Refresh the list and try again.");
           }
 
           const updates = { [`${callbackPath}/status`]: selectedStatus };
-          if (typeof current.requestId === "string" && current.requestId.trim()) {
-            const requestId = current.requestId;
+          const requestId = supportRequestId(callback, current);
+          if (requestId) {
             const otherRecords = callback.source === "all"
               ? supportState.activeCallbacks
               : supportState.allCallbacks;
             const matches = otherRecords.filter((record) =>
-              record.raw.requestId === requestId &&
-              (!record.raw.userId || !current.userId || record.raw.userId === current.userId));
+              supportRequestId(record) === requestId &&
+              supportProfileId(record) === userId);
             if (matches.length > 1) {
               throw new Error("More than one callback record has this request ID. No status was changed.");
             }
@@ -6511,9 +6553,13 @@
               if (otherSnapshot.exists()) {
                 const otherRecord = otherSnapshot.val();
                 if (!otherRecord || typeof otherRecord !== "object" || Array.isArray(otherRecord) ||
-                    otherRecord.requestId !== requestId ||
-                    (otherRecord.userId && current.userId && otherRecord.userId !== current.userId)) {
+                    supportRequestId(matches[0], otherRecord) !== requestId ||
+                    (otherRecord.userId && otherRecord.userId !== userId)) {
                   throw new Error("The matching callback changed while updating. Refresh both callback lists and retry.");
+                }
+                const otherUserId = supportProfileId({ ...matches[0], raw: otherRecord });
+                if (!otherUserId || otherUserId !== userId) {
+                  throw new Error("The matching callback belongs to a different user. No status was changed.");
                 }
                 updates[`${otherPath}/status`] = selectedStatus;
               }
