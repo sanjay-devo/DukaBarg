@@ -275,8 +275,8 @@
       }
 
       .nav-link:hover {
-        color: var(--color-text-primary);
-        background: var(--color-surface-raised);
+        color: var(--support-deep-orange);
+        background: var(--support-soft-orange);
       }
 
       .nav-link:focus-visible,
@@ -709,6 +709,7 @@
       .inventory-page[hidden],
       .customers-page[hidden],
       .orders-page[hidden],
+      .support-page[hidden],
       .welcome-card[hidden] {
         display: none;
       }
@@ -866,7 +867,7 @@
         padding: var(--space-3) 0;
         color: var(--color-text-inverse);
         background: transparent;
-        border: 0;
+        border: 1px solid transparent;
         border-bottom: 2px solid transparent;
         cursor: pointer;
         font: inherit;
@@ -921,6 +922,7 @@
         padding: var(--space-5) var(--space-6);
         color: var(--color-text-inverse);
         background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
         font-size: var(--font-size-xs);
         font-weight: 600;
         white-space: nowrap;
@@ -2867,6 +2869,36 @@
           animation: none;
         }
       }
+
+      .support-status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .support-row-actions {
+        display: flex;
+        align-items: center;
+      }
+
+      .support-countdown[data-state="passed"] {
+        color: var(--color-text-inverse);
+        font-weight: 600;
+      }
+
+      .support-tab-panel[hidden] {
+        display: none;
+      }
+
+      .support-page .category-pagination[hidden] {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -3542,8 +3574,161 @@
               </div>
           </section>
         </section>
+
+        <section class="category-page support-page" id="support-page" aria-labelledby="support-section-title" hidden>
+          <div class="category-heading-row">
+            <div>
+              <h2 id="support-section-title">Customer Support</h2>
+              <p>Review and manage live callback requests.</p>
+            </div>
+          </div>
+
+          <div class="category-tabs" role="tablist" aria-label="Callback request views">
+            <button class="category-tab" id="support-active-tab" type="button" role="tab" aria-selected="true" aria-controls="support-active-panel">Active Callbacks (<span id="support-active-count">—</span>)</button>
+            <button class="category-tab" id="support-all-tab" type="button" role="tab" aria-selected="false" aria-controls="support-all-panel">All Callbacks (<span id="support-all-count">—</span>)</button>
+          </div>
+
+          <div class="category-table-card">
+            <div class="category-filters" aria-label="Callback request filters">
+              <label class="visually-hidden" for="support-search">Search by user ID, request ID, or mobile number</label>
+              <input id="support-search" type="search" placeholder="Search user ID, request ID, or mobile" />
+              <label class="visually-hidden" for="support-status-filter">Filter by callback status</label>
+              <select id="support-status-filter" aria-label="Filter by callback status">
+                <option value="">All statuses</option>
+              </select>
+              <label class="visually-hidden" for="support-sort">Sort callback requests</label>
+              <select id="support-sort">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+              <label class="visually-hidden" for="support-date-from">Requested from date</label>
+              <input id="support-date-from" type="date" aria-label="Requested from date" />
+              <label class="visually-hidden" for="support-date-to">Requested to date</label>
+              <input id="support-date-to" type="date" aria-label="Requested to date" />
+              <button class="category-secondary-button" id="support-clear-filters" type="button">Clear filters</button>
+            </div>
+            <p class="category-feedback" id="support-filter-error" data-kind="error" role="alert" hidden></p>
+          </div>
+
+          <section class="support-tab-panel" id="support-active-panel" role="tabpanel" aria-labelledby="support-active-tab">
+            <div class="category-heading-row">
+              <div>
+                <h3>Active callback requests</h3>
+                <p id="support-live-state" role="status" aria-live="polite">Waiting for Firebase…</p>
+              </div>
+              <button class="category-secondary-button" id="support-refresh" type="button">Refresh</button>
+            </div>
+
+            <div class="category-table-card">
+              <div class="category-feedback" id="support-loading" aria-live="polite">Loading active callback requests…</div>
+              <div class="category-feedback" id="support-error" data-kind="error" role="alert" hidden>
+                <span id="support-error-message"></span>
+                <button class="category-secondary-button" id="support-retry" type="button">Retry</button>
+              </div>
+              <div class="category-feedback" id="support-empty" hidden>No active callback requests match these filters.</div>
+              <div class="category-table-wrap" id="support-table-wrap" hidden>
+                <table class="category-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Customer</th>
+                      <th scope="col">Mobile Number</th>
+                      <th scope="col">Requested At</th>
+                      <th scope="col">Estimated Connection Time</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="support-table-body"></tbody>
+                </table>
+              </div>
+              <div class="category-pagination" id="support-pagination" hidden>
+                <div class="pagination-summary"><span id="support-page-summary"></span></div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="support-previous">Previous</button>
+                  <span id="support-page-count" aria-live="polite"></span>
+                  <button type="button" id="support-next">Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="support-tab-panel" id="support-all-panel" role="tabpanel" aria-labelledby="support-all-tab" hidden>
+          <div class="category-heading-row">
+            <div><h3>All callback requests</h3></div>
+            <button class="category-secondary-button" id="support-all-refresh" type="button">Refresh</button>
+          </div>
+          <div class="category-table-card">
+            <p id="support-all-live-state" class="category-feedback" role="status" aria-live="polite">Waiting for Firebase…</p>
+            <div class="category-feedback" id="support-all-error" data-kind="error" role="alert" hidden>
+              <span id="support-all-error-message"></span>
+              <button class="category-secondary-button" id="support-all-retry" type="button">Retry</button>
+            </div>
+            <div class="category-feedback" id="support-all-empty" hidden>No callback requests are available.</div>
+            <div class="category-table-wrap" id="support-all-table-wrap" hidden>
+              <table class="category-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Mobile Number</th>
+                    <th scope="col">Requested At</th>
+                    <th scope="col">Estimated Connection Time</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="support-all-table-body"></tbody>
+              </table>
+            </div>
+            <div class="category-pagination" id="support-all-pagination" hidden>
+              <div class="pagination-summary"><span id="support-all-page-summary"></span></div>
+              <div class="category-pagination-controls">
+                <button type="button" id="support-all-previous">Previous</button>
+                <span id="support-all-page-count" aria-live="polite"></span>
+                <button type="button" id="support-all-next">Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
+
+    <dialog class="category-dialog" id="support-details-dialog" aria-labelledby="support-details-title">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div><h2 id="support-details-title">Callback request details</h2><p id="support-details-subtitle"></p></div>
+          <button class="category-dialog-close" type="button" data-support-dialog-close aria-label="Close callback details">×</button>
+        </div>
+        <section aria-labelledby="support-profile-title">
+          <h3 id="support-profile-title">Matched customer profile</h3>
+          <p id="support-profile-state" role="status" aria-live="polite">Loading customer profile…</p>
+          <dl class="category-view-details" id="support-profile-fields"></dl>
+        </section>
+        <dl class="category-view-details" id="support-details-fields"></dl>
+        <div class="category-dialog-actions"><button class="category-secondary-button" type="button" data-support-dialog-close>Close</button></div>
+      </div>
+    </dialog>
+    <dialog class="category-dialog" id="support-status-dialog" aria-labelledby="support-status-title">
+      <form class="category-dialog-form" id="support-status-form" novalidate>
+        <div class="category-dialog-heading">
+          <div><h2 id="support-status-title">Change callback status</h2><p id="support-status-description"></p></div>
+          <button class="category-dialog-close" type="button" data-support-status-close aria-label="Close status update">×</button>
+        </div>
+        <div class="category-field">
+          <label for="support-next-status">New status</label>
+          <select id="support-next-status" required>
+            <option value="PENDING">Pending</option>
+            <option value="CONNECTED">Connected</option>
+            <option value="ENDED">Ended</option>
+            <option value="EXPIRED">Expired</option>
+          </select>
+        </div>
+        <p id="support-status-error" role="alert" hidden></p>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-support-status-close>Cancel</button>
+          <button class="category-primary-button" id="support-status-save" type="submit" disabled>Update Status</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog class="orders-dialog" id="orders-details-dialog" aria-labelledby="orders-details-title">
       <div class="orders-dialog-content">
@@ -3777,6 +3962,7 @@
       const inventoryPage = document.querySelector("#inventory-page");
       const customersPage = document.querySelector("#customers-page");
       const ordersPage = document.querySelector("#orders-page");
+      const supportPage = document.querySelector("#support-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -3826,6 +4012,7 @@
         const isInventoryPage = activeLink.hash === "#inventory";
         const isCustomersPage = activeLink.hash === "#customers";
         const isOrdersPage = activeLink.hash === "#orders";
+        const isSupportPage = activeLink.hash === "#customer-support";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -3835,7 +4022,8 @@
         inventoryPage.hidden = !isInventoryPage;
         customersPage.hidden = !isCustomersPage;
         ordersPage.hidden = !isOrdersPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage;
+        supportPage.hidden = !isSupportPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isSupportPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -4005,6 +4193,38 @@
         searchTimer: null,
         activeOrder: null,
       };
+      const supportState = {
+        activeCallbacks: [],
+        allCallbacks: [],
+        userNames: Object.create(null),
+        userMobiles: Object.create(null),
+        userListeners: new Map(),
+        activeLoaded: false,
+        allLoaded: false,
+        activeError: null,
+        allError: null,
+        activeMalformedCount: 0,
+        allMalformedCount: 0,
+        stopActive: null,
+        stopAll: null,
+        stopServerOffset: null,
+        serverTimeOffset: 0,
+        serverTimeOffsetLoaded: false,
+        generation: 0,
+        activeTimeout: null,
+        allTimeout: null,
+        page: 1,
+        pageSize: 25,
+        currentView: "active",
+        detailRequestId: 0,
+        activeDetailKey: null,
+        activeActionKey: null,
+        activeActionTrigger: null,
+        countdownInterval: null,
+        activeStatusKey: null,
+        originalStatus: "",
+        savingStatus: false,
+      };
       let barcodeLibraryPromise = null;
       const categoryTableBody = document.querySelector("#category-table-body");
       const categoryLoading = document.querySelector("#category-loading");
@@ -4052,6 +4272,13 @@
       ordersActionMenu.hidden = true;
       document.body.append(ordersActionMenu);
       let activeOrderMenuTrigger = null;
+      const supportActionMenu = document.createElement("div");
+      supportActionMenu.className = "orders-action-menu";
+      supportActionMenu.id = "support-action-menu";
+      supportActionMenu.setAttribute("role", "menu");
+      supportActionMenu.setAttribute("aria-label", "Callback request actions");
+      supportActionMenu.hidden = true;
+      document.body.append(supportActionMenu);
       const customerActionMenu = document.createElement("div");
       customerActionMenu.className = "customer-action-menu";
       customerActionMenu.id = "customer-action-menu";
@@ -4108,6 +4335,738 @@
         return isDevelopment
           ? `${action} failed (${code}): ${error?.message || String(error)}`
           : `${action} failed. Please retry.`;
+      }
+
+      function parseActiveCallbacks(value) {
+        if (value === null) return { callbacks: [], malformedCount: 0 };
+        if (typeof value !== "object" || Array.isArray(value)) {
+          throw new Error("Unexpected /active_callbacks data structure.");
+        }
+        const callbacks = [];
+        let malformedCount = 0;
+        for (const [key, raw] of Object.entries(value)) {
+          if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+            malformedCount += 1;
+            continue;
+          }
+          callbacks.push({ key: `active_callbacks/${key}`, path: ["active_callbacks", key], source: "active", raw });
+        }
+        return { callbacks, malformedCount };
+      }
+
+      function isSupportCallbackRecord(value) {
+        if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+        const identityFields = ["requestId", "requestedAt", "estimatedConnectTime", "mobile", "userId"]
+          .filter((field) => value[field] !== undefined && value[field] !== null).length;
+        const hasRequestId = typeof value.requestId === "string" && value.requestId.trim().length > 0;
+        const statusWithIdentity = typeof value.status === "string" &&
+          ["requestId", "mobile", "userId"].some((field) => value[field] !== undefined && value[field] !== null);
+        return identityFields >= 2 || statusWithIdentity || hasRequestId;
+      }
+
+      function parseAllSupportCallbacks(value) {
+        if (value === null) return { callbacks: [], malformedCount: 0 };
+        if (typeof value !== "object") {
+          throw new Error("Unexpected /support_callbacks data structure.");
+        }
+        const callbacks = [];
+        let malformedCount = 0;
+        const visit = (record, path) => {
+          if (!record || typeof record !== "object") return;
+          if (isSupportCallbackRecord(record)) {
+            callbacks.push({
+              key: ["support_callbacks", ...path].join("/"),
+              path: ["support_callbacks", ...path],
+              source: "all",
+              raw: record,
+            });
+            return;
+          }
+          const children = Object.entries(record);
+          if (!children.length) {
+            malformedCount += 1;
+            return;
+          }
+          for (const [key, child] of children) visit(child, [...path, key]);
+        };
+        for (const [key, record] of Object.entries(value)) visit(record, [key]);
+        return { callbacks, malformedCount };
+      }
+
+      function supportTimestampValue(value) {
+        const timestamp = typeof value === "number"
+          ? value
+          : typeof value === "string" && value.trim() ? Number(value) : NaN;
+        return Number.isFinite(timestamp) && !Number.isNaN(new Date(timestamp).getTime()) ? timestamp : null;
+      }
+
+      function formatSupportTimestamp(value) {
+        const timestamp = supportTimestampValue(value);
+        if (timestamp === null) return "Not available";
+        const date = new Date(timestamp);
+        return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleString();
+      }
+
+      function getSupportLocalDate(value) {
+        const timestamp = supportTimestampValue(value);
+        if (timestamp === null) return "";
+        const date = new Date(timestamp);
+        if (Number.isNaN(date.getTime())) return "";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function supportValueText(value) {
+        if (value === null || value === undefined || value === "") return "Not available";
+        if (typeof value === "object") return JSON.stringify(value);
+        return String(value);
+      }
+
+      function supportStatusLabel(value) {
+        const normalized = typeof value === "string" ? value.trim().toUpperCase() : "";
+        const labels = { PENDING: "Pending", CONNECTED: "Connected", ENDED: "Ended", EXPIRED: "Expired" };
+        return labels[normalized] || (normalized || "Not available");
+      }
+
+      function supportCountdown(value, now = Date.now() + supportState.serverTimeOffset) {
+        const estimate = supportTimestampValue(value);
+        if (estimate === null) {
+          return { text: "Not available", state: "unavailable" };
+        }
+        const remainingSeconds = Math.ceil((estimate - now) / 1000);
+        if (remainingSeconds <= 0) return { text: "Time elapsed", state: "passed" };
+        const days = Math.floor(remainingSeconds / 86400);
+        const hours = Math.floor((remainingSeconds % 86400) / 3600);
+        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+        const seconds = remainingSeconds % 60;
+        const time = [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
+        return { text: days ? `Estimated in ${days}d ${time}` : `Estimated in ${time}`, state: "countdown" };
+      }
+
+      function updateSupportCountdowns() {
+        for (const element of document.querySelectorAll("[data-support-countdown]")) {
+          const rawEstimate = element.dataset.supportCountdown;
+          const estimate = rawEstimate === "" ? null : Number(rawEstimate);
+          const countdown = supportCountdown(estimate);
+          element.textContent = countdown.text;
+          element.dataset.state = countdown.state;
+          element.setAttribute("aria-label", countdown.text);
+        }
+      }
+
+      function validSupportFirebaseKey(key) {
+        return typeof key === "string" && key.length > 0 &&
+          ![".", "#", "$", "[", "]", "/"].some((character) => key.includes(character));
+      }
+
+      function supportProfileId(callback) {
+        if (typeof callback.raw.userId === "string" && callback.raw.userId.trim()) {
+          const storedId = callback.raw.userId.trim();
+          if (callback.source === "active" && storedId !== callback.path[1]) return "";
+          return storedId;
+        }
+        return callback.path[1] || "";
+      }
+
+      function syncSupportUserListeners() {
+        const callbacks = [...supportState.activeCallbacks, ...supportState.allCallbacks];
+        const userIds = new Set(callbacks.map(supportProfileId).filter(validSupportFirebaseKey));
+        for (const [userId, stop] of supportState.userListeners) {
+          if (!userIds.has(userId)) {
+            stop();
+            supportState.userListeners.delete(userId);
+            delete supportState.userNames[userId];
+            delete supportState.userMobiles[userId];
+          }
+        }
+        for (const userId of userIds) {
+          if (supportState.userListeners.has(userId)) continue;
+          supportState.userNames[userId] = null;
+          supportState.userMobiles[userId] = null;
+          const stop = onValue(ref(database, `users/${userId}`), (snapshot) => {
+            if (!supportState.userListeners.has(userId)) return;
+            const profile = snapshot.val();
+            const matchedProfile = profile && typeof profile === "object" && !Array.isArray(profile) &&
+              (!profile.uid || profile.uid === userId);
+            const name = matchedProfile
+              ? (typeof profile.fullName === "string" && profile.fullName.trim()
+                ? profile.fullName.trim()
+                : typeof profile.name === "string" ? profile.name.trim() : "")
+              : "";
+            const mobile = matchedProfile
+              ? profile.mobile ?? profile.phoneNumber ?? profile.phone ?? null
+              : null;
+            supportState.userNames[userId] = name;
+            supportState.userMobiles[userId] = mobile === null ? "" : String(mobile);
+            renderSupportCallbacks();
+          }, (error) => {
+            if (!supportState.userListeners.has(userId)) return;
+            supportState.userNames[userId] = "";
+            supportState.userMobiles[userId] = "";
+            reportFirebaseError(`Loading customer profile ${userId}`, error);
+            renderSupportCallbacks();
+          });
+          supportState.userListeners.set(userId, stop);
+        }
+      }
+
+      function getCurrentSupportCallbacks() {
+        const callbacks = supportState.currentView === "all"
+          ? supportState.allCallbacks
+          : supportState.activeCallbacks;
+        return supportState.currentView === "active"
+          ? callbacks.filter(({ raw }) => ["PENDING", "CONNECTED"].includes(
+            typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
+          ))
+          : callbacks;
+      }
+
+      function getFilteredSupportCallbacks() {
+        const search = document.querySelector("#support-search").value.trim().toLocaleLowerCase();
+        const status = document.querySelector("#support-status-filter").value;
+        const from = document.querySelector("#support-date-from").value;
+        const to = document.querySelector("#support-date-to").value;
+        const filterError = document.querySelector("#support-filter-error");
+        const invalidRange = Boolean(from && to && from > to);
+        filterError.hidden = !invalidRange;
+        filterError.textContent = invalidRange ? "The requested-to date must be the same as or later than the requested-from date." : "";
+
+        const filtered = getCurrentSupportCallbacks().filter((callback) => {
+          const { key, raw } = callback;
+          if (invalidRange) return false;
+          const userId = supportProfileId(callback) || key;
+          const requestId = typeof raw.requestId === "string" ? raw.requestId : "";
+          const mobile = supportMobile(callback);
+          if (search && ![key, userId, requestId, mobile].some((field) => field.toLocaleLowerCase().includes(search))) return false;
+          const actualStatus = typeof raw.status === "string" ? raw.status.trim() : "";
+          if (status && actualStatus !== status) return false;
+          const requestedDate = getSupportLocalDate(raw.requestedAt);
+          if (from && (!requestedDate || requestedDate < from)) return false;
+          if (to && (!requestedDate || requestedDate > to)) return false;
+          return true;
+        });
+
+        const direction = document.querySelector("#support-sort").value === "oldest" ? 1 : -1;
+        filtered.sort((a, b) => {
+          const aTime = typeof a.raw.requestedAt === "number" && Number.isFinite(a.raw.requestedAt) ? a.raw.requestedAt : null;
+          const bTime = typeof b.raw.requestedAt === "number" && Number.isFinite(b.raw.requestedAt) ? b.raw.requestedAt : null;
+          if (aTime === null && bTime !== null) return 1;
+          if (aTime !== null && bTime === null) return -1;
+          return (aTime === null ? 0 : direction * (aTime - bTime)) || a.key.localeCompare(b.key);
+        });
+        return filtered;
+      }
+
+      function renderSupportStatusFilter() {
+        const select = document.querySelector("#support-status-filter");
+        const selectedStatus = select.value;
+        const statuses = Array.from(new Set(getCurrentSupportCallbacks()
+          .map(({ raw }) => typeof raw.status === "string" ? raw.status.trim() : "")
+          .filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+        select.replaceChildren(new Option("All statuses", ""));
+        for (const status of statuses) select.add(new Option(status, status));
+        select.value = statuses.includes(selectedStatus) ? selectedStatus : "";
+      }
+
+      function renderSupportPagination(total, pageCount) {
+        const start = total ? (supportState.page - 1) * supportState.pageSize + 1 : 0;
+        const end = total ? Math.min(total, supportState.page * supportState.pageSize) : 0;
+        const prefix = supportState.currentView === "all" ? "#support-all-" : "#support-";
+        document.querySelector(`${prefix}page-summary`).textContent =
+          `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${total.toLocaleString("en-IN")} requests`;
+        document.querySelector(`${prefix}page-count`).textContent = `Page ${supportState.page} of ${pageCount}`;
+        document.querySelector(`${prefix}previous`).disabled = supportState.page <= 1;
+        document.querySelector(`${prefix}next`).disabled = supportState.page >= pageCount;
+        document.querySelector(`${prefix}pagination`).hidden = total === 0 || pageCount <= 1;
+      }
+
+      function addSupportTextCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = supportValueText(value);
+        row.append(cell);
+        return cell;
+      }
+
+      function renderSupportCallbacks() {
+        const isAll = supportState.currentView === "all";
+        const panel = isAll ? "support-all-" : "support-";
+        const loaded = isAll ? supportState.allLoaded : supportState.activeLoaded;
+        const currentError = isAll ? supportState.allError : supportState.activeError;
+        const malformedCount = isAll ? supportState.allMalformedCount : supportState.activeMalformedCount;
+        const callbacks = getCurrentSupportCallbacks();
+        const loading = document.querySelector(isAll ? "#support-all-live-state" : "#support-loading");
+        const error = document.querySelector(`#${panel}error`);
+        const table = document.querySelector(`#${panel}table-wrap`);
+        const empty = document.querySelector(`#${panel}empty`);
+        const body = document.querySelector(`#${panel}table-body`);
+        const errorMessage = document.querySelector(`#${panel}error-message`);
+        const liveState = document.querySelector(isAll ? "#support-all-live-state" : "#support-live-state");
+
+        if (supportState.activeActionKey &&
+            !getCurrentSupportCallbacks().some(({ key }) => key === supportState.activeActionKey)) {
+          closeSupportActionMenu();
+        }
+        const activeRecords = supportState.activeCallbacks.filter(({ raw }) => ["PENDING", "CONNECTED"].includes(
+          typeof raw.status === "string" ? raw.status.trim().toUpperCase() : "",
+        ));
+        document.querySelector("#support-active-count").textContent = supportState.activeLoaded
+          ? activeRecords.length.toLocaleString("en-IN")
+          : "—";
+        document.querySelector("#support-all-count").textContent = supportState.allLoaded
+          ? supportState.allCallbacks.length.toLocaleString("en-IN")
+          : "—";
+        error.hidden = !currentError;
+        errorMessage.textContent = currentError || "";
+        if (!isAll) loading.hidden = loaded || Boolean(currentError);
+        liveState.textContent = !navigator.onLine
+          ? "Browser is offline; displayed records may be stale."
+          : currentError
+            ? isAll ? "Live updates for all callbacks are unavailable." : "Live updates for active callbacks are unavailable."
+            : loaded
+              ? `Live updates active · ${callbacks.length.toLocaleString("en-IN")} ${isAll ? "all" : "active"} callback${callbacks.length === 1 ? "" : "s"}`
+              : isAll ? "Connecting to /support_callbacks…" : "Connecting to /active_callbacks…";
+        renderSupportStatusFilter();
+        body.replaceChildren();
+
+        if (!loaded) {
+          table.hidden = true;
+          empty.hidden = true;
+          if (isAll) empty.hidden = true;
+          return;
+        }
+
+        if (malformedCount) {
+          liveState.textContent += ` ${malformedCount.toLocaleString("en-IN")} unrecognized record${malformedCount === 1 ? " was" : "s were"} ignored.`;
+        }
+
+        const filtered = getFilteredSupportCallbacks();
+        const pageCount = Math.max(1, Math.ceil(filtered.length / supportState.pageSize));
+        supportState.page = Math.min(supportState.page, pageCount);
+        const first = (supportState.page - 1) * supportState.pageSize;
+        const visible = filtered.slice(first, first + supportState.pageSize);
+        for (const callback of visible) {
+          const { key, raw } = callback;
+          const userId = supportProfileId(callback);
+          const row = document.createElement("tr");
+          const customerCell = document.createElement("td");
+          const customerName = supportState.userNames[userId];
+          const name = document.createElement("span");
+          name.className = "orders-primary-text";
+          name.textContent = customerName === null
+            ? "Loading customer…"
+            : customerName || `Name unavailable · ${userId || key}`;
+          customerCell.append(name);
+          row.append(customerCell);
+          addSupportTextCell(row, supportState.userMobiles[userId] || raw.mobile);
+          addSupportTextCell(row, formatSupportTimestamp(raw.requestedAt));
+          const estimateCell = document.createElement("td");
+          const countdown = document.createElement("span");
+          countdown.className = "support-countdown";
+          const estimate = supportTimestampValue(raw.estimatedConnectTime);
+          countdown.dataset.supportCountdown = estimate === null ? "" : String(estimate);
+          estimateCell.append(countdown);
+          row.append(estimateCell);
+          const statusCell = document.createElement("td");
+          const statusBadge = document.createElement("span");
+          statusBadge.className = "support-status-badge";
+          statusBadge.textContent = supportStatusLabel(raw.status);
+          statusCell.append(statusBadge);
+          row.append(statusCell);
+          const actionsCell = document.createElement("td");
+          const actions = document.createElement("div");
+          actions.className = "support-row-actions";
+          const menuTrigger = document.createElement("button");
+          menuTrigger.type = "button";
+          menuTrigger.className = "orders-action-trigger";
+          menuTrigger.textContent = "⋮";
+          menuTrigger.dataset.supportMenu = key;
+          menuTrigger.setAttribute("aria-haspopup", "menu");
+          menuTrigger.setAttribute("aria-controls", "support-action-menu");
+          menuTrigger.setAttribute("aria-expanded", "false");
+          menuTrigger.setAttribute("aria-label", `Actions for ${customerName || userId || key}`);
+          actions.append(menuTrigger);
+          actionsCell.append(actions);
+          row.append(actionsCell);
+          body.append(row);
+        }
+        updateSupportCountdowns();
+
+        table.hidden = visible.length === 0;
+        empty.hidden = visible.length > 0;
+        empty.textContent = callbacks.length
+          ? "No callback requests match these filters. Adjust or clear the filters."
+          : isAll ? "No callback requests are available." : "No active callback requests are available.";
+        renderSupportPagination(filtered.length, pageCount);
+      }
+
+      function findSupportCallback(key) {
+        return [...supportState.activeCallbacks, ...supportState.allCallbacks]
+          .find((record) => record.key === key) || null;
+      }
+
+      function supportMobile(callback) {
+        const userId = supportProfileId(callback);
+        const mobile = supportState.userMobiles[userId] || callback.raw.mobile;
+        return mobile === null || mobile === undefined ? "" : String(mobile).trim();
+      }
+
+      function setSupportView(view) {
+        if (!["active", "all"].includes(view) || supportState.currentView === view) return;
+        supportState.currentView = view;
+        supportState.page = 1;
+        const active = view === "active";
+        document.querySelector("#support-active-tab").setAttribute("aria-selected", String(active));
+        document.querySelector("#support-all-tab").setAttribute("aria-selected", String(!active));
+        document.querySelector("#support-active-panel").hidden = !active;
+        document.querySelector("#support-all-panel").hidden = active;
+        if (active) document.querySelector("#support-all-pagination").hidden = true;
+        else document.querySelector("#support-pagination").hidden = true;
+        closeSupportActionMenu();
+        renderSupportCallbacks();
+      }
+
+      function closeSupportActionMenu(restoreFocus = false) {
+        supportActionMenu.hidden = true;
+        supportState.activeActionTrigger?.setAttribute("aria-expanded", "false");
+        if (restoreFocus) supportState.activeActionTrigger?.focus();
+        supportState.activeActionTrigger = null;
+        supportState.activeActionKey = null;
+      }
+
+      function makeSupportMenuItem(label, action, key, disabled = false) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("role", "menuitem");
+        button.dataset.supportAction = action;
+        button.dataset.supportKey = key;
+        button.textContent = label;
+        button.disabled = disabled;
+        return button;
+      }
+
+      function showSupportActionMenu(trigger, key) {
+        if (supportState.activeActionTrigger === trigger && !supportActionMenu.hidden) {
+          closeSupportActionMenu();
+          return;
+        }
+        const callback = findSupportCallback(key);
+        if (!callback) return;
+        closeSupportActionMenu();
+        supportState.activeActionTrigger = trigger;
+        supportState.activeActionKey = key;
+        trigger.setAttribute("aria-expanded", "true");
+        const mobile = supportMobile(callback);
+        const canCall = Boolean(mobile && /^\+?[\d().\-\s]+$/.test(mobile) && /\d/.test(mobile));
+        supportActionMenu.replaceChildren(
+          makeSupportMenuItem("View Details", "view", key),
+          makeSupportMenuItem("Call Customer", "call", key, !canCall),
+          makeSupportMenuItem("Change Status", "status", key),
+        );
+        supportActionMenu.hidden = false;
+        const rect = trigger.getBoundingClientRect();
+        const width = supportActionMenu.offsetWidth;
+        const height = supportActionMenu.offsetHeight;
+        const top = rect.bottom + height <= window.innerHeight - 8 ? rect.bottom : rect.top - height;
+        supportActionMenu.style.left = `${Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8))}px`;
+        supportActionMenu.style.top = `${Math.max(8, Math.min(top, window.innerHeight - height - 8))}px`;
+        supportActionMenu.querySelector("button:not(:disabled)")?.focus();
+      }
+
+      function openSupportStatusDialog(key) {
+        const callback = findSupportCallback(key);
+        if (!callback || supportState.savingStatus) return;
+        const dialog = document.querySelector("#support-status-dialog");
+        const select = document.querySelector("#support-next-status");
+        const currentStatus = typeof callback.raw.status === "string" ? callback.raw.status.trim().toUpperCase() : "";
+        supportState.activeStatusKey = key;
+        supportState.originalStatus = currentStatus;
+        supportState.savingStatus = false;
+        select.value = ["PENDING", "CONNECTED", "ENDED", "EXPIRED"].includes(currentStatus) ? currentStatus : "PENDING";
+        document.querySelector("#support-status-title").textContent = "Change callback status";
+        document.querySelector("#support-status-description").textContent =
+          `Request ${callback.raw.requestId || key} · Current status: ${supportStatusLabel(currentStatus)}`;
+        document.querySelector("#support-status-error").hidden = true;
+        document.querySelector("#support-status-error").textContent = "";
+        document.querySelector("#support-status-save").disabled = true;
+        if (!dialog.open) dialog.showModal();
+        select.focus();
+      }
+
+      async function saveSupportStatus(event) {
+        event.preventDefault();
+        const key = supportState.activeStatusKey;
+        const select = document.querySelector("#support-next-status");
+        const selectedStatus = select.value;
+        const saveButton = document.querySelector("#support-status-save");
+        const error = document.querySelector("#support-status-error");
+        if (!key || supportState.savingStatus) return;
+        const callback = findSupportCallback(key);
+        if (!callback || !callback.path.every(validSupportFirebaseKey) ||
+            (callback.source === "all" && callback.path.length > 5)) {
+          error.textContent = callback
+            ? "The callback path is deeper than the status-write paths allowed by the current Firebase rules."
+            : "The callback is no longer available. Refresh the list before changing its status.";
+          error.hidden = false;
+          return;
+        }
+        if (!supportState.activeLoaded || !supportState.allLoaded) {
+          error.textContent = "Wait for both live callback lists to load before changing status so matching requests can be synchronized safely.";
+          error.hidden = false;
+          return;
+        }
+        if (!["PENDING", "CONNECTED", "ENDED", "EXPIRED"].includes(selectedStatus) ||
+            selectedStatus === supportState.originalStatus) {
+          error.textContent = "Choose a different supported status before saving.";
+          error.hidden = false;
+          return;
+        }
+        supportState.savingStatus = true;
+        saveButton.disabled = true;
+        saveButton.setAttribute("aria-busy", "true");
+        saveButton.textContent = "Saving…";
+        error.hidden = true;
+        try {
+          const callbackPath = callback.path.join("/");
+          const currentSnapshot = await get(ref(database, callbackPath));
+          if (!currentSnapshot.exists()) throw new Error("This callback request no longer exists. Refresh the list and try again.");
+          const current = currentSnapshot.val();
+          if (!current || typeof current !== "object" || Array.isArray(current)) {
+            throw new Error("The callback record has an unexpected format and was not changed.");
+          }
+          const userId = supportProfileId(callback);
+          if (callback.source === "active" && current.userId && current.userId !== callback.path[1]) {
+            throw new Error("The callback user ID does not match its Firebase parent key. The status was not changed.");
+          }
+          if (current.userId && userId && current.userId !== userId) {
+            throw new Error("The callback user ID does not match the associated user. The status was not changed.");
+          }
+          const currentStatus = typeof current.status === "string" ? current.status.trim().toUpperCase() : "";
+          if (currentStatus !== supportState.originalStatus) {
+            throw new Error("The callback status changed while this dialog was open. Refresh the list and try again.");
+          }
+
+          const updates = { [`${callbackPath}/status`]: selectedStatus };
+          if (typeof current.requestId === "string" && current.requestId.trim()) {
+            const requestId = current.requestId;
+            const otherRecords = callback.source === "all"
+              ? supportState.activeCallbacks
+              : supportState.allCallbacks;
+            const matches = otherRecords.filter((record) =>
+              record.raw.requestId === requestId &&
+              (!record.raw.userId || !current.userId || record.raw.userId === current.userId));
+            if (matches.length > 1) {
+              throw new Error("More than one callback record has this request ID. No status was changed.");
+            }
+            if (matches.length === 1) {
+              if (callback.source === "active" && matches[0].path.length > 5) {
+                throw new Error("The matching historical callback path is deeper than the status-write paths allowed by the current Firebase rules.");
+              }
+              const otherPath = matches[0].path.join("/");
+              const otherSnapshot = await get(ref(database, otherPath));
+              if (otherSnapshot.exists()) {
+                const otherRecord = otherSnapshot.val();
+                if (!otherRecord || typeof otherRecord !== "object" || Array.isArray(otherRecord) ||
+                    otherRecord.requestId !== requestId ||
+                    (otherRecord.userId && current.userId && otherRecord.userId !== current.userId)) {
+                  throw new Error("The matching callback changed while updating. Refresh both callback lists and retry.");
+                }
+                updates[`${otherPath}/status`] = selectedStatus;
+              }
+            }
+          }
+          await update(ref(database), updates);
+          showCategoryToast(`Callback status updated to ${supportStatusLabel(selectedStatus)}. Live callback views are syncing.`);
+          document.querySelector("#support-status-dialog").close();
+        } catch (writeError) {
+          error.textContent = writeError instanceof Error && !writeError.code
+            ? writeError.message
+            : reportFirebaseError("Updating callback status", writeError);
+          error.hidden = false;
+        } finally {
+          supportState.savingStatus = false;
+          saveButton.removeAttribute("aria-busy");
+          saveButton.textContent = "Update Status";
+          if (document.querySelector("#support-status-dialog").open) {
+            saveButton.disabled = select.value === supportState.originalStatus;
+          } else {
+            supportState.activeStatusKey = null;
+          }
+        }
+      }
+
+      function appendSupportDetails(list, fields) {
+        list.replaceChildren();
+        for (const [label, value] of fields) {
+          const term = document.createElement("dt");
+          term.textContent = label;
+          const description = document.createElement("dd");
+          description.textContent = supportValueText(value);
+          list.append(term, description);
+        }
+      }
+
+      async function showSupportDetails(key) {
+        const callback = findSupportCallback(key);
+        if (!callback) return;
+        const dialog = document.querySelector("#support-details-dialog");
+        const requestId = ++supportState.detailRequestId;
+        supportState.activeDetailKey = key;
+        const userId = supportProfileId(callback);
+        const customerName = supportState.userNames[userId];
+        const mobile = supportState.userMobiles[userId] || callback.raw.mobile;
+        document.querySelector("#support-details-subtitle").textContent =
+          `${customerName || `Name unavailable · ${userId || key}`} · ${mobile || "Mobile not available"}`;
+        const detailFields = [["Firebase record path", callback.path.join("/")]];
+        for (const [field, value] of Object.entries(callback.raw)) {
+          detailFields.push([
+            field,
+            field === "requestedAt" || field === "estimatedConnectTime"
+              ? `${supportValueText(value)} (${formatSupportTimestamp(value)})`
+              : value,
+          ]);
+        }
+        appendSupportDetails(document.querySelector("#support-details-fields"), detailFields);
+        const profileState = document.querySelector("#support-profile-state");
+        const profileFields = document.querySelector("#support-profile-fields");
+        profileFields.replaceChildren();
+        profileState.textContent = "Loading the matching users record…";
+        if (!dialog.open) dialog.showModal();
+        if (!userId || [".", "#", "$", "[", "]", "/"].some((character) => userId.includes(character))) {
+          profileState.textContent = "The callback user ID is not a valid users record key.";
+          return;
+        }
+        try {
+          const snapshot = await get(ref(database, `users/${userId}`));
+          if (requestId !== supportState.detailRequestId || supportState.activeDetailKey !== key) return;
+          if (!snapshot.exists()) {
+            profileState.textContent = `No users/${userId} profile exists. Callback details remain available above.`;
+            return;
+          }
+          const profile = snapshot.val();
+          if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
+            profileState.textContent = `users/${userId} did not contain a profile object.`;
+            return;
+          }
+          if (profile.uid && profile.uid !== userId) {
+            profileState.textContent = `The users/${userId} profile UID did not match the Firebase key.`;
+            return;
+          }
+          const knownFields = ["fullName", "name", "email", "mobile", "phoneNumber", "phone", "photoURL"]
+            .filter((field) => profile[field] !== undefined && profile[field] !== null && profile[field] !== "")
+            .map((field) => [field, profile[field]]);
+          appendSupportDetails(profileFields, knownFields);
+          profileState.textContent = knownFields.length
+            ? `Matched users/${userId}.`
+            : `Matched users/${userId}; no name or common contact/profile fields are stored.`;
+        } catch (error) {
+          if (requestId !== supportState.detailRequestId || supportState.activeDetailKey !== key) return;
+          profileState.textContent = reportFirebaseError("Customer profile lookup", error);
+        }
+      }
+
+      function stopSupportListeners() {
+        supportState.generation += 1;
+        supportState.stopActive?.();
+        supportState.stopAll?.();
+        supportState.stopServerOffset?.();
+        for (const stop of supportState.userListeners.values()) stop();
+        supportState.userListeners.clear();
+        supportState.userNames = Object.create(null);
+        supportState.userMobiles = Object.create(null);
+        supportState.stopActive = null;
+        supportState.stopAll = null;
+        supportState.stopServerOffset = null;
+        window.clearInterval(supportState.countdownInterval);
+        supportState.countdownInterval = null;
+        closeSupportActionMenu();
+        const statusDialog = document.querySelector("#support-status-dialog");
+        if (statusDialog.open && !supportState.savingStatus) statusDialog.close();
+        window.clearTimeout(supportState.activeTimeout);
+        window.clearTimeout(supportState.allTimeout);
+        supportState.activeTimeout = null;
+        supportState.allTimeout = null;
+      }
+
+      function startSupportListeners() {
+        if (supportState.stopActive || supportState.stopAll) return;
+        const generation = ++supportState.generation;
+        supportState.activeCallbacks = [];
+        supportState.allCallbacks = [];
+        supportState.activeLoaded = false;
+        supportState.allLoaded = false;
+        supportState.activeError = null;
+        supportState.allError = null;
+        supportState.activeMalformedCount = 0;
+        supportState.allMalformedCount = 0;
+        supportState.serverTimeOffsetLoaded = false;
+        renderSupportCallbacks();
+        supportState.activeTimeout = window.setTimeout(() => {
+          if (generation !== supportState.generation || supportState.activeLoaded) return;
+          supportState.activeError = "Loading /active_callbacks timed out. Check the connection and retry.";
+          renderSupportCallbacks();
+        }, 15000);
+        supportState.allTimeout = window.setTimeout(() => {
+          if (generation !== supportState.generation || supportState.allLoaded) return;
+          supportState.allError = "Loading /support_callbacks timed out. Check the connection and retry.";
+          renderSupportCallbacks();
+        }, 15000);
+        supportState.countdownInterval = window.setInterval(updateSupportCountdowns, 1000);
+        supportState.stopServerOffset = onValue(ref(database, ".info/serverTimeOffset"), (snapshot) => {
+          if (generation !== supportState.generation) return;
+          const offset = snapshot.val();
+          if (typeof offset === "number" && Number.isFinite(offset)) {
+            supportState.serverTimeOffset = offset;
+            supportState.serverTimeOffsetLoaded = true;
+            updateSupportCountdowns();
+          }
+        }, (error) => {
+          if (generation !== supportState.generation) return;
+          reportFirebaseError("Reading Firebase server time offset", error);
+        });
+        supportState.stopActive = onValue(ref(database, "active_callbacks"), (snapshot) => {
+          if (generation !== supportState.generation) return;
+          window.clearTimeout(supportState.activeTimeout);
+          try {
+            const parsed = parseActiveCallbacks(snapshot.val());
+            supportState.activeCallbacks = parsed.callbacks;
+            supportState.activeMalformedCount = parsed.malformedCount;
+            syncSupportUserListeners();
+            supportState.activeLoaded = true;
+            supportState.activeError = null;
+            renderSupportCallbacks();
+          } catch (error) {
+            supportState.activeError = reportFirebaseError("Reading active callback requests", error);
+            renderSupportCallbacks();
+          }
+        }, (error) => {
+          if (generation !== supportState.generation) return;
+          window.clearTimeout(supportState.activeTimeout);
+          supportState.activeError = reportFirebaseError("Reading active callback requests", error);
+          renderSupportCallbacks();
+        });
+        supportState.stopAll = onValue(ref(database, "support_callbacks"), (snapshot) => {
+          if (generation !== supportState.generation) return;
+          window.clearTimeout(supportState.allTimeout);
+          try {
+            const parsed = parseAllSupportCallbacks(snapshot.val());
+            supportState.allCallbacks = parsed.callbacks;
+            supportState.allMalformedCount = parsed.malformedCount;
+            syncSupportUserListeners();
+            supportState.allLoaded = true;
+            supportState.allError = null;
+            renderSupportCallbacks();
+          } catch (error) {
+            supportState.allError = reportFirebaseError("Reading all callback requests", error);
+            renderSupportCallbacks();
+          }
+        }, (error) => {
+          if (generation !== supportState.generation) return;
+          window.clearTimeout(supportState.allTimeout);
+          supportState.allError = reportFirebaseError("Reading all callback requests", error);
+          renderSupportCallbacks();
+        });
       }
 
       function escapeCustomerText(value) {
@@ -6035,7 +6994,151 @@
         if (window.location.hash === "#orders" && document.body.classList.contains("is-admin-authorized")) {
           startOrdersListeners();
         }
+        if (window.location.hash === "#customer-support" && document.body.classList.contains("is-admin-authorized")) {
+          startSupportListeners();
+        } else {
+          stopSupportListeners();
+        }
       });
+
+      supportPage.addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-support-menu]");
+        if (trigger) showSupportActionMenu(trigger, trigger.dataset.supportMenu);
+      });
+      supportActionMenu.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-support-action]");
+        if (!action || action.disabled) return;
+        const callback = findSupportCallback(action.dataset.supportKey);
+        closeSupportActionMenu();
+        if (!callback) return;
+        if (action.dataset.supportAction === "view") {
+          void showSupportDetails(callback.key);
+        } else if (action.dataset.supportAction === "call") {
+          const mobile = supportMobile(callback);
+          if (mobile && /^\+?[\d().\-\s]+$/.test(mobile) && /\d/.test(mobile)) {
+            window.location.href = `tel:${mobile.replace(/[^\d+]/g, "")}`;
+          }
+        } else if (action.dataset.supportAction === "status") {
+          openSupportStatusDialog(callback.key);
+        }
+      });
+      supportActionMenu.addEventListener("keydown", (event) => {
+        const items = Array.from(supportActionMenu.querySelectorAll('[role="menuitem"]:not(:disabled)'));
+        const index = items.indexOf(document.activeElement);
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeSupportActionMenu(true);
+          return;
+        }
+        let nextIndex;
+        if (event.key === "ArrowDown") nextIndex = (index + 1) % items.length;
+        else if (event.key === "ArrowUp") nextIndex = (index - 1 + items.length) % items.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = items.length - 1;
+        else return;
+        event.preventDefault();
+        items[nextIndex]?.focus();
+      });
+      document.addEventListener("click", (event) => {
+        if (!supportActionMenu.hidden && !supportActionMenu.contains(event.target) &&
+            !event.target.closest("[data-support-menu]")) {
+          closeSupportActionMenu();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !supportActionMenu.hidden) closeSupportActionMenu(true);
+      });
+      document.querySelectorAll("[data-support-dialog-close]").forEach((button) => {
+        button.addEventListener("click", () => document.querySelector("#support-details-dialog").close());
+      });
+      document.querySelector("#support-details-dialog").addEventListener("close", () => {
+        supportState.detailRequestId += 1;
+        supportState.activeDetailKey = null;
+      });
+      document.querySelector("#support-status-form").addEventListener("submit", saveSupportStatus);
+      document.querySelector("#support-next-status").addEventListener("change", () => {
+        const saveButton = document.querySelector("#support-status-save");
+        saveButton.disabled =
+          document.querySelector("#support-next-status").value === supportState.originalStatus ||
+          supportState.savingStatus;
+      });
+      document.querySelectorAll("[data-support-status-close]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!supportState.savingStatus) document.querySelector("#support-status-dialog").close();
+        });
+      });
+      document.querySelector("#support-status-dialog").addEventListener("click", (event) => {
+        if (event.target === event.currentTarget && !supportState.savingStatus) event.currentTarget.close();
+      });
+      document.querySelector("#support-status-dialog").addEventListener("close", () => {
+        if (!supportState.savingStatus) supportState.activeStatusKey = null;
+      });
+      document.querySelector("#support-active-tab").addEventListener("click", () => setSupportView("active"));
+      document.querySelector("#support-all-tab").addEventListener("click", () => setSupportView("all"));
+      document.querySelector('[role="tablist"][aria-label="Callback request views"]').addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const view = event.key === "ArrowRight" ? "all" : "active";
+        setSupportView(view);
+        document.querySelector(view === "all" ? "#support-all-tab" : "#support-active-tab").focus();
+      });
+      document.querySelector("#support-search").addEventListener("input", () => {
+        supportState.page = 1;
+        renderSupportCallbacks();
+      });
+      ["#support-status-filter", "#support-sort", "#support-date-from", "#support-date-to"].forEach((selector) => {
+        document.querySelector(selector).addEventListener("change", () => {
+          supportState.page = 1;
+          renderSupportCallbacks();
+        });
+      });
+      document.querySelector("#support-clear-filters").addEventListener("click", () => {
+        document.querySelector("#support-search").value = "";
+        document.querySelector("#support-status-filter").value = "";
+        document.querySelector("#support-sort").value = "newest";
+        document.querySelector("#support-date-from").value = "";
+        document.querySelector("#support-date-to").value = "";
+        supportState.page = 1;
+        renderSupportCallbacks();
+      });
+      document.querySelector("#support-previous").addEventListener("click", () => {
+        if (supportState.currentView !== "active") return;
+        supportState.page = Math.max(1, supportState.page - 1);
+        renderSupportCallbacks();
+      });
+      document.querySelector("#support-next").addEventListener("click", () => {
+        if (supportState.currentView !== "active") return;
+        supportState.page += 1;
+        renderSupportCallbacks();
+      });
+      document.querySelector("#support-all-previous").addEventListener("click", () => {
+        if (supportState.currentView !== "all") return;
+        supportState.page = Math.max(1, supportState.page - 1);
+        renderSupportCallbacks();
+      });
+      document.querySelector("#support-all-next").addEventListener("click", () => {
+        if (supportState.currentView !== "all") return;
+        supportState.page += 1;
+        renderSupportCallbacks();
+      });
+      document.querySelector("#support-refresh").addEventListener("click", () => {
+        stopSupportListeners();
+        startSupportListeners();
+      });
+      document.querySelector("#support-all-refresh").addEventListener("click", () => {
+        stopSupportListeners();
+        startSupportListeners();
+      });
+      document.querySelector("#support-retry").addEventListener("click", () => {
+        stopSupportListeners();
+        startSupportListeners();
+      });
+      document.querySelector("#support-all-retry").addEventListener("click", () => {
+        stopSupportListeners();
+        startSupportListeners();
+      });
+      window.addEventListener("offline", renderSupportCallbacks);
+      window.addEventListener("online", renderSupportCallbacks);
 
       document.querySelector("#customers-search").addEventListener("input", () => {
         window.clearTimeout(customerState.searchTimer);
@@ -9245,6 +10348,7 @@
 
       function checkAdminAccess(user) {
         if (!user) {
+          stopSupportListeners();
           showUnauthenticatedState();
           return Promise.resolve();
         }
@@ -9268,6 +10372,7 @@
               return;
             }
             if (!profile.exists() || profile.child("role").val() !== "admin") {
+              stopSupportListeners();
               showGateError(
                 "Admin access required",
                 "This account does not have admin access. Return to sign in or retry after an administrator updates your role.",
@@ -9295,6 +10400,9 @@
             }
             if (window.location.hash === "#orders") {
               startOrdersListeners();
+            }
+            if (window.location.hash === "#customer-support") {
+              startSupportListeners();
             }
           } catch (error) {
             if (auth.currentUser?.uid !== user.uid) {
@@ -9380,6 +10488,7 @@
         stopAuthListener = onAuthStateChanged(
           auth,
           (user) => {
+            stopSupportListeners();
             void checkAdminAccess(user);
           },
           (error) => {

@@ -31,6 +31,46 @@
         }
       }
     },
+    "active_callbacks": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$userId": {
+        "status": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
+          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+        }
+      }
+    },
+    "support_callbacks": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$recordKey": {
+        ".write": false,
+        "status": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
+          ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+        },
+        "$nestedKey": {
+          ".write": false,
+          "status": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
+            ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+          },
+          "$deepKey": {
+            ".write": false,
+            "status": {
+              ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
+              ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+            },
+            "$leafKey": {
+              ".write": false,
+              "status": {
+                ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
+                ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED')"
+              }
+            }
+          }
+        }
+      }
+    },
     "categories": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
