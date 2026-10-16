@@ -4774,6 +4774,7 @@
         userNames: Object.create(null),
         userMobiles: Object.create(null),
         userListeners: new Map(),
+        userListenerTimeouts: new Map(),
         activeLoaded: false,
         allLoaded: false,
         activeError: null,
@@ -5368,12 +5369,32 @@
         return callback.path[1] || "";
       }
 
+      function supportCustomerName(profile) {
+        if (!profile || typeof profile !== "object" || Array.isArray(profile)) return "";
+        for (const field of ["fullName", "displayName", "customerName", "name"]) {
+          if (typeof profile[field] === "string" && profile[field].trim()) return profile[field].trim();
+        }
+        const firstName = profile.firstName ?? profile.first_name ?? "";
+        const lastName = profile.lastName ?? profile.last_name ?? "";
+        return [firstName, lastName]
+          .filter((part) => typeof part === "string" && part.trim())
+          .map((part) => part.trim())
+          .join(" ");
+      }
+
+      function supportCallbackCustomerName(callback) {
+        const raw = callback.raw;
+        return supportCustomerName(raw) || supportCustomerName(raw.customer) || supportCustomerName(raw.user);
+      }
+
       function syncSupportUserListeners() {
         const callbacks = [...supportState.activeCallbacks, ...supportState.allCallbacks];
         const userIds = new Set(callbacks.map(supportProfileId).filter(validSupportFirebaseKey));
         for (const [userId, stop] of supportState.userListeners) {
           if (!userIds.has(userId)) {
-            stop();
+            stop.stop();
+            window.clearTimeout(supportState.userListenerTimeouts.get(userId));
+            supportState.userListenerTimeouts.delete(userId);
             supportState.userListeners.delete(userId);
             delete supportState.userNames[userId];
             delete supportState.userMobiles[userId];
@@ -5383,30 +5404,52 @@
           if (supportState.userListeners.has(userId)) continue;
           supportState.userNames[userId] = null;
           supportState.userMobiles[userId] = null;
-          const stop = onValue(ref(database, `users/${userId}`), (snapshot) => {
-            if (!supportState.userListeners.has(userId)) return;
-            const profile = snapshot.val();
-            const matchedProfile = profile && typeof profile === "object" && !Array.isArray(profile) &&
-              (!profile.uid || profile.uid === userId);
-            const name = matchedProfile
-              ? (typeof profile.fullName === "string" && profile.fullName.trim()
-                ? profile.fullName.trim()
-                : typeof profile.name === "string" ? profile.name.trim() : "")
-              : "";
-            const mobile = matchedProfile
-              ? profile.mobile ?? profile.phoneNumber ?? profile.phone ?? null
-              : null;
-            supportState.userNames[userId] = name;
-            supportState.userMobiles[userId] = mobile === null ? "" : String(mobile);
+          const fallbackCallback = callbacks.find((callback) => supportProfileId(callback) === userId);
+          const fallbackName = fallbackCallback ? supportCallbackCustomerName(fallbackCallback) : "";
+          const listener = { stop: () => {} };
+          supportState.userListeners.set(userId, listener);
+          const timeout = window.setTimeout(() => {
+            if (supportState.userListeners.get(userId) !== listener || supportState.userNames[userId] !== null) return;
+            supportState.userNames[userId] = fallbackName;
             renderSupportCallbacks();
-          }, (error) => {
-            if (!supportState.userListeners.has(userId)) return;
-            supportState.userNames[userId] = "";
-            supportState.userMobiles[userId] = "";
+          }, 10000);
+          supportState.userListenerTimeouts.set(userId, timeout);
+          try {
+            listener.stop = onValue(ref(database, `users/${userId}`), (snapshot) => {
+              if (supportState.userListeners.get(userId) !== listener) return;
+              window.clearTimeout(supportState.userListenerTimeouts.get(userId));
+              supportState.userListenerTimeouts.delete(userId);
+              const profile = snapshot.val();
+              const matchedProfile = profile && typeof profile === "object" && !Array.isArray(profile) &&
+                (!profile.uid || profile.uid === userId);
+              const name = matchedProfile ? supportCustomerName(profile) : "";
+              const mobile = matchedProfile
+                ? profile.mobile ?? profile.phoneNumber ?? profile.phone ?? null
+                : null;
+              supportState.userNames[userId] = name || fallbackName;
+              supportState.userMobiles[userId] = mobile === null ? "" : String(mobile);
+              renderSupportCallbacks();
+            }, (error) => {
+              if (supportState.userListeners.get(userId) !== listener) return;
+              window.clearTimeout(supportState.userListenerTimeouts.get(userId));
+              supportState.userListenerTimeouts.delete(userId);
+              listener.stop();
+              supportState.userListeners.delete(userId);
+              supportState.userNames[userId] = fallbackName;
+              supportState.userMobiles[userId] = "";
+              reportFirebaseError(`Loading customer profile ${userId}`, error);
+              renderSupportCallbacks();
+            });
+          } catch (error) {
+            window.clearTimeout(timeout);
+            supportState.userListenerTimeouts.delete(userId);
+            if (supportState.userListeners.get(userId) === listener) {
+              supportState.userListeners.delete(userId);
+            }
+            supportState.userNames[userId] = fallbackName;
             reportFirebaseError(`Loading customer profile ${userId}`, error);
             renderSupportCallbacks();
-          });
-          supportState.userListeners.set(userId, stop);
+          }
         }
       }
 
@@ -5836,7 +5879,7 @@
         const requestId = ++supportState.detailRequestId;
         supportState.activeDetailKey = key;
         const userId = supportProfileId(callback);
-        const customerName = supportState.userNames[userId];
+        const customerName = supportState.userNames[userId] || supportCallbackCustomerName(callback);
         const mobile = supportState.userMobiles[userId] || callback.raw.mobile;
         document.querySelector("#support-details-subtitle").textContent =
           `${customerName || `Name unavailable · ${userId || key}`} · ${mobile || "Mobile not available"}`;
@@ -5875,7 +5918,7 @@
             profileState.textContent = `The users/${userId} profile UID did not match the Firebase key.`;
             return;
           }
-          const knownFields = ["fullName", "name", "email", "mobile", "phoneNumber", "phone", "photoURL"]
+          const knownFields = ["fullName", "displayName", "customerName", "name", "firstName", "lastName", "email", "mobile", "phoneNumber", "phone", "photoURL"]
             .filter((field) => profile[field] !== undefined && profile[field] !== null && profile[field] !== "")
             .map((field) => [field, profile[field]]);
           appendSupportDetails(profileFields, knownFields);
@@ -5893,8 +5936,10 @@
         supportState.stopActive?.();
         supportState.stopAll?.();
         supportState.stopServerOffset?.();
-        for (const stop of supportState.userListeners.values()) stop();
+        for (const listener of supportState.userListeners.values()) listener.stop();
         supportState.userListeners.clear();
+        for (const timeout of supportState.userListenerTimeouts.values()) window.clearTimeout(timeout);
+        supportState.userListenerTimeouts.clear();
         supportState.userNames = Object.create(null);
         supportState.userMobiles = Object.create(null);
         supportState.stopActive = null;
