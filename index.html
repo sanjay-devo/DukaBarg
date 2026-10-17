@@ -3856,7 +3856,7 @@
                     <path d="M9 9V6a3 3 0 0 1 6 0v3" />
                   </svg>
                   <span class="nav-text">Orders</span>
-                  <span class="new-badge">New</span>
+                  <span class="new-badge" id="orders-nav-count" aria-live="polite" hidden></span>
                 </a>
               </li>
               <li>
@@ -3877,6 +3877,7 @@
                     <path d="M17 19a5 5 0 0 1-5 2" />
                   </svg>
                   <span class="nav-text">Customer Support</span>
+                  <span class="new-badge" id="support-nav-count" aria-live="polite" hidden></span>
                 </a>
               </li>
             </ul>
@@ -5302,6 +5303,10 @@
       const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
       const storage = getStorage(app);
+      const sidebarBadgeState = {
+        stopOrders: null,
+        stopCallbacks: null,
+      };
       const categoryState = {
         categories: [],
         categoryDiagnostics: [],
@@ -7892,6 +7897,52 @@
           }
         }
         return { orders, malformedCount };
+      }
+
+      function setSidebarBadgeCount(elementId, count) {
+        const badge = document.getElementById(elementId);
+        badge.textContent = count > 99 ? "99+" : count.toLocaleString("en-IN");
+        badge.hidden = count === 0;
+      }
+
+      function stopSidebarBadgeListeners() {
+        sidebarBadgeState.stopOrders?.();
+        sidebarBadgeState.stopCallbacks?.();
+        sidebarBadgeState.stopOrders = null;
+        sidebarBadgeState.stopCallbacks = null;
+        for (const elementId of ["orders-nav-count", "support-nav-count"]) {
+          const badge = document.getElementById(elementId);
+          badge.textContent = "";
+          badge.hidden = true;
+        }
+      }
+
+      function startSidebarBadgeListeners() {
+        if (sidebarBadgeState.stopOrders || sidebarBadgeState.stopCallbacks) return;
+        sidebarBadgeState.stopOrders = onValue(ref(database, "orders"), (snapshot) => {
+          try {
+            const { orders } = parseOrdersPageData(snapshot.val());
+            const pendingCount = orders.filter((order) => orderStatusCategory(order) === "pending").length;
+            setSidebarBadgeCount("orders-nav-count", pendingCount);
+          } catch (error) {
+            reportFirebaseError("Updating pending order count", error);
+          }
+        }, (error) => {
+          reportFirebaseError("Listening for pending order count", error);
+        });
+        sidebarBadgeState.stopCallbacks = onValue(ref(database, "active_callbacks"), (snapshot) => {
+          try {
+            const { callbacks } = parseActiveCallbacks(snapshot.val());
+            const activeCount = callbacks.filter(({ raw }) =>
+              ["PENDING", "CONNECTING", "CONNECTED"].includes(normalizeSupportStatus(raw.status)),
+            ).length;
+            setSidebarBadgeCount("support-nav-count", activeCount);
+          } catch (error) {
+            reportFirebaseError("Updating active callback count", error);
+          }
+        }, (error) => {
+          reportFirebaseError("Listening for active callback count", error);
+        });
       }
 
       function getOrderCustomer(order) {
@@ -13462,6 +13513,7 @@
         if (!user) {
           paymentSettingsState.authorized = false;
           paymentSettingsState.generation += 1;
+          stopSidebarBadgeListeners();
           stopSupportListeners();
           stopReportsListeners();
           showUnauthenticatedState();
@@ -13471,6 +13523,7 @@
         if (existingCheck) {
           return existingCheck;
         }
+        stopSidebarBadgeListeners();
         paymentSettingsState.authorized = false;
         paymentSettingsState.generation += 1;
 
@@ -13491,6 +13544,7 @@
             if (!profile.exists() || profile.child("role").val() !== "admin") {
               paymentSettingsState.authorized = false;
               paymentSettingsState.generation += 1;
+              stopSidebarBadgeListeners();
               stopSupportListeners();
               stopReportsListeners();
               showGateError(
@@ -13512,6 +13566,7 @@
             document.body.classList.add("is-admin-authorized");
             authGate.hidden = true;
             paymentSettingsState.authorized = true;
+            startSidebarBadgeListeners();
             if (!categoryState.stopCategories) {
               startCategoryListeners();
             }
@@ -13535,6 +13590,7 @@
             if (auth.currentUser?.uid !== user.uid) {
               return;
             }
+            stopSidebarBadgeListeners();
             const state = verificationErrorState(error);
             showGateError(state.title, state.message, error);
           } finally {
