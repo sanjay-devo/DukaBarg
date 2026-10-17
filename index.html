@@ -3759,6 +3759,87 @@
           margin-left: 0;
         }
       }
+
+      .push-page[hidden] { display: none; }
+      .push-page { display: grid; gap: var(--space-7); }
+      .push-page [hidden] { display: none !important; }
+      .push-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-6); }
+      .push-heading h2 { margin: 0; font-size: var(--font-size-xl); }
+      .push-heading p { margin: var(--space-3) 0 0; color: var(--color-text-inverse); font-size: var(--font-size-sm); }
+      .push-composer, .push-preview, .push-history-card {
+        padding: var(--space-6);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+      .push-compose-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: var(--space-6); }
+      .push-fields { display: grid; gap: var(--space-5); }
+      .push-field { display: grid; gap: var(--space-2); color: var(--color-text-primary); font-size: var(--font-size-sm); font-weight: 600; }
+      .push-field input, .push-field select, .push-field textarea {
+        width: 100%; min-height: 40px; padding: var(--space-3) var(--space-4);
+        color: var(--color-text-primary); background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted); border-radius: var(--radius-md);
+        font: inherit; font-size: var(--font-size-sm);
+      }
+      .push-field textarea { min-height: 100px; resize: vertical; }
+      .push-field input:focus-visible, .push-field select:focus-visible, .push-field textarea:focus-visible {
+        outline: 2px solid var(--color-border-strong); outline-offset: 2px;
+      }
+      .push-hint, .push-counter { color: var(--color-text-inverse); font-size: var(--font-size-xs); font-weight: 400; }
+      .push-upload-row, .push-actions, .push-recipient-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
+      .push-image-preview { display: block; max-width: 100%; max-height: 180px; object-fit: contain; border-radius: var(--radius-md); }
+      .push-preview h3, .push-history-card h3 { margin: 0; font-size: var(--font-size-lg); }
+      .push-preview-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+      .push-preview-heading p { margin: var(--space-2) 0 0; color: var(--color-text-inverse); font-size: var(--font-size-xs); line-height: 1.5; }
+      .push-preview-switch { display: inline-flex; flex: 0 0 auto; padding: 3px; background: var(--color-surface-raised); border: 1px solid var(--color-border-muted); border-radius: var(--radius-xl); }
+      .push-preview-switch button { min-height: 30px; padding: var(--space-2) var(--space-4); color: var(--color-text-inverse); background: transparent; border: 0; border-radius: var(--radius-xl); cursor: pointer; font: inherit; font-size: var(--font-size-xs); }
+      .push-preview-switch button[aria-pressed="true"] { color: #fff; background: #34363a; }
+      .push-preview-switch button:focus-visible { outline: 2px solid var(--color-border-strong); outline-offset: 2px; }
+      .push-device { max-width: 440px; margin: 0 auto; padding: 13px; overflow: hidden; background: linear-gradient(155deg, #e8e9ed, #d9dbe1); border: 1px solid #d0d2d8; border-radius: 25px; }
+      .push-device-top { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 10px; color: #4d5057; font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+      .push-device-top span:last-child { font-weight: 500; }
+      .push-device-card { padding: 13px; overflow: hidden; background: #fbfbfd; border: 1px solid rgb(35 37 43 / 7%); border-radius: 19px; box-shadow: 0 2px 5px rgb(30 32 38 / 9%); }
+      .push-device-app-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-width: 0; }
+      .push-device-icon { display: grid; width: 34px; height: 34px; place-items: center; overflow: hidden; color: #fff; background: #e66239; border-radius: 10px; }
+      .push-device-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+      .push-device-app-name { min-width: 0; overflow: hidden; color: #35373d; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+      .push-device-time { color: #73757b; font-size: 10px; white-space: nowrap; }
+      .push-device-copy { min-width: 0; margin: 8px 0 0 43px; color: #25262b; overflow-wrap: anywhere; }
+      .push-device-copy strong, .push-device-copy span { display: block; overflow-wrap: anywhere; }
+      .push-device-copy strong { font-size: 13px; font-weight: 700; line-height: 1.35; }
+      .push-device-copy span { margin-top: 3px; color: #41434a; font-size: 12px; line-height: 1.45; }
+      .push-device-copy .push-device-subtitle { color: #696b72; font-size: 11px; }
+      .push-device[data-preview-state="collapsed"] .push-device-copy span { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+      .push-device[data-preview-state="collapsed"] .push-device-copy .push-device-subtitle { -webkit-line-clamp: 1; }
+      .push-device-image-frame { display: grid; min-height: 88px; max-height: 250px; margin: 11px 0 0 43px; place-items: center; overflow: hidden; background: #f0f1f3; border: 1px solid #e1e2e6; border-radius: 11px; }
+      .push-device-image { display: block; width: 100%; max-height: 250px; object-fit: contain; object-position: center; }
+      .push-device-image-fallback { padding: 12px; color: #65676e; font-size: 11px; line-height: 1.5; text-align: center; }
+      .push-preview-footnote { max-width: 440px; margin: var(--space-4) auto 0; color: var(--color-text-inverse); font-size: var(--font-size-xs); line-height: 1.5; }
+      .push-recipient-list { display: grid; max-height: 220px; gap: var(--space-2); padding: var(--space-3); overflow: auto; border: 1px solid var(--color-border-muted); border-radius: var(--radius-md); }
+      .push-recipient-list label { display: flex; align-items: center; gap: var(--space-3); font-size: var(--font-size-sm); }
+      .push-feedback { padding: var(--space-4); color: var(--color-text-inverse); background: var(--color-surface-raised); border-radius: var(--radius-md); font-size: var(--font-size-sm); }
+      .push-feedback[data-kind="error"] { color: #8c321b; }
+      .push-table-wrap { width: 100%; overflow-x: auto; }
+      .push-table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; }
+      .push-table th { padding: var(--space-4); color: var(--color-text-inverse); background: var(--color-surface-raised); font-size: var(--font-size-xs); white-space: nowrap; }
+      .push-table td { padding: var(--space-4); border-top: 1px solid var(--color-border-muted); font-size: var(--font-size-sm); vertical-align: middle; }
+      .push-table-thumb { width: 42px; height: 42px; object-fit: cover; border-radius: var(--radius-sm); }
+      .push-status { display: inline-flex; padding: var(--space-2) var(--space-3); background: var(--color-surface-raised); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 600; }
+      .push-dialog-summary { display: grid; gap: var(--space-4); margin: var(--space-5) 0; }
+      .push-dialog-summary dt { color: var(--color-text-inverse); font-size: var(--font-size-xs); }
+      .push-dialog-summary dd { margin: var(--space-1) 0 0; overflow-wrap: anywhere; font-size: var(--font-size-sm); }
+      .push-error-list { max-height: 220px; padding-left: var(--space-6); overflow: auto; color: #8c321b; font-size: var(--font-size-sm); }
+      @media (max-width: 760px) {
+        .push-compose-layout { grid-template-columns: 1fr; }
+        .push-heading { flex-direction: column; }
+        .push-preview-heading { align-items: flex-start; flex-direction: column; }
+        .push-device { padding: 10px; border-radius: 20px; }
+        .push-device-card { padding: 11px; border-radius: 17px; }
+        .push-device-image-frame, .push-device-copy { margin-left: 0; }
+        .push-device-image-frame { min-height: 72px; max-height: 210px; }
+        .push-device-image { max-height: 210px; }
+        .push-composer, .push-preview, .push-history-card { padding: var(--space-5); }
+      }
     </style>
   </head>
   <body>
@@ -4017,6 +4098,154 @@
               </svg>
             </span>
           </div>
+
+          <section class="push-page" id="push-notifications-page" aria-labelledby="push-notifications-title" hidden>
+            <header class="push-heading">
+              <div>
+                <h2 id="push-notifications-title">Push Notifications</h2>
+                <p>Compose, review, and send a notification to registered consumer devices.</p>
+              </div>
+              <span class="push-hint">FCM accepted means accepted by FCM, not confirmed delivered.</span>
+            </header>
+            <div class="push-feedback" id="push-feedback" role="status" aria-live="polite" hidden></div>
+            <section class="push-composer" aria-labelledby="push-composer-title">
+              <h3 id="push-composer-title">Compose notification</h3>
+              <div class="push-compose-layout">
+                <form class="push-fields" id="push-form">
+                  <label class="push-field" for="push-title">Title <span class="push-counter" id="push-title-count">0 / 100</span>
+                    <input id="push-title" maxlength="100" required autocomplete="off" />
+                  </label>
+                  <label class="push-field" for="push-subtitle">Subtitle <span class="push-counter" id="push-subtitle-count">0 / 120</span>
+                    <input id="push-subtitle" maxlength="120" autocomplete="off" />
+                  </label>
+                  <label class="push-field" for="push-body">Message <span class="push-counter" id="push-body-count">0 / 500</span>
+                    <textarea id="push-body" maxlength="500" required></textarea>
+                  </label>
+                  <div class="push-field">
+                    <span>Optional image</span>
+                    <div class="push-upload-row">
+                      <input id="push-image-file" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Choose notification image" />
+                      <button class="category-secondary-button" id="push-image-remove" type="button" hidden>Remove image</button>
+                    </div>
+                    <span class="push-hint" id="push-image-status">PNG, JPEG, or WebP; maximum 1 MB for FCM.</span>
+                    <button class="category-secondary-button" id="push-image-retry" type="button" hidden>Retry image upload</button>
+                    <img class="push-image-preview" id="push-image-preview" alt="Notification image preview" hidden />
+                  </div>
+                  <label class="push-field" for="push-destination">Open on tap
+                    <select id="push-destination" required>
+                      <option value="home">App Home</option>
+                      <option value="category">Specific Category</option>
+                      <option value="product">Specific Product</option>
+                      <option value="section">Supported in-app section</option>
+                      <option value="url">External Web URL</option>
+                    </select>
+                  </label>
+                  <label class="push-field" id="push-destination-record-field" for="push-destination-record" hidden>
+                    <span id="push-destination-record-label">Choose destination</span>
+                    <select id="push-destination-record"></select>
+                  </label>
+                  <label class="push-field" id="push-destination-section-field" for="push-destination-section" hidden>
+                    In-app section
+                    <select id="push-destination-section">
+                      <option value="categories">Categories</option><option value="products">Products</option>
+                      <option value="orders">Orders</option><option value="cart">Cart</option><option value="profile">Profile</option>
+                    </select>
+                  </label>
+                  <label class="push-field" id="push-destination-url-field" for="push-destination-url" hidden>
+                    HTTPS URL
+                    <input id="push-destination-url" type="url" maxlength="2048" placeholder="https://example.com/page" />
+                  </label>
+                  <div class="push-field">
+                    <span>Recipients</span>
+                    <div class="push-recipient-controls">
+                      <label><input type="radio" name="push-recipient-scope" value="all" checked /> All consumers</label>
+                      <label><input type="radio" name="push-recipient-scope" value="selected" /> Selected consumers</label>
+                      <span id="push-recipient-count" aria-live="polite">Loading registered consumers…</span>
+                    </div>
+                    <div class="push-recipient-list" id="push-recipient-list" hidden></div>
+                  </div>
+                  <div class="push-actions">
+                    <button class="category-primary-button" id="push-review" type="button">Review Before Sending</button>
+                    <button class="category-secondary-button" id="push-reset" type="button">Clear draft</button>
+                  </div>
+                </form>
+                <aside class="push-preview" aria-labelledby="push-preview-title">
+                  <div class="push-preview-heading">
+                    <div>
+                      <h3 id="push-preview-title">Android preview</h3>
+                      <p>Simulated notification shade · appearance varies by Android version and device.</p>
+                    </div>
+                    <div class="push-preview-switch" role="group" aria-label="Notification preview size">
+                      <button type="button" data-preview-state-button="collapsed" aria-pressed="true">Collapsed</button>
+                      <button type="button" data-preview-state-button="expanded" aria-pressed="false">Expanded</button>
+                    </div>
+                  </div>
+                  <div class="push-device" id="push-device" data-preview-state="collapsed">
+                    <div class="push-device-top"><span>Notifications</span><span id="push-preview-clock">now</span></div>
+                    <div class="push-device-card">
+                      <div class="push-device-app-row">
+                        <span class="push-device-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="M4 9h16l-1.4 10H5.4L4 9Z" /><path d="M8 9a4 4 0 0 1 8 0M9 13v3m6-3v3" /></svg>
+                        </span>
+                        <span class="push-device-app-name">DukaBarg</span>
+                        <span class="push-device-time" id="push-preview-time">now</span>
+                      </div>
+                      <div class="push-device-copy">
+                        <strong id="push-preview-title-text">Your notification title</strong>
+                        <span class="push-device-subtitle" id="push-preview-subtitle" hidden></span>
+                        <span id="push-preview-body">Your message will appear here.</span>
+                      </div>
+                      <div class="push-device-image-frame" id="push-preview-image-frame" hidden>
+                        <img class="push-device-image" id="push-preview-image" alt="" hidden />
+                        <span class="push-device-image-fallback" id="push-preview-image-fallback" role="status" hidden>Image preview is unavailable. The notification text will still be shown.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="push-preview-footnote">The expanded view uses Android-style large-image sizing without cropping. Real notification layouts can vary by device.</p>
+                </aside>
+              </div>
+            </section>
+            <section class="push-history-card" aria-labelledby="push-history-title">
+              <h3 id="push-history-title">Notification history &amp; analytics</h3>
+              <div class="push-feedback" id="push-history-loading" role="status">Loading notification history…</div>
+              <div class="push-table-wrap" id="push-history-wrap" hidden>
+                <table class="push-table">
+                  <thead><tr><th>Sent Date</th><th>Image</th><th>Title</th><th>Subtitle</th><th>Open</th><th>Send To</th><th>Status</th><th>No. Opened</th><th>Details</th></tr></thead>
+                  <tbody id="push-history-body"></tbody>
+                </table>
+              </div>
+              <p class="push-feedback" id="push-history-empty" hidden>No notifications have been sent yet.</p>
+            </section>
+          </section>
+
+          <dialog class="category-dialog" id="push-review-dialog" aria-labelledby="push-review-title">
+            <div class="category-dialog-form">
+              <div class="category-dialog-heading">
+                <div><h2 id="push-review-title">Review notification</h2><p id="push-review-summary"></p></div>
+                <button class="category-dialog-close" type="button" data-push-review-close aria-label="Close review">×</button>
+              </div>
+              <dl class="push-dialog-summary" id="push-review-details"></dl>
+              <div class="category-dialog-actions">
+                <button class="category-secondary-button" id="push-review-edit" type="button">Edit</button>
+                <button class="category-secondary-button" id="push-review-cancel" type="button">Cancel</button>
+                <button class="category-primary-button" id="push-confirm-send" type="button">Confirm &amp; Send</button>
+              </div>
+            </div>
+          </dialog>
+          <dialog class="category-dialog" id="push-details-dialog" aria-labelledby="push-details-title">
+            <div class="category-dialog-form">
+              <div class="category-dialog-heading">
+                <div><h2 id="push-details-title">Notification details</h2><p id="push-details-subtitle"></p></div>
+                <button class="category-dialog-close" type="button" data-push-details-close aria-label="Close notification details">×</button>
+              </div>
+              <dl class="push-dialog-summary" id="push-details-content"></dl>
+              <h3>Sending errors</h3>
+              <ul class="push-error-list" id="push-details-errors"></ul>
+              <div class="category-dialog-actions">
+                <button class="category-secondary-button" type="button" data-push-details-close>Close</button>
+              </div>
+            </div>
+          </dialog>
 
           <section class="reports-page" id="reports-page" aria-labelledby="reports-title" hidden>
             <header class="reports-heading">
@@ -5138,6 +5367,7 @@
       const reportsPage = document.querySelector("#reports-page");
       const supportPage = document.querySelector("#support-page");
       const paymentSettingsPage = document.querySelector("#payment-settings-page");
+      const pushNotificationsPage = document.querySelector("#push-notifications-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -5190,6 +5420,7 @@
         const isReportsPage = activeLink.hash === "#reports";
         const isSupportPage = activeLink.hash === "#customer-support";
         const isPaymentSettingsPage = activeLink.hash === "#payment-settings";
+        const isPushNotificationsPage = activeLink.hash === "#push-notifications";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -5202,7 +5433,8 @@
         reportsPage.hidden = !isReportsPage;
         supportPage.hidden = !isSupportPage;
         paymentSettingsPage.hidden = !isPaymentSettingsPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage;
+        pushNotificationsPage.hidden = !isPushNotificationsPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isPushNotificationsPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -5269,6 +5501,7 @@
         ref as storageRef,
         uploadBytesResumable,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
+      import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
@@ -5303,6 +5536,7 @@
       const authReady = setPersistence(auth, browserLocalPersistence);
       const database = getDatabase(app);
       const storage = getStorage(app);
+      const functions = getFunctions(app, "us-central1");
       const sidebarBadgeState = {
         stopOrders: null,
         stopCallbacks: null,
@@ -5424,6 +5658,31 @@
           categories: { key: "name", direction: "asc" },
           products: { key: "name", direction: "asc" },
         },
+      };
+      const notificationState = {
+        loaded: false,
+        loading: false,
+        loadingRecipients: false,
+        sending: false,
+        uploading: false,
+        stopHistory: null,
+        stopOpenEvents: null,
+        customers: [],
+        categories: [],
+        products: {},
+        records: {},
+        openRecords: {},
+        openEventsLoaded: false,
+        pendingNotificationId: null,
+        sendAttempted: false,
+        imageUrl: "",
+        imagePath: "",
+        imageObjectUrl: "",
+        imageSent: false,
+        imageUploadGeneration: 0,
+        imageUploadError: "",
+        imageFile: null,
+        selectedUids: new Set(),
       };
       const supportState = {
         activeCallbacks: [],
@@ -13372,6 +13631,690 @@
         window.clearTimeout(reportsState.timeout);
       }
 
+      function notificationValidToken(value) {
+        return typeof value === "string" && value.trim().length >= 20 && value.trim().length <= 4096
+          ? value.trim()
+          : "";
+      }
+
+      function notificationProfileTokens(raw) {
+        const tokens = [];
+        const stored = raw?.fcmTokens;
+        if (Array.isArray(stored)) {
+          stored.forEach((entry, index) => {
+            const token = notificationValidToken(typeof entry === "string" ? entry : entry?.token);
+            if (token) tokens.push({ token, key: String(index) });
+          });
+        } else if (stored && typeof stored === "object") {
+          Object.entries(stored).forEach(([key, entry]) => {
+            const token = notificationValidToken(typeof entry === "string" ? entry : entry?.token);
+            if (token) tokens.push({ token, key });
+          });
+        }
+        for (const field of ["fcmToken", "deviceToken", "notificationToken"]) {
+          const token = notificationValidToken(raw?.[field]);
+          if (token) tokens.push({ token, key: field });
+        }
+        return [...new Map(tokens.map((entry) => [entry.token, entry])).values()];
+      }
+
+      function notificationDestination() {
+        const type = document.querySelector("#push-destination").value;
+        if (type === "home") return { type: "home" };
+        if (type === "category" || type === "product") {
+          const id = document.querySelector("#push-destination-record").value;
+          if (!id) throw new Error(`Choose a valid ${type} destination.`);
+          const source = type === "category"
+            ? notificationState.categories.find((entry) => entry.id === id)
+            : notificationState.products[id];
+          if (!source) throw new Error(`The selected ${type} no longer exists. Refresh the page and choose another destination.`);
+          return { type, id, name: type === "category" ? source.name : productName(source) };
+        }
+        if (type === "section") {
+          const section = document.querySelector("#push-destination-section").value;
+          if (!["categories", "products", "orders", "cart", "profile"].includes(section)) {
+            throw new Error("Choose a supported in-app section.");
+          }
+          return { type: "section", section };
+        }
+        if (type === "url") {
+          let url;
+          try {
+            url = new URL(document.querySelector("#push-destination-url").value.trim());
+          } catch {
+            throw new Error("Enter a valid HTTPS URL.");
+          }
+          if (url.protocol !== "https:" || !url.hostname || url.username || url.password) {
+            throw new Error("External destinations must be valid HTTPS URLs without embedded credentials.");
+          }
+          return { type: "url", url: url.href };
+        }
+        throw new Error("Choose a supported notification destination.");
+      }
+
+      function notificationSetFeedback(message, kind = "success") {
+        const feedback = document.querySelector("#push-feedback");
+        feedback.textContent = message;
+        feedback.dataset.kind = kind;
+        feedback.hidden = !message;
+      }
+
+      function notificationFormatDestination(destination) {
+        if (!destination || typeof destination !== "object") return "Not configured";
+        if (destination.type === "home") return "App Home";
+        if (destination.type === "category") return `Category: ${destination.name || destination.id || "Unknown"}`;
+        if (destination.type === "product") return `Product: ${destination.name || destination.id || "Unknown"}`;
+        if (destination.type === "section") return `In-app section: ${destination.section || "Unknown"}`;
+        if (destination.type === "url") return destination.url || "External URL";
+        return "Unsupported destination";
+      }
+
+      function notificationBuildRecordSelect() {
+        const type = document.querySelector("#push-destination").value;
+        const field = document.querySelector("#push-destination-record-field");
+        const select = document.querySelector("#push-destination-record");
+        const category = type === "category";
+        field.hidden = !["category", "product"].includes(type);
+        document.querySelector("#push-destination-section-field").hidden = type !== "section";
+        document.querySelector("#push-destination-url-field").hidden = type !== "url";
+        document.querySelector("#push-destination-record-label").textContent = category ? "Choose category" : "Choose product";
+        const items = category
+          ? notificationState.categories.map((entry) => [entry.id, entry.name])
+          : Object.entries(notificationState.products).filter(([, value]) => value && typeof value === "object")
+            .map(([id, value]) => [id, productName(value)]);
+        const previous = select.value;
+        select.replaceChildren(new Option(category ? "Select a category" : "Select a product", ""));
+        items.forEach(([id, name]) => select.add(new Option(name || id, id)));
+        if (items.some(([id]) => id === previous)) select.value = previous;
+        select.required = ["category", "product"].includes(type);
+        if (!items.length && !field.hidden) {
+          notificationSetFeedback(`No ${type} destinations are available.`, "error");
+        }
+      }
+
+      function notificationUpdatePreview() {
+        const title = document.querySelector("#push-title").value.trim();
+        const subtitle = document.querySelector("#push-subtitle").value.trim();
+        const body = document.querySelector("#push-body").value.trim();
+        document.querySelector("#push-title-count").textContent = `${document.querySelector("#push-title").value.length} / 100`;
+        document.querySelector("#push-subtitle-count").textContent = `${document.querySelector("#push-subtitle").value.length} / 120`;
+        document.querySelector("#push-body-count").textContent = `${document.querySelector("#push-body").value.length} / 500`;
+        document.querySelector("#push-preview-title-text").textContent = title || "Your notification title";
+        document.querySelector("#push-preview-subtitle").textContent = subtitle;
+        document.querySelector("#push-preview-subtitle").hidden = !subtitle;
+        document.querySelector("#push-preview-body").textContent = body || "Your message will appear here.";
+        const previewTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date());
+        document.querySelector("#push-preview-clock").textContent = previewTime;
+        document.querySelector("#push-preview-time").textContent = previewTime;
+        const image = document.querySelector("#push-preview-image");
+        const imageFrame = document.querySelector("#push-preview-image-frame");
+        const imageFallback = document.querySelector("#push-preview-image-fallback");
+        const previewUrl = notificationState.imageObjectUrl || notificationState.imageUrl;
+        const previewState = document.querySelector("#push-device").dataset.previewState;
+        imageFrame.hidden = !previewUrl || previewState !== "expanded";
+        if (previewUrl && image.dataset.previewSrc !== previewUrl) {
+          image.dataset.previewSrc = previewUrl;
+          image.hidden = true;
+          imageFallback.textContent = "Loading image preview…";
+          imageFallback.hidden = false;
+          image.src = previewUrl;
+        } else if (!previewUrl) {
+          image.removeAttribute("src");
+          delete image.dataset.previewSrc;
+          image.hidden = true;
+          imageFallback.hidden = true;
+        }
+        const formImage = document.querySelector("#push-image-preview");
+        if (previewUrl) formImage.src = previewUrl;
+        else formImage.removeAttribute("src");
+        formImage.hidden = !previewUrl;
+        document.querySelector("#push-image-remove").hidden = !previewUrl;
+        document.querySelector("#push-image-retry").hidden = !notificationState.imageUploadError || !notificationState.imageFile;
+      }
+
+      document.querySelector("#push-preview-image").addEventListener("load", (event) => {
+        const image = event.currentTarget;
+        const currentPreviewUrl = notificationState.imageObjectUrl || notificationState.imageUrl;
+        if (image.dataset.previewSrc !== currentPreviewUrl || image.getAttribute("src") !== currentPreviewUrl) return;
+        if (!image.naturalWidth || !image.naturalHeight) return;
+        image.hidden = false;
+        document.querySelector("#push-preview-image-fallback").hidden = true;
+      });
+      document.querySelector("#push-preview-image").addEventListener("error", (event) => {
+        const image = event.currentTarget;
+        const currentPreviewUrl = notificationState.imageObjectUrl || notificationState.imageUrl;
+        if (image.dataset.previewSrc !== currentPreviewUrl || image.getAttribute("src") !== currentPreviewUrl) return;
+        image.hidden = true;
+        const fallback = document.querySelector("#push-preview-image-fallback");
+        fallback.textContent = "Image preview is unavailable. The notification text will still be shown.";
+        fallback.hidden = false;
+      });
+      document.querySelectorAll("[data-preview-state-button]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const state = button.dataset.previewStateButton;
+          document.querySelector("#push-device").dataset.previewState = state;
+          document.querySelectorAll("[data-preview-state-button]").forEach((control) =>
+            control.setAttribute("aria-pressed", String(control === button)),
+          );
+          notificationUpdatePreview();
+        });
+      });
+
+      function notificationRenderRecipients() {
+        const container = document.querySelector("#push-recipient-list");
+        const selectable = notificationState.customers;
+        const checkedCount = selectable.filter((customer) => notificationState.selectedUids.has(customer.uid)).length;
+        const scope = document.querySelector('input[name="push-recipient-scope"]:checked').value;
+        document.querySelector("#push-recipient-count").textContent = scope === "all"
+          ? `${selectable.length} consumer${selectable.length === 1 ? "" : "s"} (some may not have a registered token)`
+          : `${checkedCount} consumer${checkedCount === 1 ? "" : "s"} selected`;
+        container.hidden = scope !== "selected";
+        container.replaceChildren();
+        selectable.forEach((customer) => {
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = customer.uid;
+          checkbox.checked = notificationState.selectedUids.has(customer.uid);
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) notificationState.selectedUids.add(customer.uid);
+            else notificationState.selectedUids.delete(customer.uid);
+            notificationRenderRecipients();
+          });
+          const name = document.createElement("span");
+          const tokenStatus = notificationProfileTokens(customer.raw).length ? "" : " (no registered FCM token)";
+          name.textContent = `${customer.name || customer.email || customer.uid}${tokenStatus}`;
+          label.append(checkbox, name);
+          container.append(label);
+        });
+      }
+
+      function notificationDate(value) {
+        const date = new Date(Number(value));
+        return Number.isFinite(date.getTime()) ? date.toLocaleString() : "Date unavailable";
+      }
+
+      function notificationAppendDetail(parent, label, value) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value == null || value === "" ? "—" : String(value);
+        parent.append(term, description);
+      }
+
+      function notificationRenderHistory() {
+        const body = document.querySelector("#push-history-body");
+        const loading = document.querySelector("#push-history-loading");
+        const wrap = document.querySelector("#push-history-wrap");
+        const empty = document.querySelector("#push-history-empty");
+        const entries = Object.entries(notificationState.records || {}).filter(([, record]) =>
+          record && typeof record === "object" && !Array.isArray(record),
+        ).sort(([, a], [, b]) => Number(b.sentAt || b.createdAt || 0) - Number(a.sentAt || a.createdAt || 0));
+        loading.hidden = notificationState.loaded && notificationState.openEventsLoaded;
+        wrap.hidden = !notificationState.loaded || entries.length === 0;
+        empty.hidden = !notificationState.loaded || entries.length > 0;
+        body.replaceChildren();
+        entries.forEach(([id, record]) => {
+          const row = document.createElement("tr");
+          const values = [
+            notificationDate(record.completedAt || record.sentAt || record.createdAt),
+            "",
+            record.title || "Untitled",
+            record.subtitle || "—",
+            notificationFormatDestination(record.destination),
+            record.recipientScope === "selected" ? "Selected consumers" : "All consumers",
+            record.status === "fcm_accepted" ? "Accepted by FCM" : record.status === "partial_failure" ? "Partially accepted" : record.status === "failed" ? "Failed" : record.status === "send_requested" ? "Send requested" : String(record.status || "Unknown"),
+            notificationState.openEventsLoaded
+              ? String(Object.keys(notificationState.openRecords[id] || {}).length)
+              : "Unavailable",
+          ];
+          if (notificationState.openEventsLoaded && Object.keys(notificationState.openRecords[id] || {}).length) {
+            values[6] += ` · Opened by ${Object.keys(notificationState.openRecords[id]).length}`;
+          }
+          values.forEach((value, index) => {
+            const cell = document.createElement("td");
+            if (index === 1 && record.imageUrl) {
+              const image = document.createElement("img");
+              image.className = "push-table-thumb";
+              image.src = record.imageUrl;
+              image.alt = "Notification thumbnail";
+              image.loading = "lazy";
+              cell.append(image);
+            } else if (index === 6) {
+              const status = document.createElement("span");
+              status.className = "push-status";
+              status.textContent = value;
+              cell.append(status);
+            } else cell.textContent = value;
+            row.append(cell);
+          });
+          const actionCell = document.createElement("td");
+          const details = document.createElement("button");
+          details.type = "button";
+          details.className = "category-secondary-button";
+          details.textContent = "Inspect";
+          details.addEventListener("click", () => notificationShowDetails(id, record));
+          actionCell.append(details);
+          row.append(actionCell);
+          body.append(row);
+        });
+      }
+
+      function notificationShowDetails(id, record) {
+        const details = document.querySelector("#push-details-content");
+        details.replaceChildren();
+        document.querySelector("#push-details-subtitle").textContent = `Notification ID: ${id}`;
+        [
+          ["Title", record.title], ["Subtitle", record.subtitle], ["Message", record.body],
+          ["Sent date", notificationDate(record.completedAt || record.sentAt || record.createdAt)],
+          ["Destination", notificationFormatDestination(record.destination)],
+          ["Recipient scope", record.recipientScope === "selected" ? "Selected consumers" : "All consumers"],
+          ["Requested recipients", record.intendedRecipientCount],
+          ["FCM accepted", record.fcmAcceptedCount],
+          ["Failed recipients", record.failedRecipientCount],
+          ["Unique opens", notificationState.openEventsLoaded
+            ? Object.keys(notificationState.openRecords[id] || {}).length
+            : "Analytics unavailable"],
+          ["Status", record.status],
+        ].forEach(([label, value]) => notificationAppendDetail(details, label, value));
+        const errors = document.querySelector("#push-details-errors");
+        errors.replaceChildren();
+        const recipientRecords = record.recipients && typeof record.recipients === "object" ? Object.entries(record.recipients) : [];
+        const failures = recipientRecords.filter(([, entry]) => entry && !["accepted", "opened"].includes(entry.status));
+        if (!failures.length) {
+          const item = document.createElement("li");
+          item.textContent = "No sending errors recorded.";
+          errors.append(item);
+        } else failures.slice(0, 200).forEach(([uid, entry]) => {
+          const item = document.createElement("li");
+          item.textContent = `${uid}: ${entry.error || "FCM rejected the token"}`;
+          errors.append(item);
+        });
+        showDashboardDialog(document.querySelector("#push-details-dialog"));
+      }
+
+      function notificationReview() {
+        notificationSetFeedback("");
+        const title = document.querySelector("#push-title").value.trim();
+        const subtitle = document.querySelector("#push-subtitle").value.trim();
+        const body = document.querySelector("#push-body").value.trim();
+        if (!title || !body) throw new Error("Title and message are required.");
+        if (title.length > 100 || subtitle.length > 120 || body.length > 500) throw new Error("One or more notification fields exceed their character limits.");
+        if (notificationState.loadingRecipients) throw new Error("Consumer records are still loading. Try again when loading finishes.");
+        if (notificationState.uploading) throw new Error("Wait for the notification image upload to finish before reviewing this notification.");
+        if (notificationState.imageUploadError && notificationState.imageFile) {
+          throw new Error("The selected image has not uploaded. Retry the image upload or remove the image before reviewing.");
+        }
+        const scope = document.querySelector('input[name="push-recipient-scope"]:checked').value;
+        const recipientUids = scope === "all"
+          ? notificationState.customers.map((customer) => customer.uid)
+          : notificationState.customers.filter((customer) => notificationState.selectedUids.has(customer.uid)).map((customer) => customer.uid);
+        if (!recipientUids.length) throw new Error(scope === "all" ? "No consumer accounts are available." : "Select at least one consumer.");
+        const destination = notificationDestination();
+        const details = document.querySelector("#push-review-details");
+        details.replaceChildren();
+        [
+          ["Title", title], ["Subtitle", subtitle], ["Message", body],
+          ["Image", notificationState.imageUrl ? "Included" : "No image"],
+          ["Destination", notificationFormatDestination(destination)],
+          ["Recipients", `${recipientUids.length} ${scope === "all" ? "consumer(s) (all consumers)" : "selected consumer(s)"}`],
+        ].forEach(([label, value]) => notificationAppendDetail(details, label, value));
+        const dialog = document.querySelector("#push-review-dialog");
+        dialog.dataset.scope = scope;
+        dialog.dataset.recipientUids = JSON.stringify(recipientUids);
+        dialog.dataset.destination = JSON.stringify(destination);
+        if (!notificationState.pendingNotificationId) {
+          notificationState.pendingNotificationId = push(ref(database, "pushNotifications")).key;
+          notificationState.sendAttempted = false;
+        }
+        if (!notificationState.pendingNotificationId) throw new Error("Could not create a unique notification ID.");
+        dialog.dataset.notificationId = notificationState.pendingNotificationId;
+        document.querySelector("#push-review-edit").disabled = notificationState.sendAttempted;
+        showDashboardDialog(dialog);
+      }
+
+      async function notificationConfirmSend() {
+        if (notificationState.sending) return;
+        const dialog = document.querySelector("#push-review-dialog");
+        let recipientUids;
+        let destination;
+        try {
+          recipientUids = JSON.parse(dialog.dataset.recipientUids || "[]");
+          destination = JSON.parse(dialog.dataset.destination || "null");
+        } catch (error) {
+          console.error("Could not read the reviewed notification.", error);
+          notificationSetFeedback("The reviewed notification is invalid. Close the review and try again.", "error");
+          return;
+        }
+        const title = document.querySelector("#push-title").value.trim();
+        const subtitle = document.querySelector("#push-subtitle").value.trim();
+        const body = document.querySelector("#push-body").value.trim();
+        if (!auth.currentUser || !document.body.classList.contains("is-admin-authorized")) {
+          notificationSetFeedback("Admin authorization is no longer active. Sign in again before sending.", "error");
+          return;
+        }
+        const notificationId = dialog.dataset.notificationId;
+        if (!notificationId) {
+          notificationSetFeedback("Could not create a unique notification ID. Try again.", "error");
+          return;
+        }
+        const button = document.querySelector("#push-confirm-send");
+        notificationState.sending = true;
+        notificationState.sendAttempted = true;
+        button.disabled = true;
+        button.textContent = "Sending…";
+        try {
+          const sendNotification = httpsCallable(functions, "sendPushNotification");
+          const response = await sendNotification({
+            notificationId,
+            title,
+            subtitle,
+            body,
+            imageUrl: notificationState.imageUrl,
+            destination,
+            recipientScope: dialog.dataset.scope,
+            recipientUids: dialog.dataset.scope === "selected" ? recipientUids : [],
+          });
+          const result = response.data || {};
+          dialog.close();
+          notificationState.pendingNotificationId = null;
+          notificationState.sendAttempted = false;
+          notificationState.imageSent = Boolean(notificationState.imagePath);
+          notificationSetFeedback(
+            `Send finished: ${Number(result.fcmAcceptedCount || 0)} consumer(s) accepted by FCM; ${Number(result.failedRecipientCount || 0)} failed. FCM acceptance is not delivery confirmation.`,
+            Number(result.failedRecipientCount || 0) ? "error" : "success",
+          );
+        } catch (error) {
+          console.error("Push notification send failed.", error);
+          if (error?.code === "functions/already-exists") {
+            dialog.close();
+            notificationSetFeedback("This send request was already processed and was not sent again. Inspect history for its result.", "error");
+          } else {
+            const code = typeof error?.code === "string" ? error.code : "";
+            const message = typeof error?.message === "string" && error.message.trim()
+              ? error.message.trim()
+              : "The notification could not be sent.";
+            const internalHelp = code === "functions/internal"
+              ? " Check the sendPushNotification function logs for the underlying cause."
+              : "";
+            notificationSetFeedback(
+              `${code ? `${code}: ` : ""}${message}${internalHelp} Review notification history before retrying.`,
+              "error",
+            );
+          }
+        } finally {
+          notificationState.sending = false;
+          button.disabled = false;
+          button.textContent = "Confirm & Send";
+        }
+      }
+
+      async function notificationUploadImage(file) {
+        if (!file) return;
+        if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 1024 * 1024) {
+          throw new Error("Choose a PNG, JPEG, or WebP image no larger than 1 MB for FCM.");
+        }
+        const generation = ++notificationState.imageUploadGeneration;
+        const previousObjectUrl = notificationState.imageObjectUrl;
+        notificationState.imageObjectUrl = URL.createObjectURL(file);
+        notificationState.imageUrl = "";
+        notificationState.imageUploadError = "";
+        notificationState.imageFile = file;
+        notificationState.uploading = true;
+        document.querySelector("#push-device").dataset.previewState = "expanded";
+        document.querySelectorAll("[data-preview-state-button]").forEach((button) =>
+          button.setAttribute("aria-pressed", String(button.dataset.previewStateButton === "expanded")),
+        );
+        notificationUpdatePreview();
+        document.querySelector("#push-image-status").textContent = "Uploading image securely… The local preview is ready.";
+        if (previousObjectUrl) URL.revokeObjectURL(previousObjectUrl);
+        let timeoutId;
+        let uploadTimedOut = false;
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          if (generation !== notificationState.imageUploadGeneration) return;
+          let binary = "";
+          for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+            binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+          }
+          const uploadImage = httpsCallable(functions, "uploadPushNotificationImage", { timeout: 60000 });
+          const uploadPromise = uploadImage({ base64: btoa(binary), contentType: file.type, fileName: file.name });
+          uploadPromise.then((response) => {
+            if (uploadTimedOut || generation !== notificationState.imageUploadGeneration) {
+              const deleteImage = httpsCallable(functions, "deletePushNotificationImage", { timeout: 15000 });
+              void deleteImage({ path: response.data.path }).catch((error) => {
+                console.error("Could not remove a notification image uploaded after its selection was replaced.", error);
+              });
+            }
+          }, () => {});
+          const response = await Promise.race([
+            uploadPromise,
+            new Promise((resolve, reject) => {
+              timeoutId = window.setTimeout(() => {
+                uploadTimedOut = true;
+                reject(new Error("Image upload timed out. Retry the upload."));
+              }, 65000);
+            }),
+          ]);
+          if (generation !== notificationState.imageUploadGeneration) {
+            const deleteImage = httpsCallable(functions, "deletePushNotificationImage", { timeout: 15000 });
+            await deleteImage({ path: response.data.path });
+            return;
+          }
+          const previousPath = notificationState.imagePath;
+          const previousImageSent = notificationState.imageSent;
+          notificationState.imageUrl = response.data.url;
+          notificationState.imagePath = response.data.path;
+          notificationState.imageSent = false;
+          notificationState.imageFile = null;
+          notificationState.imageUploadError = "";
+          notificationState.imageObjectUrl = "";
+          document.querySelector("#push-image-status").textContent = "Image uploaded and ready.";
+          notificationUpdatePreview();
+          if (previousObjectUrl) URL.revokeObjectURL(previousObjectUrl);
+          if (previousPath && !previousImageSent && previousPath !== notificationState.imagePath) {
+            const deleteImage = httpsCallable(functions, "deletePushNotificationImage", { timeout: 15000 });
+            void deleteImage({ path: previousPath }).catch((error) => {
+              console.error("Uploaded replacement image, but could not remove the previous draft image.", error);
+              if (generation === notificationState.imageUploadGeneration) {
+                notificationSetFeedback("The replacement image is ready, but the previous draft image could not be removed.", "error");
+              }
+            });
+          }
+        } catch (error) {
+          if (generation !== notificationState.imageUploadGeneration) return;
+          notificationState.imageUploadError = error?.message || "Image upload failed.";
+          document.querySelector("#push-image-status").textContent = `${notificationState.imageUploadError} The local preview is kept.`;
+          notificationUpdatePreview();
+          throw error;
+        } finally {
+          window.clearTimeout(timeoutId);
+          if (generation === notificationState.imageUploadGeneration) {
+            notificationState.uploading = false;
+          }
+        }
+      }
+
+      async function notificationRemoveImage() {
+        const generation = ++notificationState.imageUploadGeneration;
+        const imagePath = notificationState.imagePath;
+        const shouldDelete = imagePath && !notificationState.imageSent;
+        const imageObjectUrl = notificationState.imageObjectUrl;
+        notificationState.imagePath = "";
+        notificationState.imageUrl = "";
+        notificationState.imageSent = false;
+        notificationState.imageFile = null;
+        notificationState.imageUploadError = "";
+        notificationState.uploading = false;
+        notificationState.imageObjectUrl = "";
+        document.querySelector("#push-image-file").value = "";
+        document.querySelector("#push-image-status").textContent = "PNG, JPEG, or WebP; maximum 1 MB for FCM.";
+        notificationUpdatePreview();
+        if (imageObjectUrl) URL.revokeObjectURL(imageObjectUrl);
+        if (shouldDelete) {
+          const deleteImage = httpsCallable(functions, "deletePushNotificationImage", { timeout: 15000 });
+          try {
+            await deleteImage({ path: imagePath });
+          } catch (error) {
+            console.error("Could not delete the removed notification image from Storage.", error);
+            if (generation === notificationState.imageUploadGeneration) {
+              document.querySelector("#push-image-status").textContent = "Image removed from this notification, but its Storage file could not be deleted.";
+            }
+            throw error;
+          }
+        }
+      }
+
+      function stopNotificationPage() {
+        notificationState.stopHistory?.();
+        notificationState.stopHistory = null;
+        notificationState.stopOpenEvents?.();
+        notificationState.stopOpenEvents = null;
+        notificationState.loaded = false;
+        notificationState.openEventsLoaded = false;
+        notificationState.loading = false;
+      }
+
+      async function startNotificationPage() {
+        if (window.location.hash !== "#push-notifications" ||
+            !document.body.classList.contains("is-admin-authorized") ||
+            notificationState.loading || notificationState.stopHistory) return;
+        notificationState.loading = true;
+        notificationState.loaded = false;
+        notificationState.loadingRecipients = true;
+        notificationRenderHistory();
+        notificationRenderRecipients();
+        try {
+          const [usersSnapshot, categoriesSnapshot, productsSnapshot] = await Promise.all([
+            get(ref(database, "users")),
+            get(ref(database, "categories")),
+            get(ref(database, "products")),
+          ]);
+          const parsed = parseCustomers(usersSnapshot.val());
+          notificationState.customers = parsed.customers;
+          notificationState.categories = normalizeCategories(categoriesSnapshot.val()).filter((entry) => entry.active !== false);
+          notificationState.products = productsSnapshot.val() && typeof productsSnapshot.val() === "object"
+            ? productsSnapshot.val() : {};
+          notificationState.loadingRecipients = false;
+          notificationRenderRecipients();
+          notificationBuildRecordSelect();
+          notificationState.stopHistory = onValue(ref(database, "pushNotifications"), (snapshot) => {
+            notificationState.records = snapshot.val() || {};
+            notificationState.loaded = true;
+            notificationRenderHistory();
+          }, (error) => {
+            console.error("Could not read notification history.", error);
+            notificationSetFeedback(reportFirebaseError("Reading notification history", error), "error");
+            notificationState.loaded = true;
+            notificationRenderHistory();
+          });
+          notificationState.stopOpenEvents = onValue(ref(database, "pushNotificationOpens"), (snapshot) => {
+            notificationState.openRecords = snapshot.val() || {};
+            notificationState.openEventsLoaded = true;
+            notificationRenderHistory();
+          }, (error) => {
+            console.error("Could not read unique notification-open events.", error);
+            notificationSetFeedback(reportFirebaseError("Reading notification open analytics", error), "error");
+            notificationState.openEventsLoaded = true;
+            notificationRenderHistory();
+          });
+        } catch (error) {
+          notificationState.loadingRecipients = false;
+          notificationState.loaded = true;
+          notificationRenderHistory();
+          notificationRenderRecipients();
+          notificationSetFeedback(reportFirebaseError("Loading notification recipients and destinations", error), "error");
+        } finally {
+          notificationState.loading = false;
+        }
+      }
+
+      window.addEventListener("hashchange", () => {
+        if (window.location.hash === "#push-notifications") void startNotificationPage();
+        else stopNotificationPage();
+      });
+
+      document.querySelectorAll("#push-title, #push-subtitle, #push-body").forEach((input) =>
+        input.addEventListener("input", notificationUpdatePreview),
+      );
+      document.querySelector("#push-destination").addEventListener("change", notificationBuildRecordSelect);
+      document.querySelectorAll('input[name="push-recipient-scope"]').forEach((radio) =>
+        radio.addEventListener("change", notificationRenderRecipients),
+      );
+      document.querySelector("#push-review").addEventListener("click", () => {
+        try {
+          notificationReview();
+        } catch (error) {
+          notificationSetFeedback(error.message || "Review could not be prepared.", "error");
+        }
+      });
+      document.querySelector("#push-form").addEventListener("submit", (event) => event.preventDefault());
+      document.querySelector("#push-review-edit").addEventListener("click", () => {
+        if (!notificationState.sendAttempted) notificationState.pendingNotificationId = null;
+        document.querySelector("#push-review-dialog").close();
+        document.querySelector("#push-title").focus();
+      });
+      document.querySelector("#push-review-cancel").addEventListener("click", () =>
+        document.querySelector("#push-review-dialog").close(),
+      );
+      document.querySelectorAll("[data-push-review-close]").forEach((button) =>
+        button.addEventListener("click", () => document.querySelector("#push-review-dialog").close()),
+      );
+      document.querySelector("#push-confirm-send").addEventListener("click", () => void notificationConfirmSend());
+      document.querySelectorAll("[data-push-details-close]").forEach((button) =>
+        button.addEventListener("click", () => document.querySelector("#push-details-dialog").close()),
+      );
+      document.querySelector("#push-image-file").addEventListener("change", async (event) => {
+        const file = event.currentTarget.files[0];
+        event.currentTarget.value = "";
+        notificationStartImageUpload(file);
+      });
+      document.querySelector("#push-image-retry").addEventListener("click", () => {
+        notificationStartImageUpload(notificationState.imageFile);
+      });
+
+      function notificationStartImageUpload(file) {
+        const upload = notificationUploadImage(file);
+        const generation = notificationState.imageUploadGeneration;
+        void upload.then(() => {
+          if (generation === notificationState.imageUploadGeneration) notificationSetFeedback("");
+        }).catch((error) => {
+          if (generation !== notificationState.imageUploadGeneration) return;
+          console.error("Notification image upload failed.", error);
+          document.querySelector("#push-image-status").textContent = `${error?.message || "Image upload failed."} The local preview is kept.`;
+          notificationSetFeedback(error?.message || "Image upload failed.", "error");
+          notificationUpdatePreview();
+        });
+      }
+      document.querySelector("#push-image-remove").addEventListener("click", async () => {
+        const button = document.querySelector("#push-image-remove");
+        button.disabled = true;
+        try {
+          await notificationRemoveImage();
+          notificationSetFeedback("");
+        } catch (error) {
+          console.error("Notification image removal failed.", error);
+          notificationSetFeedback(error?.message || "The image could not be removed.", "error");
+        } finally {
+          button.disabled = false;
+        }
+      });
+      document.querySelector("#push-reset").addEventListener("click", async () => {
+        try {
+          await notificationRemoveImage();
+          document.querySelector("#push-form").reset();
+          notificationState.selectedUids.clear();
+          if (!notificationState.sendAttempted) notificationState.pendingNotificationId = null;
+          notificationBuildRecordSelect();
+          notificationRenderRecipients();
+          notificationUpdatePreview();
+          notificationSetFeedback("");
+        } catch (error) {
+          console.error("Could not clear the notification draft image.", error);
+          notificationSetFeedback(error?.message || "The draft image could not be removed.", "error");
+        }
+      });
+
       function exportReportCsv(table) {
         const bounds = reportRangeBounds();
         if (bounds.error) {
@@ -13516,6 +14459,7 @@
           stopSidebarBadgeListeners();
           stopSupportListeners();
           stopReportsListeners();
+          stopNotificationPage();
           showUnauthenticatedState();
           return Promise.resolve();
         }
@@ -13585,6 +14529,9 @@
             }
             if (window.location.hash === "#payment-settings") {
               void loadPaymentSettings();
+            }
+            if (window.location.hash === "#push-notifications") {
+              void startNotificationPage();
             }
           } catch (error) {
             if (auth.currentUser?.uid !== user.uid) {
@@ -13667,6 +14614,7 @@
           auth,
           (user) => {
             stopSupportListeners();
+            stopNotificationPage();
             void checkAdminAccess(user);
           },
           (error) => {
