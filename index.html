@@ -4140,7 +4140,7 @@
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
         <div class="sidebar-header">
-          <a class="brand" href="#products" aria-label="DUKABARG home">
+          <a class="brand" href="#dashboard" aria-label="DUKABARG home">
             <span class="brand-name">DUKABARG</span>
           </a>
           <button
@@ -4167,7 +4167,7 @@
             <h2 class="section-label" id="main-label" hidden>MAIN</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#products" data-nav-group="main">
+                <a class="nav-link" href="#dashboard" data-nav-group="main">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
                     <rect x="13.5" y="3.5" width="7" height="5" rx="1.5" />
@@ -5507,6 +5507,7 @@
           id: "main",
           label: "Dashboard",
           tabs: [
+            { label: "Dashboard", route: "#dashboard", panel: "welcome-card" },
             { label: "Products", route: "#products", panel: "products-page" },
             { label: "Categories", route: "#categories", panel: "category-page" },
             { label: "Inventory & Barcode", route: "#inventory", panel: "inventory-page" },
@@ -5636,9 +5637,9 @@
 
       function updateCurrentLink() {
         const links = sidebar.querySelectorAll(".nav-link[data-nav-group]");
-        let routeHash = window.location.hash || "#products";
-        if (routeHash === "#dashboard" || routeHash === "#reports") {
-          routeHash = routeHash === "#reports" ? "#settings" : "#products";
+        let routeHash = window.location.hash || "#dashboard";
+        if (routeHash === "#reports") {
+          routeHash = "#settings";
           window.history.replaceState(
             window.history.state,
             "",
@@ -5654,6 +5655,7 @@
         const activeGroupId = activeGroup?.id || "dashboard";
         const activeLink = sidebar.querySelector(`[data-nav-group="${activeGroupId}"]`);
         const pageNames = {
+          "#dashboard": "Dashboard",
           "#products": "Products",
           "#categories": "Categories",
           "#inventory": "Inventory & Barcode",
