@@ -4430,7 +4430,7 @@
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Main navigation">
         <div class="sidebar-header">
-          <a class="brand" href="#dashboard" aria-label="DUKABARG home">
+          <a class="brand" href="#products" aria-label="DUKABARG home">
             <span class="brand-name">DUKABARG</span>
           </a>
           <button
@@ -4453,11 +4453,11 @@
         </div>
 
         <nav aria-label="Store sections">
-          <section class="nav-section" aria-label="Dashboard and main navigation">
+          <section class="nav-section" aria-label="Dashboard navigation">
             <h2 class="section-label" id="main-label" hidden>MAIN</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#dashboard" data-nav-group="dashboard" aria-current="page">
+                <a class="nav-link" href="#products" data-nav-group="main">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
                     <rect x="13.5" y="3.5" width="7" height="5" rx="1.5" />
@@ -4465,15 +4465,6 @@
                     <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
                   </svg>
                   <span class="nav-text">Dashboard</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#products" data-nav-group="main">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m4 7 8-4 8 4-8 4-8-4Z" />
-                    <path d="M4 7v10l8 4 8-4V7M12 11v10" />
-                  </svg>
-                  <span class="nav-text">Main</span>
                 </a>
               </li>
             </ul>
@@ -4493,7 +4484,7 @@
                 </a>
               </li>
               <li>
-                <a class="nav-link" href="#customers" data-nav-group="customers">
+                <a class="nav-link" href="#customer-support" data-nav-group="customers">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
                     <circle cx="9.5" cy="7.5" r="3.5" />
@@ -5961,7 +5952,7 @@
       const sectionNavigation = [
         {
           id: "main",
-          label: "Main",
+          label: "Dashboard",
           tabs: [
             { label: "Products", route: "#products", panel: "products-page" },
             { label: "Categories", route: "#categories", panel: "category-page" },
@@ -5980,8 +5971,8 @@
           id: "customers",
           label: "Customers & Support",
           tabs: [
-            { label: "Customers", route: "#customers", panel: "customers-page" },
             { label: "Customer Support", route: "#customer-support", panel: "support-page" },
+            { label: "Customers", route: "#customers", panel: "customers-page" },
           ],
         },
         {
@@ -6093,7 +6084,15 @@
 
       function updateCurrentLink() {
         const links = sidebar.querySelectorAll(".nav-link[data-nav-group]");
-        const routeHash = window.location.hash || "#dashboard";
+        let routeHash = window.location.hash || "#products";
+        if (routeHash === "#dashboard") {
+          routeHash = "#products";
+          window.history.replaceState(
+            window.history.state,
+            "",
+            `${window.location.pathname}${window.location.search}${routeHash}`,
+          );
+        }
         const activeRoute = isNotificationsRoute(routeHash)
           ? notificationTabRoutes[currentNotificationTab()]
           : routeHash;
