@@ -3767,14 +3767,6 @@
         max-width: 920px;
       }
 
-      .in-app-notification-card {
-        padding: var(--space-7);
-        background: var(--color-surface-muted);
-        border: 1px solid var(--color-border-muted);
-        border-radius: var(--radius-lg);
-        box-shadow: 0 8px 24px rgb(23 23 23 / 5%);
-      }
-
       .in-app-notification-fields {
         display: grid;
         gap: var(--space-6);
@@ -4060,10 +4052,6 @@
       }
 
       @media (max-width: 600px) {
-        .in-app-notification-card {
-          padding: var(--space-6);
-        }
-
         .in-app-notification-actions > button {
           width: 100%;
         }
@@ -4516,7 +4504,7 @@
                 <p>Compose a message for the Notifications page in the DukaBarg Android app.</p>
               </div>
             </div>
-            <form class="in-app-notification-card" id="in-app-notification-form">
+            <form id="in-app-notification-form">
               <div class="in-app-notification-fields">
                 <div class="in-app-notification-field">
                   <label for="in-app-notification-title">Title <span aria-hidden="true">*</span></label>
