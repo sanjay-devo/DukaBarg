@@ -6005,15 +6005,20 @@
       const notificationHistoryState = {
         notifications: {},
         inbox: {},
+        users: {},
         inboxReadable: false,
+        usersReadable: false,
         selected: new Set(),
         stopNotifications: null,
         stopInbox: null,
+        stopUsers: null,
         loading: false,
         loaded: false,
         notificationsLoaded: false,
         inboxLoaded: false,
+        usersLoaded: false,
         inboxError: "",
+        usersError: "",
         error: "",
         deleting: false,
         page: 1,
@@ -6988,6 +6993,84 @@
           Object.prototype.hasOwnProperty.call(userInbox, notificationId));
       }
 
+      const notificationHistoryTargetUidFields = [
+        "uids", "userIds", "recipientUids", "recipientUIDs", "recipientIds", "recipients",
+        "targetUids", "targetUIDs", "targetUserUids", "targetUserIds",
+        "targetIds", "selectedUids", "selectedUserUids", "selectedUserIds",
+        "selectedCustomerIds", "targetedUserIds", "targetUsers", "selectedUsers",
+      ];
+
+      function notificationHistoryTargetUids(value) {
+        const uids = new Set();
+        if (!value || typeof value !== "object" || Array.isArray(value)) return uids;
+        const collect = (candidate) => {
+          if (Array.isArray(candidate)) {
+            for (const item of candidate) {
+              if (typeof item === "string" && validSupportFirebaseKey(item)) uids.add(item);
+              else if (item && typeof item === "object" && !Array.isArray(item)) {
+                const uid = item.uid ?? item.userId ?? item.id;
+                if (typeof uid === "string" && validSupportFirebaseKey(uid)) uids.add(uid);
+              }
+            }
+            return;
+          }
+          if (!candidate || typeof candidate !== "object") return;
+          let hasNestedTargets = false;
+          for (const nestedKey of ["uids", "userIds", "selectedUsers", "recipients"]) {
+            if (Object.prototype.hasOwnProperty.call(candidate, nestedKey)) {
+              collect(candidate[nestedKey]);
+              hasNestedTargets = true;
+            }
+          }
+          if (hasNestedTargets) return;
+          for (const [uid, included] of Object.entries(candidate)) {
+            if (included && validSupportFirebaseKey(uid)) uids.add(uid);
+          }
+        };
+        for (const field of notificationHistoryTargetUidFields) {
+          if (Object.prototype.hasOwnProperty.call(value, field)) collect(value[field]);
+        }
+        return uids;
+      }
+
+      function notificationHistoryAudience(record) {
+        if (record && typeof record === "object") {
+          for (const field of ["sendToAll", "allUsers", "isAllUsers", "allCustomers"]) {
+            if (record[field] === true) return "all";
+          }
+          for (const field of ["audience", "targetAudience", "recipientType", "sendTo", "target"]) {
+            const value = record[field];
+            if (typeof value !== "string") continue;
+            const audience = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+            if (["all", "allusers", "allcustomers", "everyone", "customers"].includes(audience)) return "all";
+            if (["selected", "selectedusers", "selectedcustomers", "specificusers", "custom"].includes(audience)) {
+              return "selected";
+            }
+          }
+        }
+        return "default";
+      }
+
+      function notificationHistoryCustomerUids() {
+        const customers = new Set();
+        for (const [uid, user] of Object.entries(notificationHistoryState.users)) {
+          if (!user || typeof user !== "object" || Array.isArray(user) ||
+              user.role !== "customer" || user.uid !== uid || !validSupportFirebaseKey(uid)) continue;
+          customers.add(uid);
+        }
+        return customers;
+      }
+
+      function notificationHistoryTargetCount(notificationId) {
+        const record = notificationHistoryState.notifications[notificationId];
+        const explicitTargets = notificationHistoryTargetUids(record);
+        if (notificationHistoryTargetUidFields.some((field) =>
+          Object.prototype.hasOwnProperty.call(record || {}, field))) return explicitTargets.size;
+        if (notificationHistoryAudience(record) === "selected") return null;
+        if (!notificationHistoryState.usersReadable) return null;
+        return notificationHistoryCustomerUids().size;
+      }
+
       function notificationHistoryViewed(entry) {
         if (!entry || typeof entry !== "object" || Array.isArray(entry)) return false;
         for (const field of ["viewedAt", "readAt", "seenAt"]) {
@@ -7046,14 +7129,16 @@
       }
 
       function notificationHistoryRecipientCountText(notificationId) {
-        if (!notificationHistoryState.inboxReadable) return "Unavailable";
+        const targetCount = notificationHistoryTargetCount(notificationId);
+        const targetText = targetCount === null ? "Unavailable" : targetCount.toLocaleString("en-IN");
+        if (!notificationHistoryState.inboxReadable) return `Unavailable / ${targetText}`;
         const recipients = notificationHistoryRecipientEntries(notificationId);
         if (!notificationHistoryHasViewMarkers(notificationId)) {
-          return `Not tracked / ${recipients.length.toLocaleString("en-IN")}`;
+          return `Not tracked / ${targetText}`;
         }
         const viewed = recipients.filter(([, inbox]) =>
           notificationHistoryViewed(inbox[notificationId])).length;
-        return `${viewed.toLocaleString("en-IN")} / ${recipients.length.toLocaleString("en-IN")}`;
+        return `${viewed.toLocaleString("en-IN")} / ${targetText}`;
       }
 
       function createNotificationHistoryThumbnail(imageUrl, title) {
@@ -7220,26 +7305,37 @@
 
       function startNotificationHistory() {
         if (notificationHistoryState.loading || notificationHistoryState.stopNotifications ||
-            notificationHistoryState.stopInbox) return;
+            notificationHistoryState.stopInbox || notificationHistoryState.stopUsers) return;
         notificationHistoryState.loading = true;
         notificationHistoryState.error = "";
         notificationHistoryState.inboxReadable = false;
+        notificationHistoryState.usersReadable = false;
         notificationHistoryState.notificationsLoaded = false;
         notificationHistoryState.inboxLoaded = false;
+        notificationHistoryState.usersLoaded = false;
         notificationHistoryState.inboxError = "";
+        notificationHistoryState.usersError = "";
         notificationHistoryState.inbox = {};
+        notificationHistoryState.users = {};
         setNotificationHistoryStatus(
           notificationHistoryState.loaded ? "Refreshing notification history…" : "Loading notification history…",
         );
         const finishLoad = () => {
           if (!notificationHistoryState.notificationsLoaded ||
-              (!notificationHistoryState.inboxLoaded && !notificationHistoryState.inboxError)) return;
+              (!notificationHistoryState.inboxLoaded && !notificationHistoryState.inboxError) ||
+              (!notificationHistoryState.usersLoaded && !notificationHistoryState.usersError)) return;
           notificationHistoryState.loading = false;
           notificationHistoryState.loaded = true;
           renderNotificationHistory();
           if (notificationHistoryState.inboxError) {
             setNotificationHistoryStatus(
               `Notifications loaded, but recipient inbox access failed (${notificationHistoryState.inboxError}). Viewed counts are unavailable and deletion is disabled until inbox access is restored.`,
+              "error",
+              true,
+            );
+          } else if (notificationHistoryState.usersError) {
+            setNotificationHistoryStatus(
+              `Notifications loaded, but customer records could not be read (${notificationHistoryState.usersError}). Totals for audiences without stored recipient UIDs are unavailable.`,
               "error",
               true,
             );
@@ -7283,6 +7379,23 @@
               finishLoad();
             },
           );
+          notificationHistoryState.stopUsers = onValue(
+            ref(database, "users"),
+            (snapshot) => {
+              notificationHistoryState.users = notificationHistoryEntries(snapshot.val());
+              notificationHistoryState.usersReadable = true;
+              notificationHistoryState.usersLoaded = true;
+              notificationHistoryState.usersError = "";
+              finishLoad();
+            },
+            (error) => {
+              notificationHistoryState.usersError = String(error?.code || "read failure");
+              notificationHistoryState.usersReadable = false;
+              notificationHistoryState.usersLoaded = true;
+              console.error("Loading notification recipient customer records failed.", error);
+              finishLoad();
+            },
+          );
         } catch (error) {
           notificationHistoryState.loading = false;
           notificationHistoryState.error = "load";
@@ -7294,8 +7407,10 @@
       function stopNotificationHistory() {
         notificationHistoryState.stopNotifications?.();
         notificationHistoryState.stopInbox?.();
+        notificationHistoryState.stopUsers?.();
         notificationHistoryState.stopNotifications = null;
         notificationHistoryState.stopInbox = null;
+        notificationHistoryState.stopUsers = null;
         notificationHistoryState.loading = false;
       }
 
@@ -7307,6 +7422,7 @@
         const image = document.querySelector("#notification-history-view-image");
         const recipients = notificationHistoryRecipientEntries(notificationId);
         const viewers = recipients.filter(([, inbox]) => notificationHistoryViewed(inbox[notificationId]));
+        const targetCount = notificationHistoryTargetCount(notificationId);
         details.replaceChildren();
         const imageUrl = notificationImageUrl(String(record.imageUrl || ""));
         image.hidden = !imageUrl;
@@ -7323,7 +7439,7 @@
         notificationHistorySetDetail(
           details,
           "Total recipients",
-          notificationHistoryState.inboxReadable ? String(recipients.length) : "Unavailable (inbox read failed)",
+          targetCount === null ? "Unavailable (target audience is not available)" : String(targetCount),
         );
         notificationHistorySetDetail(
           details,
@@ -7348,21 +7464,8 @@
           viewersStatus.textContent = "View tracking is not present in the available recipient inbox records. The Android app must save a per-notification read/view marker when a user opens a notification.";
           viewersStatus.hidden = false;
         } else {
-          let profiles = new Map(customerState.customers.map((customer) => [customer.uid, customer]));
-          let profileError = null;
-          if (viewers.length && !customerState.loaded) {
-            viewersStatus.textContent = "Loading viewer name, phone, and email details…";
-            viewersStatus.hidden = false;
-            try {
-              const usersSnapshot = await get(ref(database, "users"));
-              const users = notificationHistoryEntries(usersSnapshot.val());
-              profiles = new Map(Object.entries(users)
-                .filter(([, user]) => user && typeof user === "object" && !Array.isArray(user)));
-            } catch (error) {
-              profileError = error;
-              console.error("Loading notification viewer profile details failed.", error);
-            }
-          }
+          const profiles = new Map(Object.entries(notificationHistoryState.users));
+          const profileError = notificationHistoryState.usersReadable ? null : new Error("customer profile read failure");
           if (requestId !== notificationHistoryViewRequest) return;
           viewersStatus.textContent = profileError
             ? `${viewers.length} users viewed this notification. Some profile details could not be loaded (${profileError?.code || "read error"}).`
