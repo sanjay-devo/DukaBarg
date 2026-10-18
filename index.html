@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1798,6 +1798,70 @@
         color: var(--color-text-inverse);
         font-size: var(--font-size-xs);
         font-weight: 500;
+      }
+
+      .localized-date-field {
+        position: relative;
+        min-width: 0;
+      }
+
+      .localized-date-text {
+        padding-right: 44px !important;
+      }
+
+      .localized-date-picker-button {
+        position: absolute;
+        top: 50%;
+        right: var(--space-3);
+        display: grid;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        place-items: center;
+        color: var(--color-text-inverse);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transform: translateY(-50%);
+      }
+
+      .localized-date-picker-button:hover {
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+      }
+
+      .localized-date-picker-button:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 1px;
+      }
+
+      .localized-date-picker-button svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.7;
+      }
+
+      .localized-date-native-picker {
+        position: absolute;
+        right: var(--space-3);
+        bottom: 0;
+        width: 1px;
+        height: 1px;
+        min-height: 1px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .orders-toolbar .localized-date-native-picker,
+      .category-filters .localized-date-native-picker {
+        width: 1px;
       }
 
       .orders-filter-actions {
@@ -4677,9 +4741,21 @@
                 <div class="orders-date-range" role="group" aria-label="Filter by order date range">
                   <span class="orders-date-range-label">Date range</span>
                   <label class="visually-hidden" for="orders-date-from">From date</label>
-                  <input id="orders-date-from" type="date" aria-label="Order date from" />
+                  <div class="localized-date-field">
+                    <input class="localized-date-text" id="orders-date-from" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" aria-label="Order date from" />
+                    <button class="localized-date-picker-button" type="button" data-date-picker="orders-date-from" aria-label="Choose order date from">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                    </button>
+                    <input class="localized-date-native-picker" id="orders-date-from-picker" type="date" tabindex="-1" aria-hidden="true" />
+                  </div>
                   <label class="visually-hidden" for="orders-date-to">To date</label>
-                  <input id="orders-date-to" type="date" aria-label="Order date to" />
+                  <div class="localized-date-field">
+                    <input class="localized-date-text" id="orders-date-to" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" aria-label="Order date to" />
+                    <button class="localized-date-picker-button" type="button" data-date-picker="orders-date-to" aria-label="Choose order date to">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                    </button>
+                    <input class="localized-date-native-picker" id="orders-date-to-picker" type="date" tabindex="-1" aria-hidden="true" />
+                  </div>
                   <div class="orders-filter-actions">
                     <button class="category-secondary-button" id="orders-clear-filters" type="button">Clear Filters</button>
                   </div>
@@ -5047,9 +5123,21 @@
           <div class="category-table-card">
             <div class="category-filters support-date-filters" aria-label="Filter callbacks by requested date">
               <label class="visually-hidden" for="support-date-from">Requested from date</label>
-              <input id="support-date-from" type="date" aria-label="Requested from date" />
+              <div class="localized-date-field">
+                <input class="localized-date-text" id="support-date-from" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" aria-label="Requested from date" />
+                <button class="localized-date-picker-button" type="button" data-date-picker="support-date-from" aria-label="Choose requested from date">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                </button>
+                <input class="localized-date-native-picker" id="support-date-from-picker" type="date" tabindex="-1" aria-hidden="true" />
+              </div>
               <label class="visually-hidden" for="support-date-to">Requested to date</label>
-              <input id="support-date-to" type="date" aria-label="Requested to date" />
+              <div class="localized-date-field">
+                <input class="localized-date-text" id="support-date-to" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" aria-label="Requested to date" />
+                <button class="localized-date-picker-button" type="button" data-date-picker="support-date-to" aria-label="Choose requested to date">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg>
+                </button>
+                <input class="localized-date-native-picker" id="support-date-to-picker" type="date" tabindex="-1" aria-hidden="true" />
+              </div>
             </div>
             <p class="category-feedback" id="support-filter-error" data-kind="error" role="alert" hidden></p>
           </div>
@@ -5778,6 +5866,75 @@
         ref as storageRef,
         uploadBytesResumable,
       } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
+
+      function formatDashboardDate(date, withTime = false) {
+        return new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+        }).format(date);
+      }
+
+      function dashboardDateFilterKey(value) {
+        if (!value.trim()) return "";
+        const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+        if (!match) return null;
+        const [, dayText, monthText, yearText] = match;
+        const day = Number(dayText);
+        const month = Number(monthText);
+        const year = Number(yearText);
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
+          date.getDate() !== day
+        ) return null;
+        return `${yearText}-${monthText}-${dayText}`;
+      }
+
+      function bindDashboardDateFilter(id) {
+        const textInput = document.querySelector(`#${id}`);
+        const picker = document.querySelector(`#${id}-picker`);
+        const button = document.querySelector(`[data-date-picker="${id}"]`);
+        button.addEventListener("click", () => {
+          const currentDate = dashboardDateFilterKey(textInput.value);
+          picker.value = currentDate || "";
+          if (typeof picker.showPicker === "function") picker.showPicker();
+          else picker.click();
+        });
+        picker.addEventListener("change", () => {
+          if (picker.value) {
+            const [year, month, day] = picker.value.split("-");
+            textInput.value = `${day}/${month}/${year}`;
+          } else {
+            textInput.value = "";
+          }
+          textInput.dispatchEvent(new Event("input", { bubbles: true }));
+          textInput.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        textInput.addEventListener("input", () => {
+          const digits = textInput.value.replace(/\D/g, "").slice(0, 8);
+          if (/^[\d/.-]*$/.test(textInput.value) && digits.length > 2) {
+            textInput.value = digits.length > 4
+              ? `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+              : `${digits.slice(0, 2)}/${digits.slice(2)}`;
+          }
+          if (dashboardDateFilterKey(textInput.value) !== null) {
+            textInput.setCustomValidity("");
+          }
+        });
+        textInput.addEventListener("change", () => {
+          const isInvalid = dashboardDateFilterKey(textInput.value) === null;
+          textInput.setCustomValidity(
+            isInvalid ? "Enter a valid date as DD/MM/YYYY." : "",
+          );
+          if (isInvalid) textInput.reportValidity();
+        });
+      }
+
+      ["orders-date-from", "orders-date-to", "support-date-from", "support-date-to"]
+        .forEach(bindDashboardDateFilter);
 
       const firebaseConfig = {
         apiKey: "AIzaSyArkI9Niyq-ayCSIhPfjDwAhdSZY0A-Ap4",
@@ -7128,7 +7285,7 @@
         if (value === undefined || value === null || value === "") return "Unavailable";
         const dateValue = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : value;
         const date = new Date(dateValue);
-        return Number.isNaN(date.getTime()) ? "Unavailable" : date.toLocaleString();
+        return Number.isNaN(date.getTime()) ? "Unavailable" : formatDashboardDate(date, true);
       }
 
       function notificationHistorySetDetail(details, label, value) {
@@ -8173,7 +8330,7 @@
         const timestamp = supportTimestampValue(value);
         if (timestamp === null) return "Not available";
         const date = new Date(timestamp);
-        return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleString();
+        return Number.isNaN(date.getTime()) ? "Not available" : formatDashboardDate(date, true);
       }
 
       function getSupportLocalDate(value) {
@@ -8371,13 +8528,20 @@
         const search = document.querySelector("#support-search").value.trim().toLocaleLowerCase();
         const status = normalizeSupportStatus(document.querySelector("#support-status-filter").value);
         const isAll = supportState.currentView === "all";
-        const from = isAll ? document.querySelector("#support-date-from").value : "";
-        const to = isAll ? document.querySelector("#support-date-to").value : "";
+        const fromText = isAll ? document.querySelector("#support-date-from").value : "";
+        const toText = isAll ? document.querySelector("#support-date-to").value : "";
+        const from = dashboardDateFilterKey(fromText);
+        const to = dashboardDateFilterKey(toText);
         const filterError = isAll ? document.querySelector("#support-filter-error") : null;
-        const invalidRange = isAll && Boolean(from && to && from > to);
+        const invalidDate = isAll && (from === null || to === null);
+        const invalidRange = isAll && (invalidDate || Boolean(from && to && from > to));
         if (filterError) {
           filterError.hidden = !invalidRange;
-          filterError.textContent = invalidRange ? "The requested-to date must be the same as or later than the requested-from date." : "";
+          filterError.textContent = invalidDate
+            ? "Enter dates in DD/MM/YYYY format."
+            : invalidRange
+              ? "The requested-to date must be the same as or later than the requested-from date."
+              : "";
         }
 
         const filtered = getCurrentSupportCallbacks().filter((callback) => {
@@ -8975,9 +9139,7 @@
       function formatCustomerDate(value, withTime = false) {
         const date = normalizeCustomerDate(value);
         if (!date) return "Not provided";
-        return new Intl.DateTimeFormat("en-IN", withTime
-          ? { dateStyle: "medium", timeStyle: "short" }
-          : { dateStyle: "medium" }).format(date);
+        return formatDashboardDate(date, withTime);
       }
 
       function customerDateKey(value) {
@@ -10166,10 +10328,11 @@
         const category = document.querySelector("#orders-status-filter").value;
         const payment = document.querySelector("#orders-payment-filter").value;
         const method = document.querySelector("#orders-method-filter").value;
-        const from = document.querySelector("#orders-date-from").value;
-        const to = document.querySelector("#orders-date-to").value;
+        const from = dashboardDateFilterKey(document.querySelector("#orders-date-from").value);
+        const to = dashboardDateFilterKey(document.querySelector("#orders-date-to").value);
         const sort = document.querySelector("#orders-sort").value;
         const results = orderState.orders.filter((order) => {
+          if (from === null || to === null) return false;
           const customer = getOrderCustomer(order);
           if (search && !order.id.toLocaleLowerCase().includes(search) &&
             !customer.name.toLocaleLowerCase().includes(search) &&
@@ -11017,7 +11180,14 @@
         document.querySelector(selector).addEventListener("change", () => { orderState.page = 1; renderOrdersTable(); });
       }
       document.querySelector("#orders-clear-filters").addEventListener("click", () => {
-        for (const selector of ["#orders-search", "#orders-date-from", "#orders-date-to"]) document.querySelector(selector).value = "";
+        for (const selector of ["#orders-search", "#orders-date-from", "#orders-date-to"]) {
+          const field = document.querySelector(selector);
+          field.value = "";
+          field.setCustomValidity("");
+          if (field.id.startsWith("orders-date-")) {
+            document.querySelector(`#${field.id}-picker`).value = "";
+          }
+        }
         for (const selector of ["#orders-status-filter", "#orders-payment-filter", "#orders-method-filter"]) document.querySelector(selector).value = "";
         document.querySelector("#orders-sort").value = "newest";
         orderState.page = 1;
@@ -11259,6 +11429,10 @@
         document.querySelector("#support-sort").value = "newest";
         document.querySelector("#support-date-from").value = "";
         document.querySelector("#support-date-to").value = "";
+        for (const id of ["support-date-from", "support-date-to"]) {
+          document.querySelector(`#${id}`).setCustomValidity("");
+          document.querySelector(`#${id}-picker`).value = "";
+        }
         supportState.page = 1;
         renderSupportCallbacks();
       });
@@ -11760,10 +11934,7 @@
         if (Number.isNaN(parsed.getTime())) {
           return "—";
         }
-        return new Intl.DateTimeFormat(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(parsed);
+        return formatDashboardDate(parsed, true);
       }
 
       function escapeCategoryHtml(value) {
@@ -14361,10 +14532,7 @@
           parsed = new Date(String(value));
         }
         if (Number.isNaN(parsed.getTime())) return null;
-        return new Intl.DateTimeFormat(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(parsed);
+        return formatDashboardDate(parsed, true);
       }
 
       function isDateFieldName(fieldName) {
