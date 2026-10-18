@@ -1117,6 +1117,10 @@
         list-style: none;
       }
 
+      .section-tabs[hidden] {
+        display: none;
+      }
+
       .category-tab {
         min-height: 44px;
         padding: var(--space-3) 0;
@@ -4387,11 +4391,11 @@
         </div>
 
         <nav aria-label="Store sections">
-          <section class="nav-section" aria-labelledby="main-label">
-            <h2 class="section-label" id="main-label">MAIN</h2>
+          <section class="nav-section" aria-label="Dashboard and main navigation">
+            <h2 class="section-label" id="main-label" hidden>MAIN</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#dashboard" aria-current="page">
+                <a class="nav-link" href="#dashboard" data-nav-group="dashboard" aria-current="page">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
                     <rect x="13.5" y="3.5" width="7" height="5" rx="1.5" />
@@ -4402,42 +4406,22 @@
                 </a>
               </li>
               <li>
-                <a class="nav-link" href="#products">
+                <a class="nav-link" href="#products" data-nav-group="main">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="m4 7 8-4 8 4-8 4-8-4Z" />
                     <path d="M4 7v10l8 4 8-4V7M12 11v10" />
                   </svg>
-                  <span class="nav-text">Products</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#categories">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
-                    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
-                    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
-                    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
-                  </svg>
-                  <span class="nav-text">Categories</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#inventory">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 5v14M7 5v14M10 5v14M14 5v14M17 5v14M20 5v14" />
-                    <path d="M3 3.5h18v17H3z" />
-                  </svg>
-                  <span class="nav-text">Inventory &amp; Barcode</span>
+                  <span class="nav-text">Main</span>
                 </a>
               </li>
             </ul>
           </section>
 
-          <section class="nav-section" aria-labelledby="business-label">
-            <h2 class="section-label" id="business-label">BUSINESS</h2>
+          <section class="nav-section" aria-label="Order and customer navigation">
+            <h2 class="section-label" id="business-label" hidden>BUSINESS</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#orders">
+                <a class="nav-link" href="#orders" data-nav-group="orders">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M5 8h14l1 12H4L5 8Z" />
                     <path d="M9 9V6a3 3 0 0 1 6 0v3" />
@@ -4447,58 +4431,39 @@
                 </a>
               </li>
               <li>
-                <a class="nav-link" href="#customers">
+                <a class="nav-link" href="#customers" data-nav-group="customers">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
                     <circle cx="9.5" cy="7.5" r="3.5" />
                     <path d="M17 4.3a3.5 3.5 0 0 1 0 6.8M21 20v-1.5a4 4 0 0 0-3-3.87" />
                   </svg>
-                  <span class="nav-text">Customers</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#customer-support">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 13v-2a8 8 0 0 1 16 0v2" />
-                    <path d="M4 12h3v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 1-2Zm16 0h-3v6h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-1-2Z" />
-                    <path d="M17 19a5 5 0 0 1-5 2" />
-                  </svg>
-                  <span class="nav-text">Customer Support</span>
+                  <span class="nav-text">Customers &amp; Support</span>
                   <span class="new-badge" id="support-nav-count" aria-live="polite" hidden></span>
                 </a>
               </li>
             </ul>
           </section>
 
-          <section class="nav-section" aria-labelledby="finance-label">
-            <h2 class="section-label" id="finance-label">FINANCE</h2>
+          <section class="nav-section" aria-label="Finance navigation">
+            <h2 class="section-label" id="finance-label" hidden>FINANCE</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#payments">
+                <a class="nav-link" href="#payments" data-nav-group="finance">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="3" y="5" width="18" height="14" rx="2" />
                     <path d="M3 10h18M7 15h3" />
                   </svg>
-                  <span class="nav-text">Payments &amp; Refunds</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#payment-settings">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="m19.4 15 .1.1 1.1.9-1.4 2.4-1.4-.5a7.9 7.9 0 0 1-1.7 1l-.3 1.5h-2.8l-.3-1.5a7.9 7.9 0 0 1-1.7-1l-1.4.5-1.4-2.4 1.2-.9a7.2 7.2 0 0 1 0-2L8.2 12l1.4-2.4 1.4.5a7.9 7.9 0 0 1 1.7-1l.3-1.5h2.8l.3 1.5a7.9 7.9 0 0 1 1.7 1l1.4-.5 1.4 2.4-1.2.9a7.2 7.2 0 0 1 0 2Z" />
-                  </svg>
-                  <span class="nav-text">Payment Settings</span>
+                  <span class="nav-text">Finance</span>
                 </a>
               </li>
             </ul>
           </section>
 
-          <section class="nav-section" aria-labelledby="management-label">
-            <h2 class="section-label" id="management-label">MANAGEMENT</h2>
+          <section class="nav-section" aria-label="Notifications and insights navigation">
+            <h2 class="section-label" id="management-label" hidden>MANAGEMENT</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#notifications">
+                <a class="nav-link" href="#notifications-push" data-nav-group="notifications">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
                     <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
@@ -4507,29 +4472,20 @@
                 </a>
               </li>
               <li>
-                <a class="nav-link" href="#reports">
+                <a class="nav-link" href="#reports" data-nav-group="insights">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 19V5M4 19h17" />
                     <path d="m7 15 4-4 3 2 6-7" />
                     <path d="M16 6h4v4" />
                   </svg>
-                  <span class="nav-text">Reports &amp; Analytics</span>
+                  <span class="nav-text">Insights &amp; Settings</span>
                 </a>
               </li>
             </ul>
           </section>
 
-          <section class="nav-section" aria-label="Preferences">
+          <section class="nav-section" aria-label="Account navigation">
             <ul class="nav-list">
-              <li>
-                <a class="nav-link" href="#settings">
-                  <svg class="nav-icon settings-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M10.1 2.2h3.8l.6 2.5 1.2.5 2.2-1.2 2.7 2.7-1.2 2.2.5 1.2 2.5.6v3.8l-2.5.6-.5 1.2 1.2 2.2-2.7 2.7-2.2-1.2-1.2.5-.6 2.5h-3.8l-.6-2.5-1.2-.5-2.2 1.2-2.7-2.7 1.2-2.2-.5-1.2-2.5-.6v-3.8l2.5-.6.5-1.2-1.2-2.2 2.7-2.7 2.2 1.2 1.2-.5Z" />
-                    <circle cx="12" cy="12" r="3.5" />
-                  </svg>
-                  <span class="nav-text">Settings</span>
-                </a>
-              </li>
               <li>
                 <button class="nav-link logout-button" id="logout-button" type="button">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -4577,7 +4533,9 @@
 
         <section class="main-content" aria-label="Dashboard content">
 
-          <div class="welcome-card">
+          <div class="category-tabs section-tabs" id="section-tabs" role="tablist" aria-label="Section pages" hidden></div>
+
+          <div class="welcome-card" id="welcome-card">
             <div class="welcome-copy">
               <p class="welcome-eyebrow" id="welcome-eyebrow">YOUR DASHBOARD AT A GLANCE</p>
               <h2 class="welcome-title" id="welcome-title">Welcome to your dashboard</h2>
@@ -4607,12 +4565,7 @@
           </div>
 
           <section class="notifications-page category-page" id="notifications-page" aria-label="Notifications" hidden>
-            <div role="tablist" class="category-tabs" aria-label="Notification sections">
-              <button class="category-tab" id="notifications-push-tab" type="button" role="tab" data-notification-tab="push" aria-controls="push-notifications-page" aria-selected="false">Push Notifications</button>
-              <button class="category-tab" id="notifications-app-tab" type="button" role="tab" data-notification-tab="app" aria-controls="in-app-notifications-page" aria-selected="false">App Notifications</button>
-              <button class="category-tab" id="notifications-history-tab" type="button" role="tab" data-notification-tab="history" aria-controls="notification-history-page" aria-selected="false">Notification History</button>
-            </div>
-            <section class="push-notifications-page" id="push-notifications-page" role="tabpanel" aria-labelledby="notifications-push-tab" hidden>
+            <section class="push-notifications-page" id="push-notifications-page" role="tabpanel" aria-label="Push Notifications" hidden>
               <div class="category-heading-row">
                 <div>
                   <h2>Push Notifications</h2>
@@ -4620,7 +4573,7 @@
                 </div>
               </div>
             </section>
-          <section class="in-app-notifications-page" id="in-app-notifications-page" role="tabpanel" aria-labelledby="notifications-app-tab" hidden>
+          <section class="in-app-notifications-page" id="in-app-notifications-page" role="tabpanel" aria-label="App Notifications" hidden>
             <div class="category-heading-row">
               <div>
                 <h2 id="in-app-notifications-title">App Notifications</h2>
@@ -4689,7 +4642,7 @@
             </form>
           </section>
 
-          <section class="notification-history-page" id="notification-history-page" role="tabpanel" aria-labelledby="notifications-history-tab" hidden>
+          <section class="notification-history-page" id="notification-history-page" role="tabpanel" aria-label="Notification History" hidden>
             <div class="category-heading-row">
               <div>
                 <h2 id="notification-history-title">Notification History</h2>
@@ -5081,6 +5034,15 @@
                   </label>
                   <button type="button" id="customers-next">Next</button>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="category-page" id="returns-refunds-page" aria-labelledby="returns-refunds-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="returns-refunds-title">Returns &amp; Refunds</h2>
+                <p>Returns and refunds are not available in this dashboard because Firebase order records do not include return or refund data.</p>
               </div>
             </div>
           </section>
@@ -5924,6 +5886,7 @@
       const inventoryPage = document.querySelector("#inventory-page");
       const customersPage = document.querySelector("#customers-page");
       const ordersPage = document.querySelector("#orders-page");
+      const returnsRefundsPage = document.querySelector("#returns-refunds-page");
       const reportsPage = document.querySelector("#reports-page");
       const supportPage = document.querySelector("#support-page");
       const paymentSettingsPage = document.querySelector("#payment-settings-page");
@@ -5936,6 +5899,59 @@
         app: "#notifications-app",
         history: "#notifications-history",
       };
+      const sectionTabs = document.querySelector("#section-tabs");
+      const sectionNavigation = [
+        {
+          id: "main",
+          label: "Main",
+          tabs: [
+            { label: "Products", route: "#products", panel: "products-page" },
+            { label: "Categories", route: "#categories", panel: "category-page" },
+            { label: "Inventory & Barcode", route: "#inventory", panel: "inventory-page" },
+          ],
+        },
+        {
+          id: "orders",
+          label: "Orders",
+          tabs: [
+            { label: "All Orders", route: "#orders", panel: "orders-page" },
+            { label: "Returns & Refunds", route: "#returns-refunds", panel: "returns-refunds-page" },
+          ],
+        },
+        {
+          id: "customers",
+          label: "Customers & Support",
+          tabs: [
+            { label: "Customers", route: "#customers", panel: "customers-page" },
+            { label: "Customer Support", route: "#customer-support", panel: "support-page" },
+          ],
+        },
+        {
+          id: "finance",
+          label: "Finance",
+          tabs: [
+            { label: "Payments & Refunds", route: "#payments", panel: "welcome-card" },
+            { label: "Payment Settings", route: "#payment-settings", panel: "payment-settings-page" },
+          ],
+        },
+        {
+          id: "notifications",
+          label: "Notifications",
+          tabs: [
+            { label: "Push Notifications", route: notificationTabRoutes.push, panel: "push-notifications-page", id: "notifications-push-tab" },
+            { label: "App Notifications", route: notificationTabRoutes.app, panel: "in-app-notifications-page", id: "notifications-app-tab" },
+            { label: "Notification History", route: notificationTabRoutes.history, panel: "notification-history-page", id: "notifications-history-tab" },
+          ],
+        },
+        {
+          id: "insights",
+          label: "Insights & Settings",
+          tabs: [
+            { label: "Reports & Analytics", route: "#reports", panel: "reports-page" },
+            { label: "Settings", route: "#settings", panel: "welcome-card" },
+          ],
+        },
+      ];
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -5958,14 +5974,30 @@
 
       function updateNotificationTabs() {
         const activeTab = currentNotificationTab();
-        document.querySelectorAll("#notifications-page [data-notification-tab]").forEach((tab) => {
-          const selected = tab.dataset.notificationTab === activeTab;
-          tab.setAttribute("aria-selected", String(selected));
-          tab.tabIndex = selected ? 0 : -1;
-        });
         pushNotificationsPage.hidden = activeTab !== "push";
         inAppNotificationsPage.hidden = activeTab !== "app";
         notificationHistoryPage.hidden = activeTab !== "history";
+      }
+
+      function renderSectionTabs(group, activeRoute) {
+        sectionTabs.hidden = !group;
+        sectionTabs.replaceChildren();
+        if (!group) return;
+        sectionTabs.setAttribute("aria-label", `${group.label} pages`);
+
+        group.tabs.forEach((tab, index) => {
+          const button = document.createElement("button");
+          button.className = "category-tab";
+          button.type = "button";
+          button.id = tab.id || `${group.id}-tab-${index + 1}`;
+          button.setAttribute("role", "tab");
+          button.setAttribute("aria-controls", tab.panel);
+          button.setAttribute("aria-selected", String(tab.route === activeRoute));
+          button.dataset.tabRoute = tab.route;
+          button.tabIndex = tab.route === activeRoute ? 0 : -1;
+          button.textContent = tab.label;
+          sectionTabs.append(button);
+        });
       }
 
       function updateSidebarMode() {
@@ -6002,59 +6034,79 @@
       }
 
       function updateCurrentLink() {
-        const links = sidebar.querySelectorAll(".nav-link");
-        const routeHash = window.location.hash;
-        const currentLink = Array.from(links).find(
-          (link) => link.hash === window.location.hash,
+        const links = sidebar.querySelectorAll(".nav-link[data-nav-group]");
+        const routeHash = window.location.hash || "#dashboard";
+        const activeRoute = isNotificationsRoute(routeHash)
+          ? notificationTabRoutes[currentNotificationTab()]
+          : routeHash;
+        const activeGroup = sectionNavigation.find((group) =>
+          group.tabs.some((tab) => tab.route === activeRoute),
         );
-        const activeLink = currentLink ||
-          (isNotificationsRoute(routeHash)
-            ? sidebar.querySelector('.nav-link[href="#notifications"]')
-            : null) ||
-          links[0];
-        const pageName = activeLink.querySelector(".nav-text").textContent.trim();
-        const isCategoriesPage = activeLink.hash === "#categories";
-        const isProductsPage = activeLink.hash === "#products";
-        const isInventoryPage = activeLink.hash === "#inventory";
-        const isCustomersPage = activeLink.hash === "#customers";
-        const isOrdersPage = activeLink.hash === "#orders";
-        const isReportsPage = activeLink.hash === "#reports";
-        const isSupportPage = activeLink.hash === "#customer-support";
-        const isPaymentSettingsPage = activeLink.hash === "#payment-settings";
-        const isNotificationsPage = activeLink.hash === "#notifications" || isNotificationsRoute(routeHash);
+        const activeGroupId = activeGroup?.id || "dashboard";
+        const activeLink = sidebar.querySelector(`[data-nav-group="${activeGroupId}"]`);
+        const pageNames = {
+          "#products": "Products",
+          "#categories": "Categories",
+          "#inventory": "Inventory & Barcode",
+          "#orders": "Orders",
+          "#returns-refunds": "Returns & Refunds",
+          "#customers": "Customers",
+          "#customer-support": "Customer Support",
+          "#payments": "Payments & Refunds",
+          "#payment-settings": "Payment Settings",
+          "#reports": "Reports & Analytics",
+          "#settings": "Settings",
+          [notificationTabRoutes.push]: "Notifications",
+          [notificationTabRoutes.app]: "Notifications",
+          [notificationTabRoutes.history]: "Notifications",
+        };
+        const pageName = pageNames[activeRoute] || "Dashboard";
+        const isCategoriesPage = activeRoute === "#categories";
+        const isProductsPage = activeRoute === "#products";
+        const isInventoryPage = activeRoute === "#inventory";
+        const isCustomersPage = activeRoute === "#customers";
+        const isOrdersPage = activeRoute === "#orders";
+        const isReturnsRefundsPage = activeRoute === "#returns-refunds";
+        const isReportsPage = activeRoute === "#reports";
+        const isSupportPage = activeRoute === "#customer-support";
+        const isPaymentSettingsPage = activeRoute === "#payment-settings";
+        const isNotificationsPage = activeGroupId === "notifications";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
+        renderSectionTabs(activeGroup, activeRoute);
         breadcrumbCurrent.textContent = pageName;
         categoryPage.hidden = !isCategoriesPage;
         productsPage.hidden = !isProductsPage;
         inventoryPage.hidden = !isInventoryPage;
         customersPage.hidden = !isCustomersPage;
         ordersPage.hidden = !isOrdersPage;
+        returnsRefundsPage.hidden = !isReturnsRefundsPage;
         reportsPage.hidden = !isReportsPage;
         supportPage.hidden = !isSupportPage;
         paymentSettingsPage.hidden = !isPaymentSettingsPage;
         notificationsPage.hidden = !isNotificationsPage;
         if (isNotificationsPage) updateNotificationTabs();
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isNotificationsPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReturnsRefundsPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isNotificationsPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
       }
 
-      const notificationTabs = [...document.querySelectorAll("#notifications-page [data-notification-tab]")];
-      notificationTabs.forEach((tab, index) => {
-        tab.addEventListener("click", () => {
-          window.location.hash = notificationTabRoutes[tab.dataset.notificationTab];
-        });
-        tab.addEventListener("keydown", (event) => {
-          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-          event.preventDefault();
-          const direction = event.key === "ArrowRight" ? 1 : -1;
-          const nextTab = notificationTabs[(index + direction + notificationTabs.length) % notificationTabs.length];
-          nextTab.focus();
-          nextTab.click();
-        });
+      sectionTabs.addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-tab-route]");
+        if (tab) window.location.hash = tab.dataset.tabRoute;
+      });
+      sectionTabs.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        const tabs = [...sectionTabs.querySelectorAll("[data-tab-route]")];
+        const currentIndex = tabs.indexOf(event.target.closest("[data-tab-route]"));
+        if (currentIndex < 0) return;
+        event.preventDefault();
+        const direction = event.key === "ArrowRight" ? 1 : -1;
+        const nextTab = tabs[(currentIndex + direction + tabs.length) % tabs.length];
+        nextTab.focus();
+        nextTab.click();
       });
 
       updateCurrentLink();
