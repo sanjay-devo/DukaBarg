@@ -248,6 +248,7 @@
 
       .nav-link {
         display: flex;
+        position: relative;
         min-height: 40px;
         align-items: center;
         gap: var(--space-5);
@@ -372,13 +373,23 @@
       }
 
       .new-badge {
-        padding: var(--space-2) var(--space-3);
+        display: inline-flex;
+        min-width: 22px;
+        min-height: 22px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 var(--space-3);
         color: var(--color-text-primary);
         background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
         border-radius: var(--radius-xl);
         font-size: var(--font-size-xs);
         font-weight: 600;
         line-height: 1.4;
+      }
+
+      .new-badge[hidden] {
+        display: none;
       }
 
       .main {
@@ -551,8 +562,7 @@
         }
 
         .app-shell.is-sidebar-collapsed .brand-name,
-        .app-shell.is-sidebar-collapsed .section-label,
-        .app-shell.is-sidebar-collapsed .new-badge {
+        .app-shell.is-sidebar-collapsed .section-label {
           display: none;
         }
 
@@ -571,7 +581,27 @@
           gap: 0;
           padding-right: 0;
           padding-left: 0;
+          overflow: visible;
           border-inline-start-color: transparent;
+        }
+
+        .app-shell.is-sidebar-collapsed .new-badge:not([hidden]) {
+          position: absolute;
+          z-index: 1;
+          top: 3px;
+          right: var(--space-2);
+          min-width: 18px;
+          height: 18px;
+          min-height: 18px;
+          padding: 0 var(--space-1);
+          color: var(--color-surface-muted);
+          background: var(--color-border-strong);
+          border: 1px solid var(--color-border-muted);
+          font-size: var(--font-size-xs);
+          font-weight: 700;
+          line-height: 1;
+          text-align: center;
+          white-space: nowrap;
         }
 
         .app-shell.is-sidebar-collapsed .nav-link[aria-current="page"] {
