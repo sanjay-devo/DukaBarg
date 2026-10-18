@@ -1205,7 +1205,11 @@
         white-space: nowrap;
       }
 
-      .category-tab[aria-selected="true"] {
+      .category-tabs .category-tab[aria-selected="false"] {
+        border-bottom-color: transparent;
+      }
+
+      .category-tabs .category-tab[aria-selected="true"] {
         color: var(--color-text-primary);
         border-bottom-color: var(--color-border-strong);
         font-weight: 600;
@@ -6445,6 +6449,9 @@
       const categoryPagination = document.querySelector("#category-pagination");
       const categorySearch = document.querySelector("#category-search");
       const categoryLevelFilter = document.querySelector("#category-level-filter");
+      const categoryTabs = document.querySelectorAll(
+        '#category-page [role="tablist"][aria-label="Category level"] .category-tab',
+      );
       const categoryParentFilter = document.querySelector("#category-parent-filter");
       const categoryStatusFilter = document.querySelector("#category-status-filter");
       const categoryFormDialog = document.querySelector("#category-form-dialog");
@@ -13514,7 +13521,7 @@
       categoryLevelFilter.addEventListener("change", () => {
         categoryState.level = categoryLevelFilter.value || "all";
         categoryState.page = 1;
-        document.querySelectorAll(".category-tab").forEach((tab) => {
+        categoryTabs.forEach((tab) => {
           tab.setAttribute(
             "aria-selected",
             String(tab.dataset.level === categoryState.level),
@@ -13522,32 +13529,30 @@
         });
         renderCategoryRows();
       });
-      document.querySelectorAll(".category-tab").forEach((tab) => {
+      categoryTabs.forEach((tab, index) => {
         tab.addEventListener("click", () => {
           categoryState.level = tab.dataset.level;
           categoryLevelFilter.value = tab.dataset.level === "all" ? "" : tab.dataset.level;
           categoryState.page = 1;
-          document.querySelectorAll(".category-tab").forEach((item) => {
+          categoryTabs.forEach((item) => {
             item.setAttribute("aria-selected", String(item === tab));
           });
           renderCategoryRows();
         });
         tab.addEventListener("keydown", (event) => {
-          const tabs = Array.from(document.querySelectorAll(".category-tab"));
-          const currentIndex = tabs.indexOf(tab);
           const nextIndex = event.key === "ArrowRight"
-            ? (currentIndex + 1) % tabs.length
+            ? (index + 1) % categoryTabs.length
             : event.key === "ArrowLeft"
-              ? (currentIndex - 1 + tabs.length) % tabs.length
-              : event.key === "Home"
-                ? 0
+                ? (index - 1 + categoryTabs.length) % categoryTabs.length
+                : event.key === "Home"
+                  ? 0
                 : event.key === "End"
-                  ? tabs.length - 1
+                  ? categoryTabs.length - 1
                   : -1;
           if (nextIndex >= 0) {
             event.preventDefault();
-            tabs[nextIndex].focus();
-            tabs[nextIndex].click();
+            categoryTabs[nextIndex].focus();
+            categoryTabs[nextIndex].click();
           }
         });
       });
