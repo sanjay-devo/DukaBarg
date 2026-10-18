@@ -3772,6 +3772,129 @@
         gap: var(--space-6);
       }
 
+      .in-app-notification-targeting {
+        display: grid;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+      }
+
+      .in-app-notification-target-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-4);
+      }
+
+      .in-app-notification-target-controls > [hidden],
+      #notification-recipient-retry[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-target-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        cursor: pointer;
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+      }
+
+      .in-app-notification-target-toggle input,
+      .notification-recipient-table input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--color-border-strong);
+        cursor: pointer;
+      }
+
+      .in-app-notification-target-toggle input:focus-visible,
+      .notification-recipient-table input[type="checkbox"]:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .in-app-notification-selected-users {
+        margin: 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+        overflow-wrap: anywhere;
+      }
+
+      .notification-recipient-dialog {
+        width: min(100% - var(--space-6), 920px);
+      }
+
+      .notification-recipient-dialog .category-dialog-form {
+        min-width: 0;
+      }
+
+      .notification-recipient-table-wrap {
+        max-height: min(60vh, 520px);
+        overflow: auto;
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .notification-recipient-table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        table-layout: fixed;
+        text-align: left;
+      }
+
+      .notification-recipient-table th {
+        position: sticky;
+        z-index: 1;
+        top: 0;
+        padding: var(--space-5);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        border-bottom: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .notification-recipient-table td {
+        padding: var(--space-5);
+        border-top: 1px solid var(--color-border-muted);
+        font-size: var(--font-size-sm);
+        overflow-wrap: anywhere;
+      }
+
+      .notification-recipient-table tbody tr:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .notification-recipient-table th:first-child,
+      .notification-recipient-table td:first-child {
+        width: 112px;
+        white-space: nowrap;
+      }
+
+      .notification-recipient-table th:first-child label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .notification-recipient-status {
+        margin: var(--space-4) 0 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .notification-recipient-status[data-kind="error"] {
+        color: var(--color-border-strong);
+      }
+
+      .notification-recipient-status[hidden],
+      .notification-recipient-table-wrap[hidden] {
+        display: none;
+      }
+
       .in-app-notification-field {
         display: grid;
         gap: var(--space-3);
@@ -4548,6 +4671,16 @@
                     </div>
                   </div>
                 </div>
+              </div>
+              <div class="in-app-notification-targeting">
+                <div class="in-app-notification-target-controls">
+                  <label class="in-app-notification-target-toggle" for="in-app-notification-custom-users">
+                    <input id="in-app-notification-custom-users" type="checkbox" />
+                    Send custom users
+                  </label>
+                  <button class="category-secondary-button" id="in-app-notification-choose-users" type="button" hidden>Choose</button>
+                </div>
+                <p class="in-app-notification-selected-users" id="in-app-notification-selected-users" aria-live="polite" hidden></p>
               </div>
               <div class="in-app-notification-actions">
                 <button class="category-primary-button" id="in-app-notification-send" type="submit">Send Notification</button>
@@ -5713,6 +5846,39 @@
       </div>
     </dialog>
 
+    <dialog class="category-dialog notification-recipient-dialog" id="notification-recipient-dialog" aria-labelledby="notification-recipient-title">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div>
+            <h2 id="notification-recipient-title">Choose customers</h2>
+            <p>Select the customers who should receive this notification.</p>
+          </div>
+          <button class="category-dialog-close" type="button" data-notification-recipient-close aria-label="Close customer selection">×</button>
+        </div>
+        <p class="notification-recipient-status" id="notification-recipient-status" role="status" aria-live="polite">Loading customers…</p>
+        <button class="category-secondary-button" id="notification-recipient-retry" type="button" hidden>Retry</button>
+        <div class="notification-recipient-table-wrap" id="notification-recipient-table-wrap" hidden>
+          <table class="notification-recipient-table">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <label><input id="notification-recipient-select-all" type="checkbox" aria-label="Select all customers" /> Select All</label>
+                </th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody id="notification-recipient-table-body"></tbody>
+          </table>
+        </div>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-notification-recipient-close>Cancel</button>
+          <button class="category-primary-button" id="notification-recipient-done" type="button">Done</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="category-dialog" id="category-confirm-dialog" aria-labelledby="category-confirm-title">
       <div class="category-dialog-form">
         <div class="category-dialog-heading">
@@ -6222,6 +6388,20 @@
       const inAppNotificationProgressPercent = document.querySelector("#in-app-notification-progress-percent");
       const inAppNotificationSend = document.querySelector("#in-app-notification-send");
       const inAppNotificationFeedback = document.querySelector("#in-app-notification-feedback");
+      const inAppNotificationCustomUsers = document.querySelector("#in-app-notification-custom-users");
+      const inAppNotificationChooseUsers = document.querySelector("#in-app-notification-choose-users");
+      const inAppNotificationSelectedUsers = document.querySelector("#in-app-notification-selected-users");
+      const notificationRecipientDialog = document.querySelector("#notification-recipient-dialog");
+      const notificationRecipientStatus = document.querySelector("#notification-recipient-status");
+      const notificationRecipientRetry = document.querySelector("#notification-recipient-retry");
+      const notificationRecipientTableWrap = document.querySelector("#notification-recipient-table-wrap");
+      const notificationRecipientTableBody = document.querySelector("#notification-recipient-table-body");
+      const notificationRecipientSelectAll = document.querySelector("#notification-recipient-select-all");
+      const notificationRecipientDone = document.querySelector("#notification-recipient-done");
+      const notificationRecipientSelection = new Set();
+      let notificationRecipientCustomers = [];
+      let notificationRecipientLoadGeneration = 0;
+      let notificationRecipientLoading = false;
       let inAppNotificationPreviewObjectUrl = null;
       let inAppNotificationSending = false;
       let inAppNotificationPreviewSource = "";
@@ -6444,6 +6624,12 @@
       function notificationFirebaseErrorMessage(error, stage) {
         const code = String(error?.code || "").toLowerCase();
         if (code.includes("permission") || code.includes("unauthorized") || code.includes("unauthenticated")) {
+          if (stage === "validate-recipients") {
+            return "Firebase denied access to customer records. Check your admin role and Realtime Database users read rules.";
+          }
+          if (stage === "save-selected") {
+            return "Firebase denied this targeted send. Check that admin rules allow writing the notification and each selected user's inbox entry.";
+          }
           return stage === "upload"
             ? "Firebase Storage denied this image upload. Check Storage rules for authenticated admin uploads."
             : "Firebase Realtime Database denied this save. The deployed rules must allow authenticated admins to write /inAppNotifications.";
@@ -6463,6 +6649,178 @@
           inAppNotificationImageUpload?.status === "error";
         inAppNotificationSend.disabled = inAppNotificationSending || waitingForUpload || failed;
       }
+
+      function updateNotificationRecipientSummary() {
+        inAppNotificationChooseUsers.hidden = !inAppNotificationCustomUsers.checked;
+        inAppNotificationSelectedUsers.hidden = !inAppNotificationCustomUsers.checked;
+        if (!notificationRecipientCustomers.length && !notificationRecipientSelection.size) {
+          inAppNotificationSelectedUsers.textContent = "No customers selected.";
+          return;
+        }
+        const selected = notificationRecipientCustomers.filter((customer) =>
+          notificationRecipientSelection.has(customer.uid));
+        if (!selected.length) {
+          inAppNotificationSelectedUsers.textContent = notificationRecipientSelection.size
+            ? `${notificationRecipientSelection.size} selected customer${notificationRecipientSelection.size === 1 ? "" : "s"} need to be reselected.`
+            : "No customers selected.";
+          return;
+        }
+        const names = selected.map((customer) => customer.name || "Unnamed customer");
+        inAppNotificationSelectedUsers.textContent =
+          `${selected.length} selected: ${names.join(", ")}`;
+      }
+
+      function updateNotificationRecipientSelectAll() {
+        const selectedCount = notificationRecipientCustomers.filter((customer) =>
+          notificationRecipientSelection.has(customer.uid)).length;
+        notificationRecipientSelectAll.checked = notificationRecipientCustomers.length > 0 &&
+          selectedCount === notificationRecipientCustomers.length;
+        notificationRecipientSelectAll.indeterminate = selectedCount > 0 &&
+          selectedCount < notificationRecipientCustomers.length;
+      }
+
+      function buildSelectedNotificationUpdates(notificationId, notificationRecord, recipientUids) {
+        const selectedUids = [...new Set(recipientUids)];
+        if (!selectedUids.length || selectedUids.some((uid) => !validSupportFirebaseKey(uid))) {
+          throw new Error("Choose at least one valid customer UID before sending a targeted notification.");
+        }
+        const targetedRecord = {
+          ...notificationRecord,
+          audience: "selected",
+          recipientType: "selected",
+          recipientUids: selectedUids,
+        };
+        const updates = {
+          [`inAppNotifications/${notificationId}`]: targetedRecord,
+        };
+        for (const uid of selectedUids) {
+          updates[`userInAppNotifications/${uid}/${notificationId}`] = targetedRecord;
+        }
+        return updates;
+      }
+
+      function renderNotificationRecipientRows() {
+        notificationRecipientTableBody.replaceChildren();
+        for (const customer of notificationRecipientCustomers) {
+          const row = document.createElement("tr");
+          const selectCell = document.createElement("td");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.dataset.notificationRecipientUid = customer.uid;
+          checkbox.checked = notificationRecipientSelection.has(customer.uid);
+          checkbox.setAttribute("aria-label", `Select ${customer.name || "customer"}`);
+          selectCell.append(checkbox);
+          row.append(selectCell);
+          for (const value of [customer.name || "Unnamed customer", customer.mobile || "Not available", customer.email || "Not available"]) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.append(cell);
+          }
+          notificationRecipientTableBody.append(row);
+        }
+        notificationRecipientTableWrap.hidden = notificationRecipientCustomers.length === 0;
+        updateNotificationRecipientSelectAll();
+        updateNotificationRecipientSummary();
+      }
+
+      function setNotificationRecipientStatus(message, kind = "status") {
+        notificationRecipientStatus.textContent = message;
+        notificationRecipientStatus.dataset.kind = kind;
+        notificationRecipientStatus.hidden = !message;
+      }
+
+      async function loadNotificationRecipients() {
+        const generation = ++notificationRecipientLoadGeneration;
+        notificationRecipientLoading = true;
+        notificationRecipientRetry.hidden = true;
+        notificationRecipientDone.disabled = true;
+        notificationRecipientTableWrap.hidden = true;
+        notificationRecipientTableBody.replaceChildren();
+        setNotificationRecipientStatus("Loading customers…");
+        try {
+          if (!auth.currentUser || !paymentSettingsState.authorized) {
+            throw new Error("Your admin session is not verified. Sign in again before choosing recipients.");
+          }
+          const snapshot = await get(ref(database, "users"));
+          if (generation !== notificationRecipientLoadGeneration) return;
+          const parsed = parseCustomers(snapshot.val());
+          notificationRecipientCustomers = parsed.customers
+            .sort((first, second) => (first.name || first.uid).localeCompare(second.name || second.uid, undefined, { sensitivity: "base" }));
+          const knownUids = new Set(notificationRecipientCustomers.map((customer) => customer.uid));
+          for (const uid of notificationRecipientSelection) {
+            if (!knownUids.has(uid)) notificationRecipientSelection.delete(uid);
+          }
+          notificationRecipientLoading = false;
+          notificationRecipientDone.disabled = false;
+          if (!notificationRecipientCustomers.length) {
+            setNotificationRecipientStatus("No customers are available to select.");
+          } else {
+            setNotificationRecipientStatus(`${notificationRecipientCustomers.length.toLocaleString("en-IN")} customers available.`);
+          }
+          renderNotificationRecipientRows();
+        } catch (error) {
+          if (generation !== notificationRecipientLoadGeneration) return;
+          notificationRecipientLoading = false;
+          notificationRecipientDone.disabled = true;
+          notificationRecipientRetry.hidden = false;
+          notificationRecipientCustomers = [];
+          updateNotificationRecipientSelectAll();
+          console.error("Loading notification recipient customers failed.", error);
+          setNotificationRecipientStatus(
+            error?.code
+              ? `Customers could not be loaded (${error.code}). Check Firebase permissions or retry.`
+              : error.message || "Customers could not be loaded. Retry.",
+            "error",
+          );
+          updateNotificationRecipientSummary();
+        }
+      }
+
+      async function openNotificationRecipientDialog() {
+        if (!notificationRecipientDialog.open) notificationRecipientDialog.showModal();
+        await loadNotificationRecipients();
+      }
+
+      inAppNotificationCustomUsers.addEventListener("change", updateNotificationRecipientSummary);
+      inAppNotificationChooseUsers.addEventListener("click", () => {
+        void openNotificationRecipientDialog();
+      });
+      notificationRecipientRetry.addEventListener("click", () => {
+        void loadNotificationRecipients();
+      });
+      notificationRecipientSelectAll.addEventListener("change", () => {
+        for (const customer of notificationRecipientCustomers) {
+          if (notificationRecipientSelectAll.checked) notificationRecipientSelection.add(customer.uid);
+          else notificationRecipientSelection.delete(customer.uid);
+        }
+        renderNotificationRecipientRows();
+      });
+      notificationRecipientTableBody.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[data-notification-recipient-uid]");
+        if (!checkbox) return;
+        const { notificationRecipientUid } = checkbox.dataset;
+        if (checkbox.checked) notificationRecipientSelection.add(notificationRecipientUid);
+        else notificationRecipientSelection.delete(notificationRecipientUid);
+        updateNotificationRecipientSelectAll();
+        updateNotificationRecipientSummary();
+      });
+      notificationRecipientDone.addEventListener("click", () => {
+        if (notificationRecipientLoading || !notificationRecipientCustomers.length) return;
+        if (!notificationRecipientCustomers.some((customer) => notificationRecipientSelection.has(customer.uid))) {
+          setNotificationRecipientStatus("Select at least one customer to continue.", "error");
+          return;
+        }
+        notificationRecipientDialog.close();
+        updateNotificationRecipientSummary();
+        inAppNotificationChooseUsers.focus();
+      });
+      notificationRecipientDialog.addEventListener("click", (event) => {
+        if (event.target === notificationRecipientDialog) notificationRecipientDialog.close();
+        if (event.target.closest("[data-notification-recipient-close]")) notificationRecipientDialog.close();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && notificationRecipientDialog.open) notificationRecipientDialog.close();
+      });
 
       async function deleteUnreferencedInAppNotificationImage(objectPath, imageUrl, notificationId = "") {
         if (!objectPath || !objectPath.startsWith("in-app-notifications/") || objectPath.includes("..")) {
@@ -6851,6 +7209,15 @@
           setInAppNotificationFeedback("Your admin session is not verified. Sign in again before sending.", "error");
           return;
         }
+        const useCustomRecipients = inAppNotificationCustomUsers.checked;
+        const requestedRecipientUids = useCustomRecipients
+          ? [...new Set(notificationRecipientSelection)]
+          : [];
+        if (useCustomRecipients && requestedRecipientUids.length === 0) {
+          setInAppNotificationFeedback("Choose at least one customer before sending to custom users.", "error");
+          inAppNotificationChooseUsers.focus();
+          return;
+        }
 
         const imageUrl = inAppNotificationHasImageLink.checked
           ? notificationImageUrl(inAppNotificationImageUrl.value)
@@ -6890,6 +7257,8 @@
           inAppNotificationImageUrl,
           inAppNotificationImage,
           inAppNotificationImageRemove,
+          inAppNotificationCustomUsers,
+          inAppNotificationChooseUsers,
           inAppNotificationSend,
         ];
         controls.forEach((control) => {
@@ -6901,6 +7270,18 @@
 
         let stage = "save";
         try {
+          let selectedRecipientUids = [];
+          if (useCustomRecipients) {
+            stage = "validate-recipients";
+            const usersSnapshot = await get(ref(database, "users"));
+            const parsed = parseCustomers(usersSnapshot.val());
+            const currentCustomerUids = new Set(parsed.customers.map((customer) => customer.uid));
+            if (requestedRecipientUids.some((uid) => !currentCustomerUids.has(uid))) {
+              throw new Error("One or more selected customers are no longer available. Reopen Choose and review the customer list.");
+            }
+            selectedRecipientUids = requestedRecipientUids;
+          }
+          stage = "save";
           const notificationRef = push(ref(database, "inAppNotifications"));
           const notificationId = notificationRef.key;
           if (!notificationId) {
@@ -6911,22 +7292,36 @@
           inAppNotificationPendingRecordId = notificationId;
           inAppNotificationPendingRecordImageUrl = savedImageUrl;
           const timestamp = Date.now();
-          await set(notificationRef, {
+          const notificationRecord = {
             title,
             subtitle: inAppNotificationSubtitle.value.trim(),
             imageUrl: savedImageUrl,
             timestamp,
-          });
+          };
+          if (useCustomRecipients) {
+            const updates = buildSelectedNotificationUpdates(notificationId, notificationRecord, selectedRecipientUids);
+            stage = "save-selected";
+            await update(ref(database), updates);
+          } else {
+            await set(notificationRef, notificationRecord);
+          }
           inAppNotificationPendingRecordId = "";
           inAppNotificationPendingRecordImageUrl = "";
           ++inAppNotificationImageUploadGeneration;
           inAppNotificationImageUpload = null;
           inAppNotificationForm.reset();
+          notificationRecipientSelection.clear();
+          updateNotificationRecipientSummary();
           clearInAppNotificationImage();
           updateInAppNotificationImageMode();
           inAppNotificationImageUrl.value = "";
           resetInAppNotificationProgress();
-          setInAppNotificationFeedback("Notification sent successfully.", "success");
+          setInAppNotificationFeedback(
+            useCustomRecipients
+              ? `Notification sent successfully to ${selectedRecipientUids.length.toLocaleString("en-IN")} selected customer${selectedRecipientUids.length === 1 ? "" : "s"}.`
+              : "Notification sent successfully.",
+            "success",
+          );
         } catch (error) {
           console.error(`Sending in-app notification failed (Firebase code: ${error?.code || "unknown"}).`, error);
           setInAppNotificationFeedback(notificationFirebaseErrorMessage(error, stage), "error");
