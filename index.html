@@ -3906,6 +3906,61 @@
         margin: 0;
       }
 
+      .in-app-notification-preview-progress {
+        position: absolute;
+        z-index: 1;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        color: var(--color-surface-muted);
+        background: linear-gradient(transparent, rgb(0 0 0 / 72%));
+      }
+
+      .in-app-notification-preview-progress[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-preview-progress .in-app-notification-progress-label {
+        color: inherit;
+        font-size: var(--font-size-xs);
+        text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+      }
+
+      .in-app-notification-preview-progress progress {
+        width: 100%;
+        height: 7px;
+        overflow: hidden;
+        accent-color: var(--color-border-strong);
+        border: 0;
+        border-radius: var(--radius-xl);
+      }
+
+      .in-app-notification-preview-progress progress::-webkit-progress-bar {
+        background: rgb(255 255 255 / 35%);
+        border-radius: var(--radius-xl);
+      }
+
+      .in-app-notification-preview-progress progress::-webkit-progress-value {
+        background: linear-gradient(90deg, var(--color-border-strong), #f08b69);
+        border-radius: var(--radius-xl);
+        transition: width 180ms ease;
+      }
+
+      .in-app-notification-preview-progress progress[data-state="success"] {
+        accent-color: #18794e;
+      }
+
+      .in-app-notification-preview-progress progress[data-state="success"]::-webkit-progress-value {
+        background: #32a66a;
+      }
+
+      .in-app-notification-preview-progress progress[data-state="error"] {
+        accent-color: var(--color-border-strong);
+      }
+
       .in-app-notification-image-actions[hidden] {
         display: none;
       }
@@ -3954,47 +4009,6 @@
         width: 100%;
         max-height: 260px;
         object-fit: contain;
-      }
-
-      .in-app-notification-progress {
-        display: grid;
-        gap: var(--space-3);
-      }
-
-      .in-app-notification-progress[hidden] {
-        display: none;
-      }
-
-      .in-app-notification-progress progress {
-        width: 100%;
-        height: 10px;
-        overflow: hidden;
-        accent-color: var(--color-border-strong);
-        border: 0;
-        border-radius: var(--radius-xl);
-      }
-
-      .in-app-notification-progress progress::-webkit-progress-bar {
-        background: var(--color-surface-raised);
-        border-radius: var(--radius-xl);
-      }
-
-      .in-app-notification-progress progress::-webkit-progress-value {
-        background: linear-gradient(90deg, var(--color-border-strong), #f08b69);
-        border-radius: var(--radius-xl);
-        transition: width var(--motion-fast) ease;
-      }
-
-      .in-app-notification-progress progress[data-state="success"] {
-        accent-color: #18794e;
-      }
-
-      .in-app-notification-progress progress[data-state="success"]::-webkit-progress-value {
-        background: #18794e;
-      }
-
-      .in-app-notification-progress progress[data-state="error"] {
-        accent-color: var(--color-border-strong);
       }
 
       .in-app-notification-progress-label {
@@ -4216,7 +4230,7 @@
                     <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
                     <path d="m17 3 2 2" />
                   </svg>
-                  <span class="nav-text">In-App Notifications</span>
+                  <span class="nav-text">App Notifications</span>
                 </a>
               </li>
               <li>
@@ -4322,7 +4336,7 @@
           <section class="in-app-notifications-page" id="in-app-notifications-page" aria-labelledby="in-app-notifications-title" hidden>
             <div class="category-heading-row">
               <div>
-                <h2 id="in-app-notifications-title">In-App Notifications</h2>
+                <h2 id="in-app-notifications-title">App Notifications</h2>
                 <p>Compose a message for the Notifications page in the DukaBarg Android app.</p>
               </div>
             </div>
@@ -4361,14 +4375,14 @@
                     <div class="in-app-notification-image-actions" id="in-app-notification-image-actions" hidden>
                       <button class="in-app-notification-image-remove" id="in-app-notification-image-remove" type="button" aria-label="Remove image" title="Remove image">&times;</button>
                     </div>
+                    <div class="in-app-notification-preview-progress" id="in-app-notification-progress-wrap" hidden>
+                      <div class="in-app-notification-progress-label">
+                        <span id="in-app-notification-progress-status">Uploading image</span>
+                        <span id="in-app-notification-progress-percent">0%</span>
+                      </div>
+                      <progress id="in-app-notification-progress" max="100" value="0" aria-label="In-app notification image upload progress"></progress>
+                    </div>
                   </div>
-                </div>
-                <div class="in-app-notification-progress" id="in-app-notification-progress-wrap" hidden>
-                  <div class="in-app-notification-progress-label">
-                    <span id="in-app-notification-progress-status">Ready to upload</span>
-                    <span id="in-app-notification-progress-percent">0%</span>
-                  </div>
-                  <progress id="in-app-notification-progress" max="100" value="0" aria-label="In-app notification image upload progress"></progress>
                 </div>
               </div>
               <div class="in-app-notification-actions">
@@ -5884,6 +5898,10 @@
       let inAppNotificationSending = false;
       let inAppNotificationPreviewSource = "";
       let inAppNotificationLinkedImageReady = false;
+      let inAppNotificationImageUpload = null;
+      let inAppNotificationImageUploadGeneration = 0;
+      let inAppNotificationPendingRecordId = "";
+      let inAppNotificationPendingRecordImageUrl = "";
       const categoryToastRegion = document.querySelector("#category-toast-region");
       const customerTableBody = document.querySelector("#customers-table-body");
       const customerLoading = document.querySelector("#customers-loading");
@@ -6013,6 +6031,26 @@
         }
       }
 
+      function notificationImageReferencesStoragePath(value, objectPath) {
+        if (!value || typeof value !== "string") return false;
+        try {
+          if (value.startsWith("gs://")) {
+            const match = value.match(/^gs:\/\/([^/]+)\/(.+)$/);
+            return Boolean(match) &&
+              decodeURIComponent(match[1]) === storage.app.options.storageBucket &&
+              decodeURIComponent(match[2]) === objectPath;
+          }
+          const url = new URL(value);
+          const match = url.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+          return Boolean(match) &&
+            url.hostname === "firebasestorage.googleapis.com" &&
+            decodeURIComponent(match[1]) === storage.app.options.storageBucket &&
+            decodeURIComponent(match[2]) === objectPath;
+        } catch {
+          return false;
+        }
+      }
+
       function updateInAppNotificationImageMode() {
         const hasImageLink = inAppNotificationHasImageLink.checked;
         inAppNotificationUrlField.hidden = !hasImageLink;
@@ -6090,79 +6128,338 @@
           : "We couldn’t send the in-app notification. Please retry.";
       }
 
-      async function uploadInAppNotificationImage(file, objectPath) {
-        const task = uploadBytesResumable(storageRef(storage, objectPath), file, {
-          contentType: file.type,
-        });
-        inAppNotificationProgressWrap.hidden = false;
-        inAppNotificationProgress.value = 0;
-        inAppNotificationProgress.removeAttribute("data-state");
-        inAppNotificationProgressStatus.textContent = "Uploading image";
-        inAppNotificationProgressPercent.textContent = "0%";
+      function updateInAppNotificationSendAvailability() {
+        const waitingForUpload = !inAppNotificationHasImageLink.checked &&
+          ["validating", "uploading"].includes(inAppNotificationImageUpload?.status);
+        const failed = !inAppNotificationHasImageLink.checked &&
+          inAppNotificationImageUpload?.status === "error";
+        inAppNotificationSend.disabled = inAppNotificationSending || waitingForUpload || failed;
+      }
+
+      async function deleteUnreferencedInAppNotificationImage(objectPath, imageUrl, notificationId = "") {
+        if (!objectPath || !objectPath.startsWith("in-app-notifications/") || objectPath.includes("..")) {
+          return "skipped";
+        }
+
+        const snapshot = await get(ref(database, "inAppNotifications"));
+        const records = snapshot.val();
+        const references = Object.entries(records && typeof records === "object" ? records : {})
+          .filter(([, record]) => record && typeof record === "object" && (
+            (imageUrl && record.imageUrl === imageUrl) ||
+            notificationImageReferencesStoragePath(record.imageUrl, objectPath)
+          ))
+          .map(([id]) => id);
+        if (notificationId && references.includes(notificationId)) {
+          await update(ref(database, `inAppNotifications/${notificationId}`), { imageUrl: "" });
+        }
+        const latestSnapshot = await get(ref(database, "inAppNotifications"));
+        const latestRecords = latestSnapshot.val();
+        const stillReferenced = Object.values(latestRecords && typeof latestRecords === "object" ? latestRecords : {})
+          .some((record) => record && typeof record === "object" &&
+            notificationImageReferencesStoragePath(record.imageUrl, objectPath));
+        if (stillReferenced) return "referenced";
+
         try {
-          await new Promise((resolve, reject) => {
-            task.on(
-              "state_changed",
-              (snapshot) => {
-                const percent = snapshot.totalBytes
-                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                  : 0;
-                inAppNotificationProgress.value = percent;
-                inAppNotificationProgressPercent.textContent = `${percent}%`;
-                inAppNotificationProgressStatus.textContent = "Uploading image";
-              },
-              reject,
-              resolve,
-            );
-          });
-          const imageUrl = await getDownloadURL(task.snapshot.ref);
-          inAppNotificationProgress.value = 100;
-          inAppNotificationProgress.dataset.state = "success";
-          inAppNotificationProgressStatus.textContent = "Image uploaded successfully";
-          inAppNotificationProgressPercent.textContent = "100%";
-          return imageUrl;
+          await deleteObject(storageRef(storage, objectPath));
+          return "deleted";
         } catch (error) {
-          inAppNotificationProgress.dataset.state = "error";
-          inAppNotificationProgressStatus.textContent = "Image upload failed";
+          if (error?.code === "storage/object-not-found") return "deleted";
           throw error;
         }
       }
 
-      inAppNotificationImage.addEventListener("change", async () => {
-        const file = inAppNotificationImage.files?.[0];
-        clearInAppNotificationPreview();
+      async function clearPendingInAppNotificationImageReference() {
+        const notificationId = inAppNotificationPendingRecordId;
+        const imageUrl = inAppNotificationPendingRecordImageUrl;
+        if (!notificationId || !imageUrl) return;
+        const notificationRef = ref(database, `inAppNotifications/${notificationId}`);
+        const snapshot = await get(notificationRef);
+        if (snapshot.exists() && snapshot.child("imageUrl").val() === imageUrl) {
+          await update(notificationRef, { imageUrl: "" });
+        }
+        if (
+          inAppNotificationPendingRecordId === notificationId &&
+          inAppNotificationPendingRecordImageUrl === imageUrl
+        ) {
+          inAppNotificationPendingRecordId = "";
+          inAppNotificationPendingRecordImageUrl = "";
+        }
+      }
+
+      async function disposeInAppNotificationUpload(upload, includeReplaced = true) {
+        if (!upload) return "skipped";
+        if (upload.task && upload.status === "uploading") upload.task.cancel();
+        if (upload.promise) await upload.promise.catch(() => {});
+        const result = await deleteUnreferencedInAppNotificationImage(
+          upload.objectPath,
+          upload.downloadUrl,
+          upload.notificationId || "",
+        );
+        if (inAppNotificationPendingRecordId === upload.notificationId) {
+          inAppNotificationPendingRecordId = "";
+          inAppNotificationPendingRecordImageUrl = "";
+        }
+        if (includeReplaced && upload.replacedUpload) {
+          const replacedResult = await disposeInAppNotificationUpload(upload.replacedUpload);
+          if (replacedResult === "referenced") return replacedResult;
+        }
+        return result;
+      }
+
+      function resetInAppNotificationProgress() {
         inAppNotificationProgressWrap.hidden = true;
+        inAppNotificationProgress.value = 0;
         inAppNotificationProgress.removeAttribute("data-state");
+        inAppNotificationProgressStatus.textContent = "Uploading image";
+        inAppNotificationProgressPercent.textContent = "0%";
+      }
+
+      async function beginInAppNotificationImageUpload(file) {
+        const previousUpload = inAppNotificationImageUpload;
+        const replacedUpload = previousUpload?.status === "validating"
+          ? previousUpload.replacedUpload || null
+          : previousUpload;
+        const generation = ++inAppNotificationImageUploadGeneration;
+        inAppNotificationImageUpload = file
+          ? {
+              status: "validating",
+              generation,
+              task: null,
+              promise: null,
+              objectPath: "",
+              downloadUrl: "",
+              replacedUpload,
+            }
+          : null;
+        if (previousUpload?.task && previousUpload.status === "uploading") {
+          previousUpload.task.cancel();
+          previousUpload.status = "cancelled";
+        }
+
+        clearInAppNotificationPreview();
+        resetInAppNotificationProgress();
         setInAppNotificationFeedback("");
+        updateInAppNotificationSendAvailability();
+
         if (!file) {
-          inAppNotificationImageActions.hidden = true;
+          if (previousUpload) {
+            try {
+              await disposeInAppNotificationUpload(previousUpload);
+            } catch (error) {
+              console.error("Removing the previous in-app notification image failed.", error);
+              setInAppNotificationFeedback(
+                reportFirebaseError("Removing the previous notification image", error),
+                "error",
+              );
+            }
+          }
           return;
         }
+
         const validationError = await validateInAppNotificationImage(file);
-        if (inAppNotificationImage.files?.[0] !== file) return;
+        if (generation !== inAppNotificationImageUploadGeneration) return;
         if (validationError) {
-          clearInAppNotificationImage();
+          if (replacedUpload?.status === "cancelled") replacedUpload.status = "error";
+          inAppNotificationImageUpload = replacedUpload;
+          inAppNotificationImage.value = "";
+          if (replacedUpload) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(replacedUpload.file);
+            inAppNotificationImage.files = dataTransfer.files;
+            inAppNotificationPreviewObjectUrl = URL.createObjectURL(replacedUpload.file);
+            inAppNotificationPreviewSource = inAppNotificationPreviewObjectUrl;
+            inAppNotificationPreview.src = inAppNotificationPreviewObjectUrl;
+            inAppNotificationPreviewWrap.hidden = false;
+            inAppNotificationPreviewSection.hidden = false;
+            inAppNotificationProgressWrap.hidden = false;
+            inAppNotificationProgress.value = replacedUpload.status === "uploaded" ? 100 : 0;
+            inAppNotificationProgress.dataset.state = replacedUpload.status === "uploaded" ? "success" : "error";
+            inAppNotificationProgressStatus.textContent = replacedUpload.status === "uploaded"
+              ? "Image uploaded successfully"
+              : "Image upload failed";
+            inAppNotificationProgressPercent.textContent = replacedUpload.status === "uploaded" ? "100%" : "0%";
+          } else {
+            resetInAppNotificationProgress();
+          }
+          updateInAppNotificationSendAvailability();
           setInAppNotificationFeedback(validationError, "error");
           return;
         }
+
         inAppNotificationPreviewObjectUrl = URL.createObjectURL(file);
         inAppNotificationPreviewSource = inAppNotificationPreviewObjectUrl;
         inAppNotificationPreview.src = inAppNotificationPreviewObjectUrl;
         inAppNotificationPreviewWrap.hidden = false;
         inAppNotificationPreviewSection.hidden = false;
+
+        const extension = categoryImageMimeExtensions[file.type];
+        const objectPath = `in-app-notifications/${crypto.randomUUID()}.${extension}`;
+        let task;
+        try {
+          task = uploadBytesResumable(storageRef(storage, objectPath), file, {
+            contentType: file.type,
+          });
+        } catch (error) {
+          const upload = {
+            task: null,
+            promise: null,
+            objectPath,
+            downloadUrl: "",
+            notificationId: "",
+            status: "error",
+            generation,
+            file,
+            replacedUpload,
+          };
+          inAppNotificationImageUpload = upload;
+          inAppNotificationProgressWrap.hidden = false;
+          inAppNotificationProgress.dataset.state = "error";
+          inAppNotificationProgressStatus.textContent = "Image upload failed";
+          updateInAppNotificationSendAvailability();
+          setInAppNotificationFeedback(notificationFirebaseErrorMessage(error, "upload"), "error");
+          return;
+        }
+        const upload = {
+          task,
+          promise: null,
+          objectPath,
+          downloadUrl: "",
+          notificationId: "",
+          status: "uploading",
+          generation,
+          file,
+          replacedUpload,
+        };
+        inAppNotificationImageUpload = upload;
+        inAppNotificationProgressWrap.hidden = false;
+        inAppNotificationProgress.value = 0;
+        inAppNotificationProgress.removeAttribute("data-state");
+        inAppNotificationProgressStatus.textContent = "Uploading image";
+        inAppNotificationProgressPercent.textContent = "0%";
+        updateInAppNotificationSendAvailability();
+
+        const taskPromise = new Promise((resolve, reject) => {
+          task.on(
+            "state_changed",
+            (snapshot) => {
+              if (generation !== inAppNotificationImageUploadGeneration) return;
+              const percent = snapshot.totalBytes
+                ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                : 0;
+              inAppNotificationProgress.value = percent;
+              inAppNotificationProgressPercent.textContent = `${percent}%`;
+              inAppNotificationProgressStatus.textContent = "Uploading image";
+            },
+            reject,
+            resolve,
+          );
+        });
+        upload.promise = (async () => {
+          await taskPromise;
+          upload.downloadUrl = await getDownloadURL(task.snapshot.ref);
+          return upload.downloadUrl;
+        })();
+
+        try {
+          await upload.promise;
+          if (generation !== inAppNotificationImageUploadGeneration) return;
+          if (upload.replacedUpload) {
+            let result;
+            try {
+              result = await disposeInAppNotificationUpload(upload.replacedUpload);
+            } catch (cleanupError) {
+              upload.status = "error";
+              upload.task = null;
+              inAppNotificationProgress.dataset.state = "error";
+              inAppNotificationProgressStatus.textContent = "Previous image could not be removed safely";
+              updateInAppNotificationSendAvailability();
+              console.error("Replacing the previous in-app notification image failed.", cleanupError);
+              setInAppNotificationFeedback(
+                reportFirebaseError("Removing the previous notification image", cleanupError),
+                "error",
+              );
+              return;
+            }
+            upload.replacedUpload = null;
+            if (result === "referenced") {
+              setInAppNotificationFeedback(
+                "The previous image is still used by another notification and was kept in Firebase Storage.",
+                "status",
+              );
+            }
+          }
+          upload.status = "uploaded";
+          upload.task = null;
+          inAppNotificationProgress.value = 100;
+          inAppNotificationProgress.dataset.state = "success";
+          inAppNotificationProgressStatus.textContent = "Image uploaded successfully";
+          inAppNotificationProgressPercent.textContent = "100%";
+          updateInAppNotificationSendAvailability();
+        } catch (error) {
+          upload.status = "error";
+          upload.task = null;
+          if (generation !== inAppNotificationImageUploadGeneration) return;
+          inAppNotificationProgress.dataset.state = "error";
+          inAppNotificationProgressStatus.textContent = "Image upload failed";
+          updateInAppNotificationSendAvailability();
+          setInAppNotificationFeedback(notificationFirebaseErrorMessage(error, "upload"), "error");
+          try {
+            const result = await deleteUnreferencedInAppNotificationImage(
+              upload.objectPath,
+              upload.downloadUrl,
+            );
+            if (result === "deleted") upload.objectPath = "";
+          } catch (cleanupError) {
+            console.error("Removing a failed in-app notification image upload failed.", cleanupError);
+            setInAppNotificationFeedback(
+              `${notificationFirebaseErrorMessage(error, "upload")} The incomplete Storage object could not be removed safely. ${reportFirebaseError("Removing the incomplete notification image", cleanupError)}`,
+              "error",
+            );
+          }
+        }
+      }
+
+      inAppNotificationImage.addEventListener("change", () => {
+        void beginInAppNotificationImageUpload(inAppNotificationImage.files?.[0] || null);
       });
 
-      inAppNotificationHasImageLink.addEventListener("change", () => {
+      inAppNotificationHasImageLink.addEventListener("change", async () => {
+        const previousUpload = inAppNotificationImageUpload;
+        ++inAppNotificationImageUploadGeneration;
+        inAppNotificationImageUpload = null;
         clearInAppNotificationImage();
         inAppNotificationImageUrl.value = "";
         updateInAppNotificationImageMode();
+        updateInAppNotificationSendAvailability();
         setInAppNotificationFeedback("");
+        try {
+          await clearPendingInAppNotificationImageReference();
+          await disposeInAppNotificationUpload(previousUpload);
+        } catch (error) {
+          console.error("Removing the in-app notification image after changing image mode failed.", error);
+          setInAppNotificationFeedback(
+            reportFirebaseError("Removing the notification image", error),
+            "error",
+          );
+        }
       });
 
       inAppNotificationImageUrl.addEventListener("input", () => {
+        const imageUrl = notificationImageUrl(inAppNotificationImageUrl.value);
+        if (
+          inAppNotificationPendingRecordId &&
+          inAppNotificationPendingRecordImageUrl !== imageUrl
+        ) {
+          void clearPendingInAppNotificationImageReference().catch((error) => {
+            console.error("Clearing the previous notification image reference failed.", error);
+            setInAppNotificationFeedback(
+              reportFirebaseError("Clearing the previous notification image reference", error),
+              "error",
+            );
+          });
+        }
         clearInAppNotificationPreview();
         setInAppNotificationFeedback("");
-        const imageUrl = notificationImageUrl(inAppNotificationImageUrl.value);
         if (!imageUrl) return;
         inAppNotificationPreviewSource = imageUrl;
         inAppNotificationPreview.src = imageUrl;
@@ -6176,14 +6473,37 @@
         }
       });
 
-      inAppNotificationImageRemove.addEventListener("click", () => {
+      inAppNotificationImageRemove.addEventListener("click", async () => {
+        const previousUpload = inAppNotificationImageUpload;
+        ++inAppNotificationImageUploadGeneration;
+        inAppNotificationImageUpload = null;
         if (inAppNotificationHasImageLink.checked) {
           inAppNotificationImageUrl.value = "";
           clearInAppNotificationPreview();
         } else {
           clearInAppNotificationImage();
         }
+        resetInAppNotificationProgress();
+        updateInAppNotificationSendAvailability();
         setInAppNotificationFeedback("");
+        try {
+          if (inAppNotificationHasImageLink.checked) {
+            await clearPendingInAppNotificationImageReference();
+          }
+          const result = await disposeInAppNotificationUpload(previousUpload);
+          if (result === "referenced") {
+            setInAppNotificationFeedback(
+              "The image is still used by another notification and was kept in Firebase Storage.",
+              "status",
+            );
+          }
+        } catch (error) {
+          console.error("Removing the in-app notification image failed.", error);
+          setInAppNotificationFeedback(
+            reportFirebaseError("Removing the notification image", error),
+            "error",
+          );
+        }
       });
 
       [inAppNotificationTitle, inAppNotificationSubtitle].forEach((field) => {
@@ -6218,10 +6538,23 @@
           return;
         }
 
-        inAppNotificationSending = true;
-        const imageFile = inAppNotificationHasImageLink.checked
+        const selectedUpload = inAppNotificationHasImageLink.checked
           ? null
-          : inAppNotificationImage.files?.[0] || null;
+          : inAppNotificationImageUpload;
+        if (selectedUpload && selectedUpload.status !== "uploaded") {
+          setInAppNotificationFeedback(
+            selectedUpload.status === "error"
+              ? "The image upload failed. Remove it or choose the image again before sending."
+              : "Wait for the image upload to finish before sending.",
+            "error",
+          );
+          return;
+        }
+        const savedImageUrl = inAppNotificationHasImageLink.checked
+          ? imageUrl
+          : selectedUpload?.downloadUrl || "";
+
+        inAppNotificationSending = true;
         const controls = [
           inAppNotificationTitle,
           inAppNotificationSubtitle,
@@ -6238,31 +6571,17 @@
         inAppNotificationSend.textContent = "Sending…";
         setInAppNotificationFeedback("");
 
-        let imageObjectPath = "";
         let stage = "save";
         try {
-          if (imageFile) {
-            const validationError = await validateInAppNotificationImage(imageFile);
-            if (validationError) {
-              clearInAppNotificationImage();
-              setInAppNotificationFeedback(validationError, "error");
-              return;
-            }
-          }
           const notificationRef = push(ref(database, "inAppNotifications"));
           const notificationId = notificationRef.key;
           if (!notificationId) {
             setInAppNotificationFeedback("Firebase could not create a notification ID. Please retry.", "error");
             return;
           }
-          let savedImageUrl = imageUrl;
-          if (imageFile) {
-            const extension = categoryImageMimeExtensions[imageFile.type];
-            imageObjectPath = `in-app-notifications/${notificationId}/${crypto.randomUUID()}.${extension}`;
-            stage = "upload";
-            savedImageUrl = await uploadInAppNotificationImage(imageFile, imageObjectPath);
-            stage = "save";
-          }
+          if (selectedUpload) selectedUpload.notificationId = notificationId;
+          inAppNotificationPendingRecordId = notificationId;
+          inAppNotificationPendingRecordImageUrl = savedImageUrl;
           const timestamp = Date.now();
           await set(notificationRef, {
             title,
@@ -6270,30 +6589,18 @@
             imageUrl: savedImageUrl,
             timestamp,
           });
-          const uploadedImage = Boolean(imageFile);
+          inAppNotificationPendingRecordId = "";
+          inAppNotificationPendingRecordImageUrl = "";
+          ++inAppNotificationImageUploadGeneration;
+          inAppNotificationImageUpload = null;
           inAppNotificationForm.reset();
-          clearInAppNotificationImage(!uploadedImage);
+          clearInAppNotificationImage();
           updateInAppNotificationImageMode();
           inAppNotificationImageUrl.value = "";
-          if (uploadedImage) {
-            inAppNotificationProgressWrap.hidden = false;
-            inAppNotificationProgress.value = 100;
-            inAppNotificationProgress.dataset.state = "success";
-            inAppNotificationProgressStatus.textContent = "Image uploaded successfully";
-            inAppNotificationProgressPercent.textContent = "100%";
-          }
+          resetInAppNotificationProgress();
           setInAppNotificationFeedback("Notification sent successfully.", "success");
         } catch (error) {
           console.error(`Sending in-app notification failed (Firebase code: ${error?.code || "unknown"}).`, error);
-          if (imageObjectPath) {
-            try {
-              await deleteObject(storageRef(storage, imageObjectPath));
-            } catch (cleanupError) {
-              if (cleanupError?.code !== "storage/object-not-found") {
-                console.error("Removing an unused in-app notification image failed.", cleanupError);
-              }
-            }
-          }
           setInAppNotificationFeedback(notificationFirebaseErrorMessage(error, stage), "error");
         } finally {
           inAppNotificationSending = false;
@@ -6301,6 +6608,7 @@
             control.disabled = false;
           });
           updateInAppNotificationImageMode();
+          updateInAppNotificationSendAvailability();
           inAppNotificationSend.removeAttribute("aria-busy");
           inAppNotificationSend.textContent = "Send Notification";
         }
