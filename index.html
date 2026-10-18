@@ -266,15 +266,6 @@
           border-color var(--motion-instant) ease;
       }
 
-      .logout-button {
-        width: 100%;
-        border: 0;
-        border-inline-start: 2px solid transparent;
-        background: transparent;
-        cursor: pointer;
-        text-align: left;
-      }
-
       .nav-link:hover {
         color: var(--support-deep-orange);
         background: var(--support-soft-orange);
@@ -283,9 +274,49 @@
       .nav-link:focus-visible,
       .brand:focus-visible,
       .menu-toggle:focus-visible,
-      .sidebar-toggle:focus-visible {
+      .sidebar-toggle:focus-visible,
+      .topbar-logout-button:focus-visible {
         outline: 2px solid var(--color-border-strong);
         outline-offset: 2px;
+      }
+
+      .topbar-logout-button {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 auto;
+        place-items: center;
+        margin-left: auto;
+        padding: 0;
+        color: var(--color-text-tertiary);
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition:
+          color var(--motion-instant) ease,
+          background-color var(--motion-instant) ease;
+      }
+
+      .topbar-logout-button:hover {
+        color: var(--support-deep-orange);
+        background: var(--support-soft-orange);
+      }
+
+      .topbar-logout-button:active {
+        background: var(--color-border-muted);
+      }
+
+      .topbar-logout-button:disabled,
+      .topbar-logout-button[aria-disabled="true"] {
+        color: var(--color-text-inverse);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .topbar-logout-button[aria-busy="true"] {
+        cursor: progress;
+        pointer-events: none;
       }
 
       .brand[aria-disabled="true"] {
@@ -405,6 +436,25 @@
         padding: 0 var(--space-7);
         background: var(--color-surface-muted);
         border-bottom: var(--space-1) solid var(--color-border-muted);
+      }
+
+      .topbar-actions {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: var(--space-5);
+        margin-left: auto;
+      }
+
+      .topbar-actions .logout-status {
+        max-width: min(360px, 45vw);
+        margin: 0;
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+
+      .topbar-actions .logout-status[hidden] {
+        display: none;
       }
 
       .breadcrumb {
@@ -4492,20 +4542,6 @@
             </ul>
           </section>
 
-          <section class="nav-section" aria-label="Account navigation">
-            <ul class="nav-list">
-              <li>
-                <button class="nav-link logout-button" id="logout-button" type="button">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M10 17l5-5-5-5M15 12H3" />
-                    <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-                  </svg>
-                  <span class="nav-text" id="logout-label">Logout</span>
-                </button>
-                <p class="logout-status" id="logout-status" role="status" aria-live="polite" hidden></p>
-              </li>
-            </ul>
-          </section>
         </nav>
 
       </aside>
@@ -4537,6 +4573,16 @@
           </button>
           <span class="mobile-brand">DUKABARG</span>
           <div class="breadcrumb">Store / <strong id="breadcrumb-current">Dashboard</strong></div>
+          <div class="topbar-actions">
+            <p class="logout-status" id="logout-status" role="status" aria-live="polite" hidden></p>
+            <button class="topbar-logout-button" id="logout-button" type="button" title="Logout">
+              <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5M15 12H3" />
+                <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+              </svg>
+              <span class="visually-hidden" id="logout-label">Logout</span>
+            </button>
+          </div>
         </header>
 
         <section class="main-content" aria-label="Dashboard content">
