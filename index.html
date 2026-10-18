@@ -4178,16 +4178,47 @@
       }
 
       .notification-history-viewers h3 {
-        margin: 0 0 var(--space-4);
+        margin: 0 0 var(--space-5);
         font-size: var(--font-size-sm);
       }
 
-      .notification-history-viewers ul {
-        display: grid;
-        gap: var(--space-2);
-        margin: 0;
-        padding-left: var(--space-6);
+      .notification-viewers-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .notification-viewers-table {
+        width: 100%;
+        min-width: 480px;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .notification-viewers-table th {
+        padding: var(--space-4);
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .notification-viewers-table td {
+        padding: var(--space-4);
+        border-top: 1px solid var(--color-border-muted);
         font-size: var(--font-size-sm);
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+      }
+
+      .notification-viewers-table tbody tr:hover {
+        background: var(--color-surface-raised);
+      }
+
+      .notification-viewers-table td:first-child {
+        font-weight: 600;
       }
 
       @media (max-width: 600px) {
@@ -5679,7 +5710,14 @@
         <section class="notification-history-viewers" aria-labelledby="notification-history-viewers-heading">
           <h3 id="notification-history-viewers-heading">Users who viewed this notification</h3>
           <p class="notification-history-status" id="notification-history-viewers-status"></p>
-          <ul id="notification-history-viewers-list" hidden></ul>
+          <div class="notification-viewers-table-wrap" id="notification-history-viewers-table-wrap" hidden>
+            <table class="notification-viewers-table">
+              <thead>
+                <tr><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">Email</th></tr>
+              </thead>
+              <tbody id="notification-history-viewers-list"></tbody>
+            </table>
+          </div>
         </section>
         <div class="category-dialog-actions">
           <button class="category-secondary-button" type="button" data-close-dialog>Close</button>
@@ -7299,23 +7337,22 @@
 
         const viewersStatus = document.querySelector("#notification-history-viewers-status");
         const viewersList = document.querySelector("#notification-history-viewers-list");
+        const viewersTableWrap = document.querySelector("#notification-history-viewers-table-wrap");
         viewersList.replaceChildren();
+        viewersTableWrap.hidden = true;
         if (!notificationHistoryViewDialog.open) notificationHistoryViewDialog.showModal();
         if (!notificationHistoryState.inboxReadable) {
-              viewersStatus.textContent = "Recipient inbox records could not be read.";
-              viewersStatus.hidden = false;
-          viewersList.hidden = true;
+          viewersStatus.textContent = "Recipient inbox records could not be read.";
+          viewersStatus.hidden = false;
         } else if (!notificationHistoryHasViewMarkers(notificationId)) {
           viewersStatus.textContent = "View tracking is not present in the available recipient inbox records. The Android app must save a per-notification read/view marker when a user opens a notification.";
           viewersStatus.hidden = false;
-          viewersList.hidden = true;
         } else {
           let profiles = new Map(customerState.customers.map((customer) => [customer.uid, customer]));
           let profileError = null;
           if (viewers.length && !customerState.loaded) {
-            viewersStatus.textContent = "Loading viewer names and email addresses…";
+            viewersStatus.textContent = "Loading viewer name, phone, and email details…";
             viewersStatus.hidden = false;
-            viewersList.hidden = true;
             try {
               const usersSnapshot = await get(ref(database, "users"));
               const users = notificationHistoryEntries(usersSnapshot.val());
@@ -7331,17 +7368,30 @@
             ? `${viewers.length} users viewed this notification. Some profile details could not be loaded (${profileError?.code || "read error"}).`
             : `${viewers.length} users viewed this notification.`;
           viewersStatus.hidden = false;
-          viewersList.hidden = viewers.length === 0;
+          viewersTableWrap.hidden = viewers.length === 0;
           for (const [uid, inbox] of viewers) {
             const inboxEntry = inbox[notificationId];
             const profile = profiles.get(uid);
-            const name = String(inboxEntry?.name || inboxEntry?.userName || profile?.name || profile?.displayName || "").trim();
+            const name = String(
+              inboxEntry?.fullName ||
+              inboxEntry?.name ||
+              inboxEntry?.userName ||
+              profile?.name ||
+              profile?.fullName ||
+              profile?.displayName ||
+              "",
+            ).trim();
             const email = String(inboxEntry?.email || profile?.email || "").trim();
-            const user = document.createElement("li");
-            user.textContent = name
-              ? (email ? `${name} (${email})` : name)
-              : (email || uid);
-            viewersList.append(user);
+            const phone = customerPhone(inboxEntry || {}) ||
+              customerPhone(profile?.raw || profile || {});
+            const row = document.createElement("tr");
+            for (const value of [name || "Not available", phone || "Not available", email || "Not available"]) {
+              const cell = document.createElement("td");
+              cell.textContent = value;
+              row.append(cell);
+            }
+            if (!name && !phone && !email) row.cells[0].textContent = uid;
+            viewersList.append(row);
           }
         }
       }
