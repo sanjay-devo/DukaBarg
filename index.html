@@ -3759,6 +3759,298 @@
           margin-left: 0;
         }
       }
+
+      .in-app-notifications-page {
+        max-width: 920px;
+      }
+
+      .in-app-notification-card {
+        padding: var(--space-7);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 24px rgb(23 23 23 / 5%);
+      }
+
+      .in-app-notification-fields {
+        display: grid;
+        gap: var(--space-6);
+      }
+
+      .in-app-notification-field {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .in-app-notification-field label,
+      .in-app-notification-field-label {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+      }
+
+      .in-app-notification-field[hidden],
+      .in-app-notification-preview-section[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-upload-content {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .in-app-notification-upload-content[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-link-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: fit-content;
+        cursor: pointer;
+      }
+
+      .in-app-notification-link-toggle input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: var(--color-border-strong);
+      }
+
+      .in-app-notification-link-toggle input:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 3px;
+      }
+
+      .in-app-notification-field input[type="text"],
+      .in-app-notification-field input[type="url"],
+      .in-app-notification-field textarea {
+        width: 100%;
+        min-height: 44px;
+        padding: var(--space-4) var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-surface-muted);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+        font: inherit;
+      }
+
+      .in-app-notification-field textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .in-app-notification-field input:focus-visible,
+      .in-app-notification-field textarea:focus-visible,
+      .in-app-notification-upload:focus-within {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .in-app-notification-field input:disabled,
+      .in-app-notification-field textarea:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .in-app-notification-hint {
+        margin: 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .in-app-notification-upload {
+        display: flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-4) var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border: 1px dashed var(--color-border-strong);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        transition: background-color var(--motion-instant) ease;
+      }
+
+      .in-app-notification-upload:hover {
+        background: #fff4ef;
+      }
+
+      .in-app-notification-upload input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
+
+      .in-app-notification-preview-wrap {
+        position: relative;
+        width: min(100%, 420px);
+        overflow: hidden;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-lg);
+      }
+
+      .in-app-notification-image-actions {
+        position: absolute;
+        z-index: 1;
+        top: var(--space-3);
+        right: var(--space-3);
+        margin: 0;
+      }
+
+      .in-app-notification-image-actions[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-image-remove {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        padding: 0;
+        color: var(--color-text-primary);
+        background: rgb(255 255 255 / 88%);
+        border: 1px solid rgb(23 23 23 / 12%);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 1px 4px rgb(0 0 0 / 16%);
+        cursor: pointer;
+        font: inherit;
+        font-size: 22px;
+        line-height: 1;
+        transition:
+          background-color var(--motion-instant) ease,
+          transform var(--motion-instant) ease;
+      }
+
+      .in-app-notification-image-remove:hover:not(:disabled) {
+        background: var(--color-surface-muted);
+        transform: scale(1.06);
+      }
+
+      .in-app-notification-image-remove:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .in-app-notification-image-remove:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .in-app-notification-preview-wrap[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-preview {
+        display: block;
+        width: 100%;
+        max-height: 260px;
+        object-fit: contain;
+      }
+
+      .in-app-notification-progress {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .in-app-notification-progress[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-progress progress {
+        width: 100%;
+        height: 10px;
+        overflow: hidden;
+        accent-color: var(--color-border-strong);
+        border: 0;
+        border-radius: var(--radius-xl);
+      }
+
+      .in-app-notification-progress progress::-webkit-progress-bar {
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-xl);
+      }
+
+      .in-app-notification-progress progress::-webkit-progress-value {
+        background: linear-gradient(90deg, var(--color-border-strong), #f08b69);
+        border-radius: var(--radius-xl);
+        transition: width var(--motion-fast) ease;
+      }
+
+      .in-app-notification-progress progress[data-state="success"] {
+        accent-color: #18794e;
+      }
+
+      .in-app-notification-progress progress[data-state="success"]::-webkit-progress-value {
+        background: #18794e;
+      }
+
+      .in-app-notification-progress progress[data-state="error"] {
+        accent-color: var(--color-border-strong);
+      }
+
+      .in-app-notification-progress-label {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .in-app-notification-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-4);
+        margin-top: var(--space-7);
+      }
+
+      .in-app-notification-actions[hidden] {
+        display: none;
+      }
+
+      .in-app-notification-feedback {
+        margin: var(--space-6) 0 0;
+        padding: var(--space-5);
+        color: var(--color-text-primary);
+        background: var(--color-surface-raised);
+        border-left: 3px solid var(--color-border-strong);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-sm);
+      }
+
+      .in-app-notification-feedback[data-state="success"] {
+        color: #14532d;
+        background: #f0fdf4;
+        border-left-color: #18794e;
+      }
+
+      .in-app-notification-feedback[data-state="error"] {
+        color: #7f1d1d;
+        background: #fef2f2;
+      }
+
+      .in-app-notification-feedback[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .in-app-notification-card {
+          padding: var(--space-6);
+        }
+
+        .in-app-notification-actions > button {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -3919,6 +4211,15 @@
                 </a>
               </li>
               <li>
+                <a class="nav-link" href="#in-app-notifications">
+                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
+                    <path d="m17 3 2 2" />
+                  </svg>
+                  <span class="nav-text">In-App Notifications</span>
+                </a>
+              </li>
+              <li>
                 <a class="nav-link" href="#reports">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 19V5M4 19h17" />
@@ -4017,6 +4318,65 @@
               </svg>
             </span>
           </div>
+
+          <section class="in-app-notifications-page" id="in-app-notifications-page" aria-labelledby="in-app-notifications-title" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="in-app-notifications-title">In-App Notifications</h2>
+                <p>Compose a message for the Notifications page in the DukaBarg Android app.</p>
+              </div>
+            </div>
+            <form class="in-app-notification-card" id="in-app-notification-form">
+              <div class="in-app-notification-fields">
+                <div class="in-app-notification-field">
+                  <label for="in-app-notification-title">Title <span aria-hidden="true">*</span></label>
+                  <input id="in-app-notification-title" name="title" type="text" maxlength="120" required autocomplete="off" />
+                </div>
+                <div class="in-app-notification-field">
+                  <label for="in-app-notification-subtitle">Subtitle</label>
+                  <textarea id="in-app-notification-subtitle" name="subtitle" maxlength="300" rows="3"></textarea>
+                </div>
+                <div class="in-app-notification-field">
+                  <span class="in-app-notification-field-label">Image Upload</span>
+                  <label class="in-app-notification-link-toggle" for="in-app-notification-has-image-link">
+                    <input id="in-app-notification-has-image-link" type="checkbox" />
+                    I have an image link
+                  </label>
+                  <div class="in-app-notification-field" id="in-app-notification-url-field" hidden>
+                    <label for="in-app-notification-image-url">Image URL</label>
+                    <input id="in-app-notification-image-url" name="imageUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/image.jpg" />
+                    <p class="in-app-notification-hint">HTTP or HTTPS image URL.</p>
+                  </div>
+                  <div class="in-app-notification-upload-content" id="in-app-notification-upload-field">
+                    <label class="in-app-notification-upload" for="in-app-notification-image">
+                      Choose an image (JPEG, PNG, WebP, or GIF; up to 5 MB)
+                      <input id="in-app-notification-image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="in-app-notification-image-hint" />
+                    </label>
+                    <p class="in-app-notification-hint" id="in-app-notification-image-hint">An image is optional. You can remove it before sending.</p>
+                  </div>
+                </div>
+                <div class="in-app-notification-preview-section" id="in-app-notification-preview-section" hidden>
+                  <div class="in-app-notification-preview-wrap" id="in-app-notification-preview-wrap" hidden>
+                    <img class="in-app-notification-preview" id="in-app-notification-preview" alt="Selected notification image preview" />
+                    <div class="in-app-notification-image-actions" id="in-app-notification-image-actions" hidden>
+                      <button class="in-app-notification-image-remove" id="in-app-notification-image-remove" type="button" aria-label="Remove image" title="Remove image">&times;</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="in-app-notification-progress" id="in-app-notification-progress-wrap" hidden>
+                  <div class="in-app-notification-progress-label">
+                    <span id="in-app-notification-progress-status">Ready to upload</span>
+                    <span id="in-app-notification-progress-percent">0%</span>
+                  </div>
+                  <progress id="in-app-notification-progress" max="100" value="0" aria-label="In-app notification image upload progress"></progress>
+                </div>
+              </div>
+              <div class="in-app-notification-actions">
+                <button class="category-primary-button" id="in-app-notification-send" type="submit">Send Notification</button>
+              </div>
+              <p class="in-app-notification-feedback" id="in-app-notification-feedback" role="status" aria-live="polite" hidden></p>
+            </form>
+          </section>
 
           <section class="reports-page" id="reports-page" aria-labelledby="reports-title" hidden>
             <header class="reports-heading">
@@ -5138,6 +5498,7 @@
       const reportsPage = document.querySelector("#reports-page");
       const supportPage = document.querySelector("#support-page");
       const paymentSettingsPage = document.querySelector("#payment-settings-page");
+      const inAppNotificationsPage = document.querySelector("#in-app-notifications-page");
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
@@ -5190,6 +5551,7 @@
         const isReportsPage = activeLink.hash === "#reports";
         const isSupportPage = activeLink.hash === "#customer-support";
         const isPaymentSettingsPage = activeLink.hash === "#payment-settings";
+        const isInAppNotificationsPage = activeLink.hash === "#in-app-notifications";
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -5202,7 +5564,8 @@
         reportsPage.hidden = !isReportsPage;
         supportPage.hidden = !isSupportPage;
         paymentSettingsPage.hidden = !isPaymentSettingsPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage;
+        inAppNotificationsPage.hidden = !isInAppNotificationsPage;
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isInAppNotificationsPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
@@ -5498,6 +5861,29 @@
         "image/gif": "gif",
       };
       const maxCategoryImageBytes = 5 * 1024 * 1024;
+      const inAppNotificationForm = document.querySelector("#in-app-notification-form");
+      const inAppNotificationTitle = document.querySelector("#in-app-notification-title");
+      const inAppNotificationSubtitle = document.querySelector("#in-app-notification-subtitle");
+      const inAppNotificationHasImageLink = document.querySelector("#in-app-notification-has-image-link");
+      const inAppNotificationImageUrl = document.querySelector("#in-app-notification-image-url");
+      const inAppNotificationUrlField = document.querySelector("#in-app-notification-url-field");
+      const inAppNotificationUploadField = document.querySelector("#in-app-notification-upload-field");
+      const inAppNotificationImage = document.querySelector("#in-app-notification-image");
+      const inAppNotificationPreview = document.querySelector("#in-app-notification-preview");
+      const inAppNotificationPreviewWrap = document.querySelector("#in-app-notification-preview-wrap");
+      const inAppNotificationPreviewSection = document.querySelector("#in-app-notification-preview-section");
+      const inAppNotificationImageActions = document.querySelector("#in-app-notification-image-actions");
+      const inAppNotificationImageRemove = document.querySelector("#in-app-notification-image-remove");
+      const inAppNotificationProgressWrap = document.querySelector("#in-app-notification-progress-wrap");
+      const inAppNotificationProgress = document.querySelector("#in-app-notification-progress");
+      const inAppNotificationProgressStatus = document.querySelector("#in-app-notification-progress-status");
+      const inAppNotificationProgressPercent = document.querySelector("#in-app-notification-progress-percent");
+      const inAppNotificationSend = document.querySelector("#in-app-notification-send");
+      const inAppNotificationFeedback = document.querySelector("#in-app-notification-feedback");
+      let inAppNotificationPreviewObjectUrl = null;
+      let inAppNotificationSending = false;
+      let inAppNotificationPreviewSource = "";
+      let inAppNotificationLinkedImageReady = false;
       const categoryToastRegion = document.querySelector("#category-toast-region");
       const customerTableBody = document.querySelector("#customers-table-body");
       const customerLoading = document.querySelector("#customers-loading");
@@ -5595,6 +5981,330 @@
           ? `${action} failed (${code}): ${error?.message || String(error)}`
           : `${action} failed. Please retry.`;
       }
+
+      function setInAppNotificationFeedback(message, state = "status") {
+        inAppNotificationFeedback.textContent = message;
+        inAppNotificationFeedback.dataset.state = state;
+        inAppNotificationFeedback.setAttribute("role", state === "error" ? "alert" : "status");
+        inAppNotificationFeedback.setAttribute("aria-live", state === "error" ? "assertive" : "polite");
+        inAppNotificationFeedback.hidden = !message;
+      }
+
+      function clearInAppNotificationPreview() {
+        inAppNotificationPreviewSource = "";
+        inAppNotificationLinkedImageReady = false;
+        if (inAppNotificationPreviewObjectUrl) {
+          URL.revokeObjectURL(inAppNotificationPreviewObjectUrl);
+          inAppNotificationPreviewObjectUrl = null;
+        }
+        inAppNotificationPreview.removeAttribute("src");
+        inAppNotificationPreviewWrap.hidden = true;
+        inAppNotificationPreviewSection.hidden = true;
+        inAppNotificationImageActions.hidden = true;
+      }
+
+      function notificationImageUrl(value) {
+        if (!value.trim()) return "";
+        try {
+          const url = new URL(value.trim());
+          return ["http:", "https:"].includes(url.protocol) && url.hostname ? url.href : "";
+        } catch {
+          return "";
+        }
+      }
+
+      function updateInAppNotificationImageMode() {
+        const hasImageLink = inAppNotificationHasImageLink.checked;
+        inAppNotificationUrlField.hidden = !hasImageLink;
+        inAppNotificationImageUrl.disabled = !hasImageLink;
+        inAppNotificationUploadField.hidden = hasImageLink;
+        inAppNotificationImage.disabled = hasImageLink || inAppNotificationSending;
+      }
+
+      updateInAppNotificationImageMode();
+
+      function clearInAppNotificationImage(resetProgress = true) {
+        clearInAppNotificationPreview();
+        inAppNotificationImage.value = "";
+        if (resetProgress) {
+          inAppNotificationProgressWrap.hidden = true;
+          inAppNotificationProgress.value = 0;
+          inAppNotificationProgress.removeAttribute("data-state");
+          inAppNotificationProgressStatus.textContent = "";
+          inAppNotificationProgressPercent.textContent = "0%";
+        }
+      }
+
+      inAppNotificationPreview.addEventListener("load", () => {
+        if (!inAppNotificationPreviewSource || inAppNotificationPreview.src !== inAppNotificationPreviewSource) return;
+        inAppNotificationLinkedImageReady = true;
+        inAppNotificationImageActions.hidden = false;
+      });
+
+      inAppNotificationPreview.addEventListener("error", () => {
+        if (!inAppNotificationPreviewSource || inAppNotificationPreview.src !== inAppNotificationPreviewSource) return;
+        inAppNotificationLinkedImageReady = false;
+        inAppNotificationImageActions.hidden = true;
+        setInAppNotificationFeedback(
+          inAppNotificationHasImageLink.checked
+            ? "The image URL could not be loaded. Check the link and try again."
+            : "The selected image could not be previewed. Choose another image.",
+          "error",
+        );
+      });
+
+      async function validateInAppNotificationImage(file) {
+        if (!Object.prototype.hasOwnProperty.call(categoryImageMimeExtensions, file.type)) {
+          return "Choose a JPEG, PNG, WebP, or GIF image.";
+        }
+        if (file.size <= 0) return "The selected image is empty.";
+        if (file.size > maxCategoryImageBytes) return "Notification images must be 5 MB or smaller.";
+        let signature;
+        try {
+          signature = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+        } catch {
+          return "The selected image could not be read. Choose it again.";
+        }
+        const matches = {
+          "image/jpeg": signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff,
+          "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((byte, index) => signature[index] === byte),
+          "image/webp": String.fromCharCode(...signature.slice(0, 4)) === "RIFF" &&
+            String.fromCharCode(...signature.slice(8, 12)) === "WEBP",
+          "image/gif": ["GIF87a", "GIF89a"].includes(String.fromCharCode(...signature.slice(0, 6))),
+        };
+        return matches[file.type] ? "" : "The selected file contents do not match its image type.";
+      }
+
+      function notificationFirebaseErrorMessage(error, stage) {
+        const code = String(error?.code || "").toLowerCase();
+        if (code.includes("permission") || code.includes("unauthorized") || code.includes("unauthenticated")) {
+          return stage === "upload"
+            ? "Firebase Storage denied this image upload. Check Storage rules for authenticated admin uploads."
+            : "Firebase Realtime Database denied this save. The deployed rules must allow authenticated admins to write /inAppNotifications.";
+        }
+        if (code.includes("network") || code.includes("unavailable") || navigator.onLine === false) {
+          return "A network error interrupted the notification. Check your connection and retry.";
+        }
+        return isDevelopment
+          ? `Sending the in-app notification failed (${error?.code || "unknown"}): ${error?.message || String(error)}`
+          : "We couldn’t send the in-app notification. Please retry.";
+      }
+
+      async function uploadInAppNotificationImage(file, objectPath) {
+        const task = uploadBytesResumable(storageRef(storage, objectPath), file, {
+          contentType: file.type,
+        });
+        inAppNotificationProgressWrap.hidden = false;
+        inAppNotificationProgress.value = 0;
+        inAppNotificationProgress.removeAttribute("data-state");
+        inAppNotificationProgressStatus.textContent = "Uploading image";
+        inAppNotificationProgressPercent.textContent = "0%";
+        try {
+          await new Promise((resolve, reject) => {
+            task.on(
+              "state_changed",
+              (snapshot) => {
+                const percent = snapshot.totalBytes
+                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                  : 0;
+                inAppNotificationProgress.value = percent;
+                inAppNotificationProgressPercent.textContent = `${percent}%`;
+                inAppNotificationProgressStatus.textContent = "Uploading image";
+              },
+              reject,
+              resolve,
+            );
+          });
+          const imageUrl = await getDownloadURL(task.snapshot.ref);
+          inAppNotificationProgress.value = 100;
+          inAppNotificationProgress.dataset.state = "success";
+          inAppNotificationProgressStatus.textContent = "Image uploaded successfully";
+          inAppNotificationProgressPercent.textContent = "100%";
+          return imageUrl;
+        } catch (error) {
+          inAppNotificationProgress.dataset.state = "error";
+          inAppNotificationProgressStatus.textContent = "Image upload failed";
+          throw error;
+        }
+      }
+
+      inAppNotificationImage.addEventListener("change", async () => {
+        const file = inAppNotificationImage.files?.[0];
+        clearInAppNotificationPreview();
+        inAppNotificationProgressWrap.hidden = true;
+        inAppNotificationProgress.removeAttribute("data-state");
+        setInAppNotificationFeedback("");
+        if (!file) {
+          inAppNotificationImageActions.hidden = true;
+          return;
+        }
+        const validationError = await validateInAppNotificationImage(file);
+        if (inAppNotificationImage.files?.[0] !== file) return;
+        if (validationError) {
+          clearInAppNotificationImage();
+          setInAppNotificationFeedback(validationError, "error");
+          return;
+        }
+        inAppNotificationPreviewObjectUrl = URL.createObjectURL(file);
+        inAppNotificationPreviewSource = inAppNotificationPreviewObjectUrl;
+        inAppNotificationPreview.src = inAppNotificationPreviewObjectUrl;
+        inAppNotificationPreviewWrap.hidden = false;
+        inAppNotificationPreviewSection.hidden = false;
+      });
+
+      inAppNotificationHasImageLink.addEventListener("change", () => {
+        clearInAppNotificationImage();
+        inAppNotificationImageUrl.value = "";
+        updateInAppNotificationImageMode();
+        setInAppNotificationFeedback("");
+      });
+
+      inAppNotificationImageUrl.addEventListener("input", () => {
+        clearInAppNotificationPreview();
+        setInAppNotificationFeedback("");
+        const imageUrl = notificationImageUrl(inAppNotificationImageUrl.value);
+        if (!imageUrl) return;
+        inAppNotificationPreviewSource = imageUrl;
+        inAppNotificationPreview.src = imageUrl;
+        inAppNotificationPreviewWrap.hidden = false;
+        inAppNotificationPreviewSection.hidden = false;
+      });
+
+      inAppNotificationImageUrl.addEventListener("blur", () => {
+        if (inAppNotificationImageUrl.value.trim() && !notificationImageUrl(inAppNotificationImageUrl.value)) {
+          setInAppNotificationFeedback("Enter a valid HTTP or HTTPS image URL.", "error");
+        }
+      });
+
+      inAppNotificationImageRemove.addEventListener("click", () => {
+        if (inAppNotificationHasImageLink.checked) {
+          inAppNotificationImageUrl.value = "";
+          clearInAppNotificationPreview();
+        } else {
+          clearInAppNotificationImage();
+        }
+        setInAppNotificationFeedback("");
+      });
+
+      [inAppNotificationTitle, inAppNotificationSubtitle].forEach((field) => {
+        field.addEventListener("input", () => setInAppNotificationFeedback(""));
+      });
+
+      inAppNotificationForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (inAppNotificationSend.disabled || inAppNotificationSending) return;
+        const title = inAppNotificationTitle.value.trim();
+        if (!title) {
+          setInAppNotificationFeedback("Enter a title before sending.", "error");
+          inAppNotificationTitle.focus();
+          return;
+        }
+        if (!auth.currentUser || !paymentSettingsState.authorized) {
+          setInAppNotificationFeedback("Your admin session is not verified. Sign in again before sending.", "error");
+          return;
+        }
+
+        const imageUrl = inAppNotificationHasImageLink.checked
+          ? notificationImageUrl(inAppNotificationImageUrl.value)
+          : "";
+        if (inAppNotificationHasImageLink.checked && inAppNotificationImageUrl.value.trim() && !imageUrl) {
+          setInAppNotificationFeedback("Enter a valid HTTP or HTTPS image URL.", "error");
+          inAppNotificationImageUrl.focus();
+          return;
+        }
+        if (inAppNotificationHasImageLink.checked && imageUrl && !inAppNotificationLinkedImageReady) {
+          setInAppNotificationFeedback("Wait for the image preview to load, or check the image URL.", "error");
+          inAppNotificationImageUrl.focus();
+          return;
+        }
+
+        inAppNotificationSending = true;
+        const imageFile = inAppNotificationHasImageLink.checked
+          ? null
+          : inAppNotificationImage.files?.[0] || null;
+        const controls = [
+          inAppNotificationTitle,
+          inAppNotificationSubtitle,
+          inAppNotificationHasImageLink,
+          inAppNotificationImageUrl,
+          inAppNotificationImage,
+          inAppNotificationImageRemove,
+          inAppNotificationSend,
+        ];
+        controls.forEach((control) => {
+          control.disabled = true;
+        });
+        inAppNotificationSend.setAttribute("aria-busy", "true");
+        inAppNotificationSend.textContent = "Sending…";
+        setInAppNotificationFeedback("");
+
+        let imageObjectPath = "";
+        let stage = "save";
+        try {
+          if (imageFile) {
+            const validationError = await validateInAppNotificationImage(imageFile);
+            if (validationError) {
+              clearInAppNotificationImage();
+              setInAppNotificationFeedback(validationError, "error");
+              return;
+            }
+          }
+          const notificationRef = push(ref(database, "inAppNotifications"));
+          const notificationId = notificationRef.key;
+          if (!notificationId) {
+            setInAppNotificationFeedback("Firebase could not create a notification ID. Please retry.", "error");
+            return;
+          }
+          let savedImageUrl = imageUrl;
+          if (imageFile) {
+            const extension = categoryImageMimeExtensions[imageFile.type];
+            imageObjectPath = `in-app-notifications/${notificationId}/${crypto.randomUUID()}.${extension}`;
+            stage = "upload";
+            savedImageUrl = await uploadInAppNotificationImage(imageFile, imageObjectPath);
+            stage = "save";
+          }
+          const timestamp = Date.now();
+          await set(notificationRef, {
+            title,
+            subtitle: inAppNotificationSubtitle.value.trim(),
+            imageUrl: savedImageUrl,
+            timestamp,
+          });
+          const uploadedImage = Boolean(imageFile);
+          inAppNotificationForm.reset();
+          clearInAppNotificationImage(!uploadedImage);
+          updateInAppNotificationImageMode();
+          inAppNotificationImageUrl.value = "";
+          if (uploadedImage) {
+            inAppNotificationProgressWrap.hidden = false;
+            inAppNotificationProgress.value = 100;
+            inAppNotificationProgress.dataset.state = "success";
+            inAppNotificationProgressStatus.textContent = "Image uploaded successfully";
+            inAppNotificationProgressPercent.textContent = "100%";
+          }
+          setInAppNotificationFeedback("Notification sent successfully.", "success");
+        } catch (error) {
+          console.error(`Sending in-app notification failed (Firebase code: ${error?.code || "unknown"}).`, error);
+          if (imageObjectPath) {
+            try {
+              await deleteObject(storageRef(storage, imageObjectPath));
+            } catch (cleanupError) {
+              if (cleanupError?.code !== "storage/object-not-found") {
+                console.error("Removing an unused in-app notification image failed.", cleanupError);
+              }
+            }
+          }
+          setInAppNotificationFeedback(notificationFirebaseErrorMessage(error, stage), "error");
+        } finally {
+          inAppNotificationSending = false;
+          controls.forEach((control) => {
+            control.disabled = false;
+          });
+          updateInAppNotificationImageMode();
+          inAppNotificationSend.removeAttribute("aria-busy");
+          inAppNotificationSend.textContent = "Send Notification";
+        }
+      });
 
       function paymentSettingsControls() {
         return document.querySelectorAll(
