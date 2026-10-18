@@ -4065,6 +4065,142 @@
           width: 100%;
         }
       }
+
+      .notification-history {
+        margin-top: var(--space-7);
+      }
+
+      .notification-history-toolbar {
+        border-bottom: 1px solid var(--color-border-muted);
+      }
+
+      .notification-history-toolbar .customers-bulk-actions {
+        margin-left: auto;
+      }
+
+      .notification-history-table {
+        min-width: 1060px;
+      }
+
+      .notification-history-table th:nth-child(1) { width: 5%; }
+      .notification-history-table th:nth-child(2) { width: 9%; }
+      .notification-history-table th:nth-child(3) { width: 19%; }
+      .notification-history-table th:nth-child(4) { width: 26%; }
+      .notification-history-table th:nth-child(5) { width: 18%; }
+      .notification-history-table th:nth-child(6) { width: 13%; }
+      .notification-history-table th:nth-child(7) { width: 10%; }
+
+      .notification-history-table th:last-child,
+      .notification-history-table td:last-child {
+        text-align: right;
+      }
+
+      .notification-history button:focus-visible,
+      .notification-history input:focus-visible {
+        outline: 2px solid var(--color-border-strong);
+        outline-offset: 2px;
+      }
+
+      .notification-history-thumb {
+        display: block;
+        width: 56px;
+        height: 48px;
+        object-fit: cover;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+      }
+
+      .notification-history-thumb-placeholder {
+        display: grid;
+        width: 56px;
+        height: 48px;
+        place-items: center;
+        color: var(--color-text-inverse);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+      }
+
+      .notification-history-title,
+      .notification-history-subtitle {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .notification-history-title {
+        font-weight: 600;
+      }
+
+      .notification-history-date {
+        white-space: nowrap;
+      }
+
+      .notification-history-status {
+        margin: 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-sm);
+      }
+
+      .notification-history-status[data-kind="error"] {
+        color: #8c321b;
+      }
+
+      .notification-history-status-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: var(--space-5) 0;
+      }
+
+      .notification-history-details-image {
+        display: block;
+        width: 100%;
+        max-height: 360px;
+        margin-bottom: var(--space-6);
+        object-fit: contain;
+        background: var(--color-surface-raised);
+        border-radius: var(--radius-md);
+      }
+
+      .notification-history-viewers {
+        grid-column: 1 / -1;
+        margin-top: var(--space-6);
+        padding-top: var(--space-5);
+        border-top: 1px solid var(--color-border-muted);
+      }
+
+      .notification-history-viewers h3 {
+        margin: 0 0 var(--space-4);
+        font-size: var(--font-size-sm);
+      }
+
+      .notification-history-viewers ul {
+        display: grid;
+        gap: var(--space-2);
+        margin: 0;
+        padding-left: var(--space-6);
+        font-size: var(--font-size-sm);
+      }
+
+      @media (max-width: 600px) {
+        .notification-history-toolbar {
+          align-items: flex-start;
+        }
+
+        .notification-history-toolbar .customers-bulk-actions {
+          margin-left: 0;
+        }
+
+        .notification-history-status-wrap {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
     </style>
   </head>
   <body>
@@ -4390,6 +4526,61 @@
               </div>
               <p class="in-app-notification-feedback" id="in-app-notification-feedback" role="status" aria-live="polite" hidden></p>
             </form>
+            <section class="notification-history category-table-card customers-card" id="notification-history" aria-labelledby="notification-history-title">
+              <div class="category-heading-row">
+                <div>
+                  <h2 id="notification-history-title">Notification History</h2>
+                  <p>Review notifications sent to DukaBarg app users.</p>
+                </div>
+              </div>
+              <div class="customers-toolbar notification-history-toolbar">
+                <span id="notification-history-selection-summary" aria-live="polite">0 selected</span>
+                <div class="customers-bulk-actions" id="notification-history-bulk-actions" aria-label="Bulk notification actions" hidden>
+                  <button class="category-secondary-button" id="notification-history-clear-selection" type="button">Clear selection</button>
+                  <button class="category-danger-button" id="notification-history-delete-selected" type="button" disabled>Delete Selected</button>
+                </div>
+              </div>
+              <div class="notification-history-status-wrap">
+                <p class="notification-history-status" id="notification-history-status" role="status" aria-live="polite">Loading notification history…</p>
+                <button class="category-secondary-button" id="notification-history-retry" type="button" hidden>Retry loading</button>
+              </div>
+              <div class="customers-feedback notification-history-empty" id="notification-history-empty" role="status" aria-live="polite" hidden>No in-app notifications found.</div>
+              <div class="customers-table-wrap" id="notification-history-table-wrap" hidden>
+                <table class="customers-table notification-history-table">
+                  <thead>
+                    <tr>
+                      <th scope="col"><input id="notification-history-select-page" type="checkbox" aria-label="Select all notifications on this page" /></th>
+                      <th scope="col">Image</th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Subtitle</th>
+                      <th scope="col">Sent Date &amp; Time</th>
+                      <th scope="col">Viewed</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="notification-history-table-body"></tbody>
+                </table>
+              </div>
+              <div class="category-pagination customers-pagination" id="notification-history-pagination" hidden>
+                <div class="pagination-summary">
+                  <span id="notification-history-page-summary"></span>
+                  <label class="pagination-size" for="notification-history-page-size">Rows per page
+                    <select id="notification-history-page-size" aria-label="Notification rows per page">
+                      <option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="category-pagination-controls">
+                  <button type="button" id="notification-history-previous">Previous</button>
+                  <div class="pagination-pages" id="notification-history-page-buttons" aria-label="Notification pages"></div>
+                  <label class="pagination-page-input" for="notification-history-page-input">Page
+                    <input id="notification-history-page-input" type="number" min="1" value="1" inputmode="numeric" aria-label="Go to notification page" />
+                    <span>of <span id="notification-history-page-count">1</span></span>
+                  </label>
+                  <button type="button" id="notification-history-next">Next</button>
+                </div>
+              </div>
+            </section>
           </section>
 
           <section class="reports-page" id="reports-page" aria-labelledby="reports-title" hidden>
@@ -5464,6 +5655,25 @@
       </div>
     </dialog>
 
+    <dialog class="category-dialog" id="notification-history-view-dialog" aria-labelledby="notification-history-view-title">
+      <div class="category-dialog-form">
+        <div class="category-dialog-heading">
+          <div><h2 id="notification-history-view-title">Notification details</h2></div>
+          <button class="category-dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
+        </div>
+        <img class="notification-history-details-image" id="notification-history-view-image" alt="" hidden />
+        <dl class="category-view-details" id="notification-history-view-details"></dl>
+        <section class="notification-history-viewers" aria-labelledby="notification-history-viewers-heading">
+          <h3 id="notification-history-viewers-heading">Users who viewed this notification</h3>
+          <p class="notification-history-status" id="notification-history-viewers-status"></p>
+          <ul id="notification-history-viewers-list" hidden></ul>
+        </section>
+        <div class="category-dialog-actions">
+          <button class="category-secondary-button" type="button" data-close-dialog>Close</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="category-dialog" id="category-confirm-dialog" aria-labelledby="category-confirm-title">
       <div class="category-dialog-form">
         <div class="category-dialog-heading">
@@ -5683,6 +5893,23 @@
       const sidebarBadgeState = {
         stopOrders: null,
         stopCallbacks: null,
+      };
+      const notificationHistoryState = {
+        notifications: {},
+        inbox: {},
+        inboxReadable: false,
+        selected: new Set(),
+        stopNotifications: null,
+        stopInbox: null,
+        loading: false,
+        loaded: false,
+        notificationsLoaded: false,
+        inboxLoaded: false,
+        inboxError: "",
+        error: "",
+        deleting: false,
+        page: 1,
+        pageSize: 10,
       };
       const categoryState = {
         categories: [],
@@ -6612,6 +6839,697 @@
           inAppNotificationSend.removeAttribute("aria-busy");
           inAppNotificationSend.textContent = "Send Notification";
         }
+      });
+
+      const notificationHistory = document.querySelector("#notification-history");
+      const notificationHistoryStatus = document.querySelector("#notification-history-status");
+      const notificationHistoryRetry = document.querySelector("#notification-history-retry");
+      const notificationHistoryTableBody = document.querySelector("#notification-history-table-body");
+      const notificationHistoryTableWrap = document.querySelector("#notification-history-table-wrap");
+      const notificationHistoryEmpty = document.querySelector("#notification-history-empty");
+      const notificationHistoryPagination = document.querySelector("#notification-history-pagination");
+      const notificationHistorySelectPage = document.querySelector("#notification-history-select-page");
+      const notificationHistoryDeleteSelected = document.querySelector("#notification-history-delete-selected");
+      const notificationHistoryClearSelection = document.querySelector("#notification-history-clear-selection");
+      const notificationHistoryViewDialog = document.querySelector("#notification-history-view-dialog");
+      const notificationHistoryActionMenu = document.createElement("div");
+      notificationHistoryActionMenu.className = "customer-action-menu";
+      notificationHistoryActionMenu.id = "notification-history-action-menu";
+      notificationHistoryActionMenu.setAttribute("role", "menu");
+      notificationHistoryActionMenu.setAttribute("aria-label", "Notification actions");
+      notificationHistoryActionMenu.hidden = true;
+      document.body.append(notificationHistoryActionMenu);
+      let activeNotificationHistoryMenuTrigger = null;
+      let notificationHistoryViewRequest = 0;
+
+      function setNotificationHistoryStatus(message, kind = "status", retry = false) {
+        notificationHistoryStatus.textContent = message;
+        notificationHistoryStatus.dataset.kind = kind;
+        notificationHistoryStatus.hidden = !message;
+        notificationHistoryRetry.hidden = !retry;
+        notificationHistoryStatus.parentElement.hidden = !message && !retry;
+      }
+
+      function notificationHistoryEntries(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      }
+
+      function notificationHistoryRecipientEntries(notificationId) {
+        return Object.entries(notificationHistoryState.inbox).filter(([, userInbox]) =>
+          userInbox && typeof userInbox === "object" && !Array.isArray(userInbox) &&
+          Object.prototype.hasOwnProperty.call(userInbox, notificationId));
+      }
+
+      function notificationHistoryViewed(entry) {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) return false;
+        for (const field of ["viewedAt", "readAt", "seenAt"]) {
+          if (entry[field] !== undefined && entry[field] !== null && entry[field] !== "" && entry[field] !== false) {
+            return true;
+          }
+        }
+        return ["viewed", "isViewed", "read", "isRead", "seen", "isSeen"]
+          .some((field) => entry[field] === true);
+      }
+
+      function notificationHistoryHasViewMarkers(notificationId) {
+        return notificationHistoryRecipientEntries(notificationId).some(([, userInbox]) => {
+          const entry = userInbox[notificationId];
+          return entry && typeof entry === "object" &&
+            ["viewedAt", "readAt", "seenAt", "viewed", "isViewed", "read", "isRead", "seen", "isSeen"]
+              .some((field) => Object.prototype.hasOwnProperty.call(entry, field));
+        });
+      }
+
+      function notificationHistoryTimestamp(record) {
+        return record.createdAt ?? record.timestamp;
+      }
+
+      function notificationHistoryTimeValue(value) {
+        if (typeof value === "number") return value;
+        if (typeof value === "string") {
+          const numericValue = /^\d+$/.test(value) ? Number(value) : Date.parse(value);
+          return Number.isNaN(numericValue) ? 0 : numericValue;
+        }
+        return 0;
+      }
+
+      function notificationHistoryFormatDate(value) {
+        if (value === undefined || value === null || value === "") return "Unavailable";
+        const dateValue = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : value;
+        const date = new Date(dateValue);
+        return Number.isNaN(date.getTime()) ? "Unavailable" : date.toLocaleString();
+      }
+
+      function notificationHistorySetDetail(details, label, value) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value;
+        details.append(term, description);
+      }
+
+      function notificationHistoryRows() {
+        return Object.entries(notificationHistoryState.notifications)
+          .filter(([id, record]) => validSupportFirebaseKey(id) && record &&
+            typeof record === "object" && !Array.isArray(record))
+          .sort(([, first], [, second]) =>
+            notificationHistoryTimeValue(notificationHistoryTimestamp(second)) -
+            notificationHistoryTimeValue(notificationHistoryTimestamp(first)));
+      }
+
+      function notificationHistoryRecipientCountText(notificationId) {
+        if (!notificationHistoryState.inboxReadable) return "Unavailable";
+        const recipients = notificationHistoryRecipientEntries(notificationId);
+        if (!notificationHistoryHasViewMarkers(notificationId)) {
+          return `Not tracked / ${recipients.length.toLocaleString("en-IN")}`;
+        }
+        const viewed = recipients.filter(([, inbox]) =>
+          notificationHistoryViewed(inbox[notificationId])).length;
+        return `${viewed.toLocaleString("en-IN")} / ${recipients.length.toLocaleString("en-IN")}`;
+      }
+
+      function createNotificationHistoryThumbnail(imageUrl, title) {
+        const placeholder = () => {
+          const element = document.createElement("span");
+          element.className = "notification-history-thumb-placeholder";
+          element.textContent = "No image";
+          element.setAttribute("aria-label", "No notification image");
+          return element;
+        };
+        if (!imageUrl) return placeholder();
+        const image = document.createElement("img");
+        image.className = "notification-history-thumb";
+        image.alt = `${title} thumbnail`;
+        image.loading = "lazy";
+        image.src = imageUrl;
+        image.addEventListener("error", () => image.replaceWith(placeholder()), { once: true });
+        return image;
+      }
+
+      function renderNotificationHistory() {
+        const records = notificationHistoryRows();
+        const knownIds = new Set(records.map(([id]) => id));
+        for (const id of notificationHistoryState.selected) {
+          if (!knownIds.has(id)) notificationHistoryState.selected.delete(id);
+        }
+        const pageCount = Math.max(1, Math.ceil(records.length / notificationHistoryState.pageSize));
+        notificationHistoryState.page = Math.min(notificationHistoryState.page, pageCount);
+        const startIndex = (notificationHistoryState.page - 1) * notificationHistoryState.pageSize;
+        const visible = records.slice(startIndex, startIndex + notificationHistoryState.pageSize);
+        const pageIds = visible.map(([id]) => id);
+        const selectedOnPage = pageIds.filter((id) => notificationHistoryState.selected.has(id)).length;
+        const summary = document.querySelector("#notification-history-selection-summary");
+        const bulkActions = document.querySelector("#notification-history-bulk-actions");
+        summary.textContent = `${notificationHistoryState.selected.size.toLocaleString("en-IN")} selected`;
+        bulkActions.hidden = notificationHistoryState.selected.size === 0;
+        notificationHistoryDeleteSelected.disabled =
+          notificationHistoryState.deleting || !notificationHistoryState.inboxReadable ||
+          notificationHistoryState.selected.size === 0;
+        notificationHistoryClearSelection.disabled = notificationHistoryState.deleting;
+        notificationHistorySelectPage.disabled = notificationHistoryState.deleting || pageIds.length === 0;
+        notificationHistorySelectPage.checked = pageIds.length > 0 && selectedOnPage === pageIds.length;
+        notificationHistorySelectPage.indeterminate = selectedOnPage > 0 && selectedOnPage < pageIds.length;
+        notificationHistoryTableBody.replaceChildren();
+        notificationHistoryTableWrap.hidden = !notificationHistoryState.loaded || records.length === 0;
+        notificationHistoryEmpty.hidden = !notificationHistoryState.loaded || records.length > 0;
+        notificationHistoryPagination.hidden = !notificationHistoryState.loaded || records.length === 0;
+
+        for (const [id, record] of visible) {
+          const row = document.createElement("tr");
+          const selectCell = document.createElement("td");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = notificationHistoryState.selected.has(id);
+          checkbox.disabled = notificationHistoryState.deleting;
+          checkbox.setAttribute("aria-label", `Select ${String(record.title || "notification")}`);
+          checkbox.dataset.notificationSelect = id;
+          selectCell.append(checkbox);
+
+          const imageCell = document.createElement("td");
+          const imageUrl = notificationImageUrl(String(record.imageUrl || ""));
+          const titleText = String(record.title || "Untitled notification");
+          imageCell.append(createNotificationHistoryThumbnail(imageUrl, titleText));
+
+          const titleCell = document.createElement("td");
+          const title = document.createElement("strong");
+          title.className = "notification-history-title";
+          title.textContent = titleText;
+          title.title = titleText;
+          titleCell.append(title);
+
+          const subtitleCell = document.createElement("td");
+          const subtitleText = String(record.subtitle || "");
+          const subtitle = document.createElement("span");
+          subtitle.className = "notification-history-subtitle";
+          subtitle.textContent = subtitleText || "—";
+          subtitle.title = subtitleText;
+          subtitleCell.append(subtitle);
+
+          const dateCell = document.createElement("td");
+          dateCell.className = "notification-history-date";
+          dateCell.textContent = notificationHistoryFormatDate(notificationHistoryTimestamp(record));
+
+          const viewedCell = document.createElement("td");
+          viewedCell.textContent = notificationHistoryRecipientCountText(id);
+
+          const actionsCell = document.createElement("td");
+          const trigger = document.createElement("button");
+          trigger.type = "button";
+          trigger.className = "customer-actions-trigger";
+          trigger.textContent = "⋮";
+          trigger.setAttribute("aria-label", `Actions for ${String(record.title || "notification")}`);
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.setAttribute("aria-haspopup", "menu");
+          trigger.disabled = notificationHistoryState.deleting;
+          trigger.dataset.notificationMenuTrigger = id;
+          actionsCell.append(trigger);
+          row.append(selectCell, imageCell, titleCell, subtitleCell, dateCell, viewedCell, actionsCell);
+          notificationHistoryTableBody.append(row);
+        }
+        renderNotificationHistoryPagination(records.length, pageCount);
+      }
+
+      function renderNotificationHistoryPagination(total, pageCount) {
+        const pageButtons = document.querySelector("#notification-history-page-buttons");
+        pageButtons.replaceChildren();
+        const startPage = Math.max(1, Math.min(notificationHistoryState.page - 3, pageCount - 6));
+        const endPage = Math.min(pageCount, startPage + 6);
+        for (let page = startPage; page <= endPage; page += 1) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to notification page ${page}`);
+          if (page === notificationHistoryState.page) button.setAttribute("aria-current", "page");
+          button.addEventListener("click", () => {
+            notificationHistoryState.page = page;
+            renderNotificationHistory();
+          });
+          pageButtons.append(button);
+        }
+        const start = total ? (notificationHistoryState.page - 1) * notificationHistoryState.pageSize + 1 : 0;
+        const end = total ? Math.min(total, notificationHistoryState.page * notificationHistoryState.pageSize) : 0;
+        document.querySelector("#notification-history-page-summary").textContent =
+          `Showing ${start.toLocaleString("en-IN")}–${end.toLocaleString("en-IN")} of ${total.toLocaleString("en-IN")} notifications`;
+        document.querySelector("#notification-history-page-count").textContent = String(pageCount);
+        const pageInput = document.querySelector("#notification-history-page-input");
+        pageInput.max = String(pageCount);
+        pageInput.value = String(notificationHistoryState.page);
+        document.querySelector("#notification-history-previous").disabled = notificationHistoryState.page <= 1;
+        document.querySelector("#notification-history-next").disabled = notificationHistoryState.page >= pageCount;
+      }
+
+      function closeNotificationHistoryActionMenu(returnFocus = false) {
+        notificationHistoryActionMenu.hidden = true;
+        activeNotificationHistoryMenuTrigger?.setAttribute("aria-expanded", "false");
+        if (returnFocus) activeNotificationHistoryMenuTrigger?.focus();
+        activeNotificationHistoryMenuTrigger = null;
+      }
+
+      function openNotificationHistoryActionMenu(trigger, notificationId) {
+        if (activeNotificationHistoryMenuTrigger === trigger && !notificationHistoryActionMenu.hidden) {
+          closeNotificationHistoryActionMenu();
+          return;
+        }
+        closeNotificationHistoryActionMenu();
+        activeNotificationHistoryMenuTrigger = trigger;
+        trigger.setAttribute("aria-expanded", "true");
+        notificationHistoryActionMenu.innerHTML = `
+          <button type="button" role="menuitem" data-notification-action="view" data-notification-id="${escapeCustomerText(notificationId)}">View Details</button>
+          <button type="button" role="menuitem" data-notification-action="delete" data-notification-id="${escapeCustomerText(notificationId)}" ${notificationHistoryState.inboxReadable ? "" : "disabled"}>Delete</button>`;
+        notificationHistoryActionMenu.hidden = false;
+        const rect = trigger.getBoundingClientRect();
+        const menuRect = notificationHistoryActionMenu.getBoundingClientRect();
+        const left = Math.max(8, Math.min(window.innerWidth - menuRect.width - 8, rect.right - menuRect.width));
+        const openBelow = rect.bottom + menuRect.height <= window.innerHeight - 8;
+        const preferredTop = openBelow
+          ? rect.bottom + 4
+          : rect.top - menuRect.height - 4;
+        const top = Math.max(8, Math.min(window.innerHeight - menuRect.height - 8, preferredTop));
+        notificationHistoryActionMenu.style.left = `${left}px`;
+        notificationHistoryActionMenu.style.top = `${top}px`;
+        notificationHistoryActionMenu.querySelector("button")?.focus();
+      }
+
+      function startNotificationHistory() {
+        if (notificationHistoryState.loading || notificationHistoryState.stopNotifications ||
+            notificationHistoryState.stopInbox) return;
+        notificationHistoryState.loading = true;
+        notificationHistoryState.error = "";
+        notificationHistoryState.inboxReadable = false;
+        notificationHistoryState.notificationsLoaded = false;
+        notificationHistoryState.inboxLoaded = false;
+        notificationHistoryState.inboxError = "";
+        notificationHistoryState.inbox = {};
+        setNotificationHistoryStatus(
+          notificationHistoryState.loaded ? "Refreshing notification history…" : "Loading notification history…",
+        );
+        const finishLoad = () => {
+          if (!notificationHistoryState.notificationsLoaded ||
+              (!notificationHistoryState.inboxLoaded && !notificationHistoryState.inboxError)) return;
+          notificationHistoryState.loading = false;
+          notificationHistoryState.loaded = true;
+          renderNotificationHistory();
+          if (notificationHistoryState.inboxError) {
+            setNotificationHistoryStatus(
+              `Notifications loaded, but recipient inbox access failed (${notificationHistoryState.inboxError}). Viewed counts are unavailable and deletion is disabled until inbox access is restored.`,
+              "error",
+              true,
+            );
+          } else {
+            setNotificationHistoryStatus("");
+          }
+        };
+        try {
+          notificationHistoryState.stopNotifications = onValue(
+            ref(database, "inAppNotifications"),
+            (snapshot) => {
+              notificationHistoryState.notifications = notificationHistoryEntries(snapshot.val());
+              notificationHistoryState.notificationsLoaded = true;
+              finishLoad();
+            },
+            (error) => {
+              notificationHistoryState.error = "notifications";
+              notificationHistoryState.loading = false;
+              console.error("Loading in-app notification history failed.", error);
+              setNotificationHistoryStatus(
+                `Could not load notification history (${error?.code || "read error"}). Verify Firebase Realtime Database read permissions.`,
+                "error",
+                true,
+              );
+            },
+          );
+          notificationHistoryState.stopInbox = onValue(
+            ref(database, "userInAppNotifications"),
+            (snapshot) => {
+              notificationHistoryState.inbox = notificationHistoryEntries(snapshot.val());
+              notificationHistoryState.inboxReadable = true;
+              notificationHistoryState.inboxLoaded = true;
+              notificationHistoryState.inboxError = "";
+              finishLoad();
+            },
+            (error) => {
+              notificationHistoryState.error = "inbox";
+              notificationHistoryState.inboxError = String(error?.code || "read failure");
+              notificationHistoryState.inboxReadable = false;
+              console.error("Loading in-app notification recipient inboxes failed.", error);
+              finishLoad();
+            },
+          );
+        } catch (error) {
+          notificationHistoryState.loading = false;
+          notificationHistoryState.error = "load";
+          console.error("Starting in-app notification history failed.", error);
+          setNotificationHistoryStatus("Could not load notification history.", "error", true);
+        }
+      }
+
+      function stopNotificationHistory() {
+        notificationHistoryState.stopNotifications?.();
+        notificationHistoryState.stopInbox?.();
+        notificationHistoryState.stopNotifications = null;
+        notificationHistoryState.stopInbox = null;
+        notificationHistoryState.loading = false;
+      }
+
+      async function openNotificationHistoryDetails(notificationId) {
+        const record = notificationHistoryState.notifications[notificationId];
+        if (!record || typeof record !== "object" || Array.isArray(record)) return;
+        const requestId = ++notificationHistoryViewRequest;
+        const details = document.querySelector("#notification-history-view-details");
+        const image = document.querySelector("#notification-history-view-image");
+        const recipients = notificationHistoryRecipientEntries(notificationId);
+        const viewers = recipients.filter(([, inbox]) => notificationHistoryViewed(inbox[notificationId]));
+        details.replaceChildren();
+        const imageUrl = notificationImageUrl(String(record.imageUrl || ""));
+        image.hidden = !imageUrl;
+        if (imageUrl) {
+          image.src = imageUrl;
+          image.alt = `${String(record.title || "Notification")} image`;
+        } else {
+          image.removeAttribute("src");
+          image.alt = "";
+        }
+        notificationHistorySetDetail(details, "Title", String(record.title || "Untitled notification"));
+        notificationHistorySetDetail(details, "Subtitle", String(record.subtitle || "—"));
+        notificationHistorySetDetail(details, "Sent", notificationHistoryFormatDate(notificationHistoryTimestamp(record)));
+        notificationHistorySetDetail(
+          details,
+          "Total recipients",
+          notificationHistoryState.inboxReadable ? String(recipients.length) : "Unavailable (inbox read failed)",
+        );
+        notificationHistorySetDetail(
+          details,
+          "Viewed",
+          !notificationHistoryState.inboxReadable
+            ? "Unavailable (inbox read failed)"
+            : notificationHistoryHasViewMarkers(notificationId)
+              ? String(viewers.length)
+              : "Not tracked in the available recipient records",
+        );
+
+        const viewersStatus = document.querySelector("#notification-history-viewers-status");
+        const viewersList = document.querySelector("#notification-history-viewers-list");
+        viewersList.replaceChildren();
+        if (!notificationHistoryViewDialog.open) notificationHistoryViewDialog.showModal();
+        if (!notificationHistoryState.inboxReadable) {
+              viewersStatus.textContent = "Recipient inbox records could not be read.";
+              viewersStatus.hidden = false;
+          viewersList.hidden = true;
+        } else if (!notificationHistoryHasViewMarkers(notificationId)) {
+          viewersStatus.textContent = "View tracking is not present in the available recipient inbox records. The Android app must save a per-notification read/view marker when a user opens a notification.";
+          viewersStatus.hidden = false;
+          viewersList.hidden = true;
+        } else {
+          let profiles = new Map(customerState.customers.map((customer) => [customer.uid, customer]));
+          let profileError = null;
+          if (viewers.length && !customerState.loaded) {
+            viewersStatus.textContent = "Loading viewer names and email addresses…";
+            viewersStatus.hidden = false;
+            viewersList.hidden = true;
+            try {
+              const usersSnapshot = await get(ref(database, "users"));
+              const users = notificationHistoryEntries(usersSnapshot.val());
+              profiles = new Map(Object.entries(users)
+                .filter(([, user]) => user && typeof user === "object" && !Array.isArray(user)));
+            } catch (error) {
+              profileError = error;
+              console.error("Loading notification viewer profile details failed.", error);
+            }
+          }
+          if (requestId !== notificationHistoryViewRequest) return;
+          viewersStatus.textContent = profileError
+            ? `${viewers.length} users viewed this notification. Some profile details could not be loaded (${profileError?.code || "read error"}).`
+            : `${viewers.length} users viewed this notification.`;
+          viewersStatus.hidden = false;
+          viewersList.hidden = viewers.length === 0;
+          for (const [uid, inbox] of viewers) {
+            const inboxEntry = inbox[notificationId];
+            const profile = profiles.get(uid);
+            const name = String(inboxEntry?.name || inboxEntry?.userName || profile?.name || profile?.displayName || "").trim();
+            const email = String(inboxEntry?.email || profile?.email || "").trim();
+            const user = document.createElement("li");
+            user.textContent = name
+              ? (email ? `${name} (${email})` : name)
+              : (email || uid);
+            viewersList.append(user);
+          }
+        }
+      }
+
+      function notificationHistoryStoragePath(imageUrl) {
+        if (!imageUrl || typeof imageUrl !== "string") return "";
+        try {
+          if (imageUrl.startsWith("gs://")) {
+            const match = imageUrl.match(/^gs:\/\/([^/]+)\/(.+)$/);
+            if (!match || decodeURIComponent(match[1]) !== storage.app.options.storageBucket) return "";
+            const objectPath = decodeURIComponent(match[2]);
+            return objectPath.startsWith("in-app-notifications/") && !objectPath.includes("..")
+              ? objectPath
+              : "";
+          }
+          const url = new URL(imageUrl);
+          const match = url.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/);
+          if (!match || url.hostname !== "firebasestorage.googleapis.com" ||
+              decodeURIComponent(match[1]) !== storage.app.options.storageBucket) return "";
+          const objectPath = decodeURIComponent(match[2]);
+          return objectPath.startsWith("in-app-notifications/") && !objectPath.includes("..")
+            ? objectPath
+            : "";
+        } catch {
+          return "";
+        }
+      }
+
+      async function deleteInAppNotification(notificationId) {
+        if (!notificationHistoryState.inboxReadable) {
+          throw new Error("Recipient inboxes could not be read; refusing an incomplete deletion.");
+        }
+        if (!validSupportFirebaseKey(notificationId)) throw new Error("Invalid notification ID.");
+        const [recordSnapshot, inboxSnapshot] = await Promise.all([
+          get(ref(database, `inAppNotifications/${notificationId}`)),
+          get(ref(database, "userInAppNotifications")),
+        ]);
+        const record = recordSnapshot.val() || notificationHistoryState.notifications[notificationId];
+        const latestInbox = notificationHistoryEntries(inboxSnapshot.val());
+        const recipients = Object.entries(latestInbox)
+          .filter(([, userInbox]) => userInbox && typeof userInbox === "object" &&
+            !Array.isArray(userInbox) && Object.prototype.hasOwnProperty.call(userInbox, notificationId))
+          .map(([uid]) => uid);
+        if (recipients.some((uid) => !validSupportFirebaseKey(uid))) {
+          throw new Error("A recipient inbox has an invalid Firebase UID; refusing an incomplete deletion.");
+        }
+        for (const uid of recipients) {
+          await remove(ref(database, `userInAppNotifications/${uid}/${notificationId}`));
+        }
+        await remove(ref(database, `inAppNotifications/${notificationId}`));
+        notificationHistoryState.selected.delete(notificationId);
+        const objectPath = notificationHistoryStoragePath(String(record?.imageUrl || ""));
+        let storageCleanupError = null;
+        if (objectPath) {
+          try {
+            const latestInboxSnapshot = await get(ref(database, "userInAppNotifications"));
+            const latestInbox = notificationHistoryEntries(latestInboxSnapshot.val());
+            const inboxReferenceExists = Object.values(latestInbox).some((userInbox) =>
+              userInbox && typeof userInbox === "object" && !Array.isArray(userInbox) &&
+              Object.values(userInbox).some((entry) => entry && typeof entry === "object" &&
+                notificationImageReferencesStoragePath(entry.imageUrl, objectPath)));
+            if (inboxReferenceExists) {
+              console.info(`Keeping shared notification image ${objectPath}.`);
+            } else {
+              const result = await deleteUnreferencedInAppNotificationImage(
+                objectPath,
+                String(record.imageUrl),
+              );
+              if (result === "referenced") {
+                console.info(`Keeping shared notification image ${objectPath}.`);
+              }
+            }
+          } catch (error) {
+            storageCleanupError = error;
+            console.error("Removing an unreferenced in-app notification image failed.", error);
+          }
+        }
+        return { storageCleanupError };
+      }
+
+      async function deleteSelectedInAppNotifications(notificationIds) {
+        if (!notificationIds.length || notificationHistoryState.deleting) return;
+        const confirmed = window.confirm(
+          notificationIds.length === 1
+            ? "Delete this notification and its recipient inbox entries?"
+            : `Delete these ${notificationIds.length} notifications and their recipient inbox entries?`,
+        );
+        if (!confirmed) return;
+        notificationHistoryState.deleting = true;
+        notificationHistoryDeleteSelected.disabled = true;
+        setNotificationHistoryStatus("Deleting notifications…");
+        let deletedCount = 0;
+        const deletionErrors = [];
+        const storageCleanupErrors = [];
+        try {
+          for (const notificationId of notificationIds) {
+            try {
+              const result = await deleteInAppNotification(notificationId);
+              if (result.storageCleanupError) {
+                storageCleanupErrors.push(result.storageCleanupError);
+              }
+              notificationHistoryState.selected.delete(notificationId);
+              deletedCount += 1;
+            } catch (error) {
+              console.error(`Deleting in-app notification ${notificationId} failed.`, error);
+              deletionErrors.push(error);
+            }
+          }
+          const deletedMessage = `${deletedCount} of ${notificationIds.length} notification${notificationIds.length === 1 ? "" : "s"} deleted.`;
+          const deletionCodes = [...new Set(deletionErrors.map((error) =>
+            String(error?.code || (error instanceof Error ? error.message : "unknown error"))))];
+          const deletionMessage = deletionErrors.length
+            ? ` ${deletionErrors.length} could not be deleted (${deletionCodes.join(", ")}); retry to clean up any remaining inbox entries.`
+            : "";
+          const storageCodes = [...new Set(storageCleanupErrors.map((error) =>
+            String(error?.code || (error instanceof Error ? error.message : "unknown error"))))];
+          const storageMessage = storageCleanupErrors.length
+            ? ` ${storageCleanupErrors.length} Storage image${storageCleanupErrors.length === 1 ? "" : "s"} could not be checked or removed (${storageCodes.join(", ")}); notification data was deleted.`
+            : "";
+          setNotificationHistoryStatus(
+            `${deletedMessage}${deletionMessage}${storageMessage}`,
+            deletionErrors.length || storageCleanupErrors.length ? "error" : "status",
+          );
+        } finally {
+          notificationHistoryState.deleting = false;
+          renderNotificationHistory();
+        }
+      }
+
+      notificationHistoryRetry.addEventListener("click", () => {
+        stopNotificationHistory();
+        startNotificationHistory();
+      });
+
+      notificationHistorySelectPage.addEventListener("change", () => {
+        const ids = notificationHistoryRows()
+          .slice((notificationHistoryState.page - 1) * notificationHistoryState.pageSize,
+            notificationHistoryState.page * notificationHistoryState.pageSize)
+          .map(([id]) => id);
+        if (notificationHistorySelectPage.checked) {
+          ids.forEach((id) => notificationHistoryState.selected.add(id));
+        } else {
+          ids.forEach((id) => notificationHistoryState.selected.delete(id));
+        }
+        renderNotificationHistory();
+      });
+
+      notificationHistoryDeleteSelected.addEventListener("click", () => {
+        deleteSelectedInAppNotifications([...notificationHistoryState.selected]);
+      });
+      notificationHistoryClearSelection.addEventListener("click", () => {
+        notificationHistoryState.selected.clear();
+        renderNotificationHistory();
+      });
+
+      notificationHistoryTableBody.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("[data-notification-select]");
+        if (!checkbox) return;
+        if (checkbox.checked) notificationHistoryState.selected.add(checkbox.dataset.notificationSelect);
+        else notificationHistoryState.selected.delete(checkbox.dataset.notificationSelect);
+        renderNotificationHistory();
+      });
+
+      notificationHistoryTableBody.addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-notification-menu-trigger]");
+        if (trigger) {
+          openNotificationHistoryActionMenu(trigger, trigger.dataset.notificationMenuTrigger);
+        }
+      });
+
+      notificationHistoryActionMenu.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-notification-action]");
+        if (!action || action.disabled) return;
+        const { notificationId } = action.dataset;
+        const actionName = action.dataset.notificationAction;
+        closeNotificationHistoryActionMenu();
+        if (actionName === "view") {
+          openNotificationHistoryDetails(notificationId);
+        } else if (actionName === "delete") {
+          deleteSelectedInAppNotifications([notificationId]);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (notificationHistoryActionMenu.hidden ||
+            notificationHistoryActionMenu.contains(event.target) ||
+            activeNotificationHistoryMenuTrigger?.contains(event.target)) return;
+        closeNotificationHistoryActionMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (notificationHistoryActionMenu.hidden) return;
+        const items = [...notificationHistoryActionMenu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
+        const index = items.indexOf(document.activeElement);
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeNotificationHistoryActionMenu(true);
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const next = event.key === "ArrowDown" ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+          items[next]?.focus();
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          items[0]?.focus();
+        } else if (event.key === "End") {
+          event.preventDefault();
+          items[items.length - 1]?.focus();
+        } else if (event.key === "Tab") {
+          closeNotificationHistoryActionMenu();
+        }
+      });
+      window.addEventListener("scroll", () => closeNotificationHistoryActionMenu(), true);
+      window.addEventListener("resize", () => closeNotificationHistoryActionMenu());
+
+      document.querySelector("#notification-history-previous").addEventListener("click", () => {
+        notificationHistoryState.page = Math.max(1, notificationHistoryState.page - 1);
+        renderNotificationHistory();
+      });
+      document.querySelector("#notification-history-next").addEventListener("click", () => {
+        notificationHistoryState.page += 1;
+        renderNotificationHistory();
+      });
+      document.querySelector("#notification-history-page-input").addEventListener("change", (event) => {
+        const page = Number(event.target.value);
+        const count = Math.max(1, Math.ceil(notificationHistoryRows().length / notificationHistoryState.pageSize));
+        if (!Number.isInteger(page) || page < 1 || page > count) {
+          event.target.value = String(notificationHistoryState.page);
+          showCategoryToast(`Enter a page number from 1 to ${count}.`, "error");
+          return;
+        }
+        notificationHistoryState.page = page;
+        renderNotificationHistory();
+      });
+      document.querySelector("#notification-history-page-size").addEventListener("change", (event) => {
+        notificationHistoryState.pageSize = Number(event.target.value);
+        notificationHistoryState.page = 1;
+        renderNotificationHistory();
+      });
+
+      window.addEventListener("hashchange", () => {
+        if (window.location.hash === "#in-app-notifications" && paymentSettingsState.authorized) {
+          startNotificationHistory();
+        } else {
+          stopNotificationHistory();
+          closeNotificationHistoryActionMenu();
+        }
+      });
+      if (window.location.hash === "#in-app-notifications" && paymentSettingsState.authorized) {
+        startNotificationHistory();
+      }
+
+      notificationHistoryViewDialog.querySelectorAll("[data-close-dialog]").forEach((button) => {
+        button.addEventListener("click", () => notificationHistoryViewDialog.close());
+      });
+      notificationHistoryViewDialog.addEventListener("click", (event) => {
+        if (event.target === notificationHistoryViewDialog) notificationHistoryViewDialog.close();
+      });
+      notificationHistoryViewDialog.addEventListener("close", () => {
+        notificationHistoryViewRequest += 1;
       });
 
       function paymentSettingsControls() {
@@ -14531,6 +15449,7 @@
         if (!user) {
           paymentSettingsState.authorized = false;
           paymentSettingsState.generation += 1;
+          stopNotificationHistory();
           stopSidebarBadgeListeners();
           stopSupportListeners();
           stopReportsListeners();
@@ -14542,6 +15461,7 @@
           return existingCheck;
         }
         stopSidebarBadgeListeners();
+        stopNotificationHistory();
         paymentSettingsState.authorized = false;
         paymentSettingsState.generation += 1;
 
@@ -14562,6 +15482,7 @@
             if (!profile.exists() || profile.child("role").val() !== "admin") {
               paymentSettingsState.authorized = false;
               paymentSettingsState.generation += 1;
+              stopNotificationHistory();
               stopSidebarBadgeListeners();
               stopSupportListeners();
               stopReportsListeners();
@@ -14585,6 +15506,9 @@
             authGate.hidden = true;
             paymentSettingsState.authorized = true;
             startSidebarBadgeListeners();
+            if (window.location.hash === "#in-app-notifications") {
+              startNotificationHistory();
+            }
             if (!categoryState.stopCategories) {
               startCategoryListeners();
             }
