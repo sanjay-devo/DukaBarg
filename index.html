@@ -715,6 +715,9 @@
     </style>
     <style>
       .category-page[hidden],
+      .push-notifications-page[hidden],
+      .in-app-notifications-page[hidden],
+      .notification-history-page[hidden],
       .products-page[hidden],
       .inventory-page[hidden],
       .customers-page[hidden],
@@ -4353,20 +4356,12 @@
             <h2 class="section-label" id="management-label">MANAGEMENT</h2>
             <ul class="nav-list">
               <li>
-                <a class="nav-link" href="#push-notifications">
+                <a class="nav-link" href="#notifications">
                   <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
-                  </svg>
-                  <span class="nav-text">Push Notifications</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="#in-app-notifications">
-                  <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
-                    <path d="m17 3 2 2" />
                   </svg>
-                  <span class="nav-text">App Notifications</span>
+                  <span class="nav-text">Notifications</span>
                 </a>
               </li>
               <li>
@@ -4469,7 +4464,21 @@
             </span>
           </div>
 
-          <section class="in-app-notifications-page" id="in-app-notifications-page" aria-labelledby="in-app-notifications-title" hidden>
+          <section class="notifications-page category-page" id="notifications-page" aria-label="Notifications" hidden>
+            <div role="tablist" class="category-tabs" aria-label="Notification sections">
+              <button class="category-tab" id="notifications-push-tab" type="button" role="tab" data-notification-tab="push" aria-controls="push-notifications-page" aria-selected="false">Push Notifications</button>
+              <button class="category-tab" id="notifications-app-tab" type="button" role="tab" data-notification-tab="app" aria-controls="in-app-notifications-page" aria-selected="false">App Notifications</button>
+              <button class="category-tab" id="notifications-history-tab" type="button" role="tab" data-notification-tab="history" aria-controls="notification-history-page" aria-selected="false">Notification History</button>
+            </div>
+            <section class="push-notifications-page" id="push-notifications-page" role="tabpanel" aria-labelledby="notifications-push-tab" hidden>
+              <div class="category-heading-row">
+                <div>
+                  <h2>Push Notifications</h2>
+                  <p>Push notification management is not configured in this dashboard.</p>
+                </div>
+              </div>
+            </section>
+          <section class="in-app-notifications-page" id="in-app-notifications-page" role="tabpanel" aria-labelledby="notifications-app-tab" hidden>
             <div class="category-heading-row">
               <div>
                 <h2 id="in-app-notifications-title">App Notifications</h2>
@@ -4526,13 +4535,16 @@
               </div>
               <p class="in-app-notification-feedback" id="in-app-notification-feedback" role="status" aria-live="polite" hidden></p>
             </form>
-            <section class="notification-history category-table-card customers-card" id="notification-history" aria-labelledby="notification-history-title">
-              <div class="category-heading-row">
-                <div>
-                  <h2 id="notification-history-title">Notification History</h2>
-                  <p>Review notifications sent to DukaBarg app users.</p>
-                </div>
+          </section>
+
+          <section class="notification-history-page" id="notification-history-page" role="tabpanel" aria-labelledby="notifications-history-tab" hidden>
+            <div class="category-heading-row">
+              <div>
+                <h2 id="notification-history-title">Notification History</h2>
+                <p>Review notifications sent to DukaBarg app users.</p>
               </div>
+            </div>
+            <section class="notification-history category-table-card customers-card" id="notification-history" aria-label="Sent notifications">
               <div class="customers-toolbar notification-history-toolbar">
                 <span id="notification-history-selection-summary" aria-live="polite">0 selected</span>
                 <div class="customers-bulk-actions" id="notification-history-bulk-actions" aria-label="Bulk notification actions" hidden>
@@ -4581,6 +4593,7 @@
                 </div>
               </div>
             </section>
+          </section>
           </section>
 
           <section class="reports-page" id="reports-page" aria-labelledby="reports-title" hidden>
@@ -5722,10 +5735,46 @@
       const reportsPage = document.querySelector("#reports-page");
       const supportPage = document.querySelector("#support-page");
       const paymentSettingsPage = document.querySelector("#payment-settings-page");
+      const notificationsPage = document.querySelector("#notifications-page");
       const inAppNotificationsPage = document.querySelector("#in-app-notifications-page");
+      const notificationHistoryPage = document.querySelector("#notification-history-page");
+      const pushNotificationsPage = document.querySelector("#push-notifications-page");
+      const notificationTabRoutes = {
+        push: "#notifications-push",
+        app: "#notifications-app",
+        history: "#notifications-history",
+      };
       const welcomeCard = document.querySelector(".welcome-card");
       const desktopMedia = window.matchMedia("(min-width: 761px)");
       let isSidebarCollapsed = false;
+
+      function isNotificationsRoute(hash = window.location.hash) {
+        return hash === "#notifications" ||
+          hash === "#push-notifications" ||
+          hash === "#in-app-notifications" ||
+          hash === "#notification-history" ||
+          Object.values(notificationTabRoutes).includes(hash);
+      }
+
+      function currentNotificationTab() {
+        if (window.location.hash === "#push-notifications" ||
+            window.location.hash === notificationTabRoutes.push) return "push";
+        if (window.location.hash === "#notification-history" ||
+            window.location.hash === notificationTabRoutes.history) return "history";
+        return "app";
+      }
+
+      function updateNotificationTabs() {
+        const activeTab = currentNotificationTab();
+        document.querySelectorAll("#notifications-page [data-notification-tab]").forEach((tab) => {
+          const selected = tab.dataset.notificationTab === activeTab;
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+        });
+        pushNotificationsPage.hidden = activeTab !== "push";
+        inAppNotificationsPage.hidden = activeTab !== "app";
+        notificationHistoryPage.hidden = activeTab !== "history";
+      }
 
       function updateSidebarMode() {
         const isDesktopCollapsed = isSidebarCollapsed && desktopMedia.matches;
@@ -5762,10 +5811,15 @@
 
       function updateCurrentLink() {
         const links = sidebar.querySelectorAll(".nav-link");
+        const routeHash = window.location.hash;
         const currentLink = Array.from(links).find(
           (link) => link.hash === window.location.hash,
         );
-        const activeLink = currentLink || links[0];
+        const activeLink = currentLink ||
+          (isNotificationsRoute(routeHash)
+            ? sidebar.querySelector('.nav-link[href="#notifications"]')
+            : null) ||
+          links[0];
         const pageName = activeLink.querySelector(".nav-text").textContent.trim();
         const isCategoriesPage = activeLink.hash === "#categories";
         const isProductsPage = activeLink.hash === "#products";
@@ -5775,7 +5829,7 @@
         const isReportsPage = activeLink.hash === "#reports";
         const isSupportPage = activeLink.hash === "#customer-support";
         const isPaymentSettingsPage = activeLink.hash === "#payment-settings";
-        const isInAppNotificationsPage = activeLink.hash === "#in-app-notifications";
+        const isNotificationsPage = activeLink.hash === "#notifications" || isNotificationsRoute(routeHash);
 
         links.forEach((link) => link.removeAttribute("aria-current"));
         activeLink.setAttribute("aria-current", "page");
@@ -5788,12 +5842,28 @@
         reportsPage.hidden = !isReportsPage;
         supportPage.hidden = !isSupportPage;
         paymentSettingsPage.hidden = !isPaymentSettingsPage;
-        inAppNotificationsPage.hidden = !isInAppNotificationsPage;
-        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isInAppNotificationsPage;
+        notificationsPage.hidden = !isNotificationsPage;
+        if (isNotificationsPage) updateNotificationTabs();
+        welcomeCard.hidden = isCategoriesPage || isProductsPage || isInventoryPage || isCustomersPage || isOrdersPage || isReportsPage || isSupportPage || isPaymentSettingsPage || isNotificationsPage;
         welcomeEyebrow.textContent = `YOUR ${pageName.toUpperCase()} AT A GLANCE`;
         welcomeTitle.textContent = `Welcome to your ${pageName.toLowerCase()}`;
         document.title = `${pageName} | DukaBarg`;
       }
+
+      const notificationTabs = [...document.querySelectorAll("#notifications-page [data-notification-tab]")];
+      notificationTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => {
+          window.location.hash = notificationTabRoutes[tab.dataset.notificationTab];
+        });
+        tab.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          event.preventDefault();
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          const nextTab = notificationTabs[(index + direction + notificationTabs.length) % notificationTabs.length];
+          nextTab.focus();
+          nextTab.click();
+        });
+      });
 
       updateCurrentLink();
       updateSidebarMode();
@@ -7511,14 +7581,16 @@
       });
 
       window.addEventListener("hashchange", () => {
-        if (window.location.hash === "#in-app-notifications" && paymentSettingsState.authorized) {
+        if (["#notification-history", "#notifications-history"].includes(window.location.hash) &&
+            paymentSettingsState.authorized) {
           startNotificationHistory();
         } else {
           stopNotificationHistory();
           closeNotificationHistoryActionMenu();
         }
       });
-      if (window.location.hash === "#in-app-notifications" && paymentSettingsState.authorized) {
+      if (["#notification-history", "#notifications-history"].includes(window.location.hash) &&
+          paymentSettingsState.authorized) {
         startNotificationHistory();
       }
 
@@ -15506,7 +15578,7 @@
             authGate.hidden = true;
             paymentSettingsState.authorized = true;
             startSidebarBadgeListeners();
-            if (window.location.hash === "#in-app-notifications") {
+            if (["#notification-history", "#notifications-history"].includes(window.location.hash)) {
               startNotificationHistory();
             }
             if (!categoryState.stopCategories) {
