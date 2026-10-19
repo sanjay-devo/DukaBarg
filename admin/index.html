@@ -5576,10 +5576,20 @@
             </select>
           </div>
           <div class="category-field">
-            <label for="category-image-input">Category image</label>
+            <span class="category-field-label">Category image</span>
             <div class="category-image-editor">
-              <input id="category-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="category-image-hint category-image-upload-status" />
-              <span class="category-field-hint" id="category-image-hint">JPEG, PNG, WebP, or GIF. Maximum file size: 5 MB. Existing image is kept unless replaced.</span>
+              <label class="in-app-notification-link-toggle" for="category-image-link-toggle">
+                <input id="category-image-link-toggle" type="checkbox" />
+                I have an image link
+              </label>
+              <div id="category-image-url-field" hidden>
+                <input id="category-image-url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/image.jpg" aria-label="Category image URL" aria-describedby="category-image-url-hint category-image-upload-status" />
+                <span class="category-field-hint" id="category-image-url-hint">Enter an HTTP or HTTPS image URL. Existing image is kept unless replaced.</span>
+              </div>
+              <div id="category-image-upload-field">
+                <input id="category-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="category-image-hint category-image-upload-status" />
+                <span class="category-field-hint" id="category-image-hint">JPEG, PNG, WebP, or GIF. Maximum file size: 5 MB. Existing image is kept unless replaced.</span>
+              </div>
               <div class="category-image-preview-wrap" id="category-image-preview-wrap" hidden>
                 <img class="category-image-preview" id="category-image-preview" alt="Selected category image preview" />
                 <button class="category-image-remove" id="category-image-remove" type="button" aria-label="Remove Image" title="Remove Image">×</button>
@@ -6316,6 +6326,10 @@
       const categoryNameInput = document.querySelector("#category-name");
       const categoryStatusSelect = document.querySelector("#category-status");
       const categorySaveButton = document.querySelector("#category-save-button");
+      const categoryImageLinkToggle = document.querySelector("#category-image-link-toggle");
+      const categoryImageUrlField = document.querySelector("#category-image-url-field");
+      const categoryImageUrlInput = document.querySelector("#category-image-url");
+      const categoryImageUploadField = document.querySelector("#category-image-upload-field");
       const categoryImageInput = document.querySelector("#category-image-input");
       const categoryImagePreview = document.querySelector("#category-image-preview");
       const categoryImagePreviewWrap = document.querySelector("#category-image-preview-wrap");
@@ -12161,6 +12175,10 @@
       function resetCategoryImageSelection() {
         clearCategoryImagePreviewObjectUrl();
         categoryImageRemovalRequested = false;
+        categoryImageLinkToggle.checked = false;
+        categoryImageUrlInput.value = "";
+        categoryImageUrlField.hidden = true;
+        categoryImageUploadField.hidden = false;
         categoryImageInput.value = "";
         categoryImagePreviewWrap.hidden = true;
         categoryImagePreview.removeAttribute("src");
@@ -12781,7 +12799,20 @@
       async function saveCategoryInternal(event) {
         event.preventDefault();
         categoryFormError.hidden = true;
-        const imageFile = categoryImageInput.files?.[0] || null;
+        const imageFile = categoryImageLinkToggle.checked ? null : categoryImageInput.files?.[0] || null;
+        let linkedImageUrl = "";
+        if (categoryImageLinkToggle.checked && categoryImageUrlInput.value.trim()) {
+          try {
+            const parsedImageUrl = new URL(categoryImageUrlInput.value.trim());
+            if (!["http:", "https:"].includes(parsedImageUrl.protocol)) throw new Error("Invalid image URL protocol.");
+            linkedImageUrl = parsedImageUrl.href;
+          } catch {
+            categoryFormError.textContent = "Enter a valid HTTP or HTTPS image URL.";
+            categoryFormError.hidden = false;
+            categoryImageUrlInput.focus();
+            return;
+          }
+        }
         const imageValidationError = await categoryImageValidationError(imageFile);
         if (imageValidationError) {
           categoryFormError.textContent = imageValidationError;
@@ -12936,6 +12967,8 @@
             );
             fields.imageUrl = uploadedImageUrl;
             categorySaveButton.textContent = "Saving…";
+          } else if (linkedImageUrl) {
+            fields.imageUrl = linkedImageUrl;
           } else if (existing && categoryImageRemovalRequested) {
             fields.imageUrl = null;
           }
@@ -12959,6 +12992,7 @@
           if (
             existing?.imageUrl &&
             ((uploadedImageUrl && existing.imageUrl !== uploadedImageUrl) ||
+              (linkedImageUrl && existing.imageUrl !== linkedImageUrl) ||
               (!imageFile && categoryImageRemovalRequested))
           ) {
             const cleanup = await removeManagedCategoryImage(existing.imageUrl, categoryId, latestCategories);
@@ -13264,6 +13298,48 @@
 
       document.querySelector("#category-add-button").addEventListener("click", () => openCategoryForm());
       document.querySelector("#category-retry").addEventListener("click", startCategoryListeners);
+      categoryImageLinkToggle.addEventListener("change", () => {
+        if (categoryImageLinkToggle.checked && categoryImageInput.files?.length) {
+          categoryImageLinkToggle.checked = false;
+          categoryImageUploadStatus.textContent = "Remove the selected image file before switching to an image link.";
+          return;
+        }
+        const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        categoryImageUrlField.hidden = !categoryImageLinkToggle.checked;
+        categoryImageUploadField.hidden = categoryImageLinkToggle.checked;
+        if (categoryImageLinkToggle.checked) {
+          categoryImageUrlInput.value = categoryImageRemovalRequested ? "" : existing?.imageUrl || "";
+        } else {
+          categoryImageUrlInput.value = "";
+          showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = categoryImageRemovalRequested
+            ? "Existing image will be removed when you save."
+            : existing?.imageUrl
+              ? "Existing image will be kept."
+              : "";
+        }
+      });
+      categoryImageUrlInput.addEventListener("input", () => {
+        const value = categoryImageUrlInput.value.trim();
+        if (!value) {
+          const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+          showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
+          categoryImageUploadStatus.textContent = categoryImageRemovalRequested
+            ? "Existing image will be removed when you save."
+            : existing?.imageUrl
+              ? "Existing image will be kept unless replaced."
+              : "";
+          return;
+        }
+        const imageUrl = safeCategoryImageUrl(value);
+        if (!imageUrl || !/^https?:\/\//i.test(value)) {
+          categoryImageUploadStatus.textContent = "Enter a valid HTTP or HTTPS image URL.";
+          return;
+        }
+        categoryImageRemovalRequested = false;
+        showCategoryImagePreview(imageUrl);
+        categoryImageUploadStatus.textContent = "Image link ready to save.";
+      });
       categoryImageInput.addEventListener("change", async () => {
         const file = categoryImageInput.files?.[0] || null;
         const validationError = await categoryImageValidationError(file);
@@ -13291,6 +13367,16 @@
       categoryImageRemoveButton.addEventListener("click", () => {
         const selectedFile = categoryImageInput.files?.[0] || null;
         const existing = categoryState.categories.find((entry) => entry.id === categoryState.editingId);
+        if (categoryImageLinkToggle.checked) {
+          const hadImage = Boolean(categoryImageUrlInput.value.trim() || existing?.imageUrl);
+          categoryImageUrlInput.value = "";
+          categoryImageRemovalRequested = hadImage;
+          showCategoryImagePreview();
+          categoryImageUploadStatus.textContent = hadImage
+            ? "Existing image will be removed when you save."
+            : "Image removed. Enter a link if needed.";
+          return;
+        }
         if (selectedFile) {
           categoryImageInput.value = "";
           showCategoryImagePreview(categoryImageRemovalRequested ? "" : existing?.imageUrl || "");
