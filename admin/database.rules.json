@@ -34,6 +34,8 @@
     "active_callbacks": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "status": {
           ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
           ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
@@ -43,7 +45,8 @@
     "support_callbacks": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       "$recordKey": {
-        ".write": false,
+        ".read": "auth != null && (auth.uid === $recordKey || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $recordKey || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "status": {
           ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && data.parent().exists()",
           ".validate": "newData.isString() && (newData.val() === 'PENDING' || newData.val() === 'CONNECTING' || newData.val() === 'CONNECTED' || newData.val() === 'ENDED' || newData.val() === 'EXPIRED' || newData.val() === 'CANCELLED')"
@@ -72,11 +75,28 @@
       }
     },
     "categories": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".read": true,
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
     },
     "products": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".indexOn": ["category", "subCategory", "isTrending", "createdAt"]
+    },
+    "carts": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+    "search_history": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "trending_searches": {
+      ".read": true,
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
     },
     "orders": {
@@ -169,11 +189,11 @@
     },
     "settings": {
       "charges": {
-        ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".read": true,
         ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
       },
       "payment": {
-        ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".read": true,
         ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
       }
     },
@@ -187,6 +207,16 @@
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+    "notification_analytics": {
+      "$notificationId": {
+        "opens": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
       }
     }
   }
