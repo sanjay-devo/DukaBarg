@@ -332,35 +332,6 @@
             margin-bottom: 15px;
         }
 
-        /* Copy Code Floating Bar */
-        .copy-code-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2000;
-        }
-
-        .btn-copy-full {
-            background-color: #27AE60;
-            color: #FFFFFF;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-copy-full:hover {
-            background-color: #219653;
-            transform: scale(1.05);
-        }
-
         /* Footer */
         footer {
             background-color: var(--primary);
@@ -573,13 +544,6 @@
         </div>
     </section>
 
-    <!-- Floating Copy Code Button -->
-    <div class="copy-code-container">
-        <button class="btn-copy-full" onclick="copyEntireHTML()">
-            📋 Copy Full Code
-        </button>
-    </div>
-
     <!-- Footer Section -->
     <footer id="contact">
         <div class="footer-grid">
@@ -594,18 +558,17 @@
             <div class="footer-links">
                 <h4>Legal Policies</h4>
                 <ul>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms & Conditions</a></li>
-                    <li><a href="#">Returns & Refund Policy</a></li>
-                    <li><a href="#">Account Deletion</a></li>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                    <li><a href="returns-refund.html">Returns & Refund Policy</a></li>
+                    <li><a href="delete-account.html">Account Deletion</a></li>
                 </ul>
             </div>
             <div class="footer-links">
                 <h4>App Links</h4>
                 <ul>
                     <li><a href="https://play.google.com/store/apps/details?id=com.dukans.india" target="_blank">Download for Android</a></li>
-                    <li><a href="#">Customer Support</a></li>
-                    <li><a href="#">Help Center</a></li>
+                    <li><a href="customer-support.html">Customer Support</a></li>
                 </ul>
             </div>
         </div>
@@ -614,23 +577,5 @@
         </div>
     </footer>
 
-    <!-- JavaScript Copy Functionality -->
-    <script>
-        function copyEntireHTML() {
-            const entireHTML = document.documentElement.outerHTML;
-            navigator.clipboard.writeText(entireHTML).then(() => {
-                const btn = document.querySelector('.btn-copy-full');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied!';
-                btn.style.backgroundColor = '#155724';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.backgroundColor = '#27AE60';
-                }, 2500);
-            }).catch(err => {
-                alert('Copy failed: ' + err);
-            });
-        }
-    </script>
 </body>
 </html>

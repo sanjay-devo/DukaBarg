@@ -44,26 +44,6 @@
             letter-spacing: 0.5px;
         }
 
-        .copy-btn {
-            background-color: #f1d9b5;
-            color: #4a231f;
-            border: none;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .copy-btn:hover {
-            background-color: #e2c499;
-            transform: translateY(-1px);
-        }
-
         .content {
             padding: 30px;
             line-height: 1.6;
@@ -179,9 +159,6 @@
     <div class="container-box">
         <div class="header-bar">
             <h1 class="header-title">DUKANS INDIA - Delete Account Instructions</h1>
-            <button class="copy-btn" onclick="copyDeleteAccountHTML()">
-                📋 Copy Code
-            </button>
         </div>
 
         <div class="content">
@@ -249,26 +226,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function copyDeleteAccountHTML() {
-            const entireHTML = document.documentElement.outerHTML;
-            navigator.clipboard.writeText(entireHTML).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied!';
-                btn.style.backgroundColor = '#d4edda';
-                btn.style.color = '#155724';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.backgroundColor = '#f1d9b5';
-                    btn.style.color = '#4a231f';
-                }, 2000);
-            }).catch(err => {
-                alert('Copy failed: ' + err);
-            });
-        }
-    </script>
 
 </body>
 </html>
