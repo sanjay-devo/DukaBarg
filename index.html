@@ -3370,6 +3370,91 @@
         font-size: var(--font-size-xs);
       }
 
+      .product-image-field {
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .product-image-field-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+      }
+
+      .product-image-field-label {
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+      }
+
+      .product-image-field-heading > .product-image-field-label {
+        margin: 0;
+      }
+
+      .product-image-field .in-app-notification-link-toggle {
+        display: inline-flex;
+        width: fit-content;
+        margin: 0;
+      }
+
+      .product-image-url-field[hidden],
+      .product-image-upload-field[hidden],
+      .product-image-preview-list[hidden] {
+        display: none;
+      }
+
+      .product-image-preview-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: var(--space-4);
+      }
+
+      .product-image-preview-item {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        aspect-ratio: 1;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-muted);
+        border-radius: var(--radius-md);
+      }
+
+      .product-image-preview-item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .product-image-preview-item .in-app-notification-image-actions {
+        top: var(--space-2);
+        right: var(--space-2);
+      }
+
+      .product-image-preview-item .in-app-notification-image-remove {
+        width: 28px;
+        height: 28px;
+        font-size: 20px;
+      }
+
+      .product-image-preview-item .in-app-notification-preview-progress {
+        padding: var(--space-3);
+      }
+
+      .product-image-status {
+        margin: 0;
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-xs);
+      }
+
+      .product-image-status[data-kind="error"] {
+        color: var(--color-border-strong);
+      }
+
+      .product-image-status:empty {
+        display: none;
+      }
+
       .product-barcode-preview {
         min-height: 88px;
         display: grid;
@@ -5342,8 +5427,61 @@
           <div class="product-field"><label>Code 128 preview</label><div class="product-barcode-preview" id="product-form-barcode-preview" aria-live="polite">Enter or generate a barcode value.</div></div>
           <div class="product-field full-width"><label for="product-short-description">Short description</label><input id="product-short-description" maxlength="300" /></div>
           <div class="product-field full-width"><label for="product-long-description">Long description</label><textarea id="product-long-description" rows="4"></textarea></div>
-          <div class="product-field full-width"><label for="product-main-image">Main image URL</label><input id="product-main-image" type="url" placeholder="https://…" /></div>
-          <div class="product-field full-width"><label for="product-additional-images">Additional image URLs</label><textarea id="product-additional-images" rows="2" placeholder="One URL per line"></textarea></div>
+          <div class="product-field full-width product-image-field">
+            <div class="product-image-field-heading">
+              <span class="product-image-field-label">Main image</span>
+              <label class="in-app-notification-link-toggle" for="product-main-image-link-toggle">
+                <input id="product-main-image-link-toggle" type="checkbox" />
+                I have an image link
+              </label>
+            </div>
+            <div class="product-image-url-field" id="product-main-image-url-field" hidden>
+              <input id="product-main-image" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/image.jpg" aria-label="Main image URL" />
+            </div>
+            <div class="product-image-upload-field" id="product-main-image-upload-field">
+              <label class="in-app-notification-upload" for="product-main-image-file">
+                Choose an image (JPEG, PNG, WebP, or GIF; up to 5 MB)
+                <input id="product-main-image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="product-main-image-hint" />
+              </label>
+              <p class="in-app-notification-hint" id="product-main-image-hint">An image is optional. Choose a file to replace the current main image.</p>
+            </div>
+            <div class="in-app-notification-preview-wrap" id="product-main-image-preview-wrap" hidden>
+              <img class="in-app-notification-preview" id="product-main-image-preview" alt="Main product image preview" />
+              <div class="in-app-notification-image-actions">
+                <button class="in-app-notification-image-remove" id="product-main-image-remove" type="button" aria-label="Remove main image" title="Remove main image">&times;</button>
+              </div>
+              <div class="in-app-notification-preview-progress" id="product-main-image-progress-wrap" hidden>
+                <div class="in-app-notification-progress-label">
+                  <span id="product-main-image-progress-status"></span>
+                  <span id="product-main-image-progress-percent">0%</span>
+                </div>
+                <progress id="product-main-image-progress" max="100" value="0" aria-label="Main product image upload progress"></progress>
+              </div>
+            </div>
+            <p class="product-image-status" id="product-main-image-status" role="status" aria-live="polite"></p>
+          </div>
+          <div class="product-field full-width product-image-field">
+            <div class="product-image-field-heading">
+              <span class="product-image-field-label">Additional images</span>
+              <label class="in-app-notification-link-toggle" for="product-additional-images-link-toggle">
+                <input id="product-additional-images-link-toggle" type="checkbox" />
+                I have an image link
+              </label>
+            </div>
+            <div class="product-image-url-field" id="product-additional-images-url-field" hidden>
+              <textarea id="product-additional-images" rows="3" placeholder="One URL per line" aria-label="Additional image URLs, one per line"></textarea>
+              <p class="in-app-notification-hint">Enter one HTTP or HTTPS image URL per line.</p>
+            </div>
+            <div class="product-image-upload-field" id="product-additional-images-upload-field">
+              <label class="in-app-notification-upload" for="product-additional-images-files">
+                Choose images (JPEG, PNG, WebP, or GIF; up to 5 MB each)
+                <input id="product-additional-images-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple aria-describedby="product-additional-images-hint" />
+              </label>
+              <p class="in-app-notification-hint" id="product-additional-images-hint">Choose multiple images. Their displayed order is the saved gallery order.</p>
+            </div>
+            <div class="product-image-preview-list" id="product-additional-images-preview-list" hidden></div>
+            <p class="product-image-status" id="product-additional-images-status" role="status" aria-live="polite"></p>
+          </div>
         </div></section>
         <section class="product-form-section"><h3>Categories</h3><p class="product-category-warning" id="product-category-warning" role="alert" hidden><span id="product-category-warning-message"></span> <button class="category-secondary-button" id="product-category-retry" type="button">Retry</button></p><p class="product-category-warning" id="product-hierarchy-warning" role="alert" hidden></p><div class="product-form-grid">
           <div class="product-field"><label for="product-master-category">Master category</label><select id="product-master-category"><option value="">Select master category</option></select></div>
@@ -6042,6 +6180,37 @@
         saving: false,
         categoryNeedsCorrection: false,
       };
+      const productImageState = {
+        mainUrl: "",
+        mainFile: null,
+        mainPreviewObjectUrl: null,
+        mainTouched: false,
+        mainValidating: false,
+        mainGeneration: 0,
+        additional: [],
+        additionalTouched: false,
+        additionalValidating: false,
+        additionalGeneration: 0,
+      };
+      const productMainImageLinkToggle = document.querySelector("#product-main-image-link-toggle");
+      const productMainImageUrlField = document.querySelector("#product-main-image-url-field");
+      const productMainImageUploadField = document.querySelector("#product-main-image-upload-field");
+      const productMainImageUrl = document.querySelector("#product-main-image");
+      const productMainImageFile = document.querySelector("#product-main-image-file");
+      const productMainImagePreviewWrap = document.querySelector("#product-main-image-preview-wrap");
+      const productMainImagePreview = document.querySelector("#product-main-image-preview");
+      const productMainImageProgressWrap = document.querySelector("#product-main-image-progress-wrap");
+      const productMainImageProgress = document.querySelector("#product-main-image-progress");
+      const productMainImageProgressStatus = document.querySelector("#product-main-image-progress-status");
+      const productMainImageProgressPercent = document.querySelector("#product-main-image-progress-percent");
+      const productMainImageStatus = document.querySelector("#product-main-image-status");
+      const productAdditionalImagesLinkToggle = document.querySelector("#product-additional-images-link-toggle");
+      const productAdditionalImagesUrlField = document.querySelector("#product-additional-images-url-field");
+      const productAdditionalImagesUploadField = document.querySelector("#product-additional-images-upload-field");
+      const productAdditionalImages = document.querySelector("#product-additional-images");
+      const productAdditionalImagesFiles = document.querySelector("#product-additional-images-files");
+      const productAdditionalImagesPreviewList = document.querySelector("#product-additional-images-preview-list");
+      const productAdditionalImagesStatus = document.querySelector("#product-additional-images-status");
       const inventoryState = {
         page: 1,
         pageSize: 10,
@@ -13972,9 +14141,486 @@
         container.append(row);
       }
 
+      function setProductImageStatus(section, message, kind = "status") {
+        const status = section === "main" ? productMainImageStatus : productAdditionalImagesStatus;
+        status.textContent = message;
+        status.dataset.kind = kind;
+        status.setAttribute("role", kind === "error" ? "alert" : "status");
+        status.setAttribute("aria-live", kind === "error" ? "assertive" : "polite");
+      }
+
+      function clearProductImagePreviews() {
+        if (productImageState.mainPreviewObjectUrl) {
+          URL.revokeObjectURL(productImageState.mainPreviewObjectUrl);
+        }
+        for (const image of productImageState.additional) {
+          if (image.previewObjectUrl) URL.revokeObjectURL(image.previewObjectUrl);
+        }
+        productImageState.mainUrl = "";
+        productImageState.mainFile = null;
+        productImageState.mainPreviewObjectUrl = null;
+        productImageState.mainTouched = false;
+        productImageState.mainValidating = false;
+        productImageState.additional = [];
+        productImageState.additionalTouched = false;
+        productImageState.additionalValidating = false;
+        productImageState.mainGeneration += 1;
+        productImageState.additionalGeneration += 1;
+        productMainImageFile.value = "";
+        productMainImageFile.disabled = false;
+        productAdditionalImagesFiles.value = "";
+        productAdditionalImagesFiles.disabled = false;
+        productMainImageProgressWrap.hidden = true;
+        productMainImageProgress.value = 0;
+        productMainImageProgress.removeAttribute("data-state");
+        productMainImageProgressStatus.textContent = "";
+        productMainImageProgressPercent.textContent = "0%";
+        setProductImageStatus("main", "");
+        setProductImageStatus("additional", "");
+      }
+
+      function renderProductMainImage() {
+        const previewUrl = productMainImageLinkToggle.checked
+          ? productMainImageUrl.value.trim()
+          : productImageState.mainPreviewObjectUrl || productImageState.mainUrl;
+        productMainImagePreviewWrap.hidden = !previewUrl;
+        if (previewUrl) productMainImagePreview.src = previewUrl;
+        else productMainImagePreview.removeAttribute("src");
+      }
+
+      function productAdditionalImagePreviews() {
+        if (productAdditionalImagesLinkToggle.checked) {
+          return productAdditionalImages.value
+            .split(/\r?\n/)
+            .map((url) => url.trim())
+            .filter(Boolean)
+            .map((url) => ({ url, previewUrl: url, file: null }));
+        }
+        return productImageState.additional;
+      }
+
+      function renderProductAdditionalImages() {
+        const images = productAdditionalImagePreviews();
+        productAdditionalImagesPreviewList.replaceChildren();
+        productAdditionalImagesPreviewList.hidden = images.length === 0;
+        for (const [index, image] of images.entries()) {
+          const item = document.createElement("div");
+          item.className = "product-image-preview-item";
+          const preview = document.createElement("img");
+          preview.src = image.previewObjectUrl || image.previewUrl || image.url;
+          preview.alt = `Additional product image ${index + 1} preview`;
+          item.append(preview);
+
+          const actions = document.createElement("div");
+          actions.className = "in-app-notification-image-actions";
+          const removeButton = document.createElement("button");
+          removeButton.className = "in-app-notification-image-remove";
+          removeButton.type = "button";
+          removeButton.dataset.productImageRemove = String(index);
+          removeButton.setAttribute("aria-label", `Remove additional image ${index + 1}`);
+          removeButton.title = `Remove additional image ${index + 1}`;
+          removeButton.textContent = "×";
+          removeButton.disabled = productState.saving || productImageState.additionalValidating;
+          actions.append(removeButton);
+          item.append(actions);
+
+          if (!productAdditionalImagesLinkToggle.checked && ["uploading", "uploaded", "error"].includes(image.status)) {
+            const progressWrap = document.createElement("div");
+            progressWrap.className = "in-app-notification-preview-progress";
+            const label = document.createElement("div");
+            label.className = "in-app-notification-progress-label";
+            const status = document.createElement("span");
+            status.textContent = image.status === "uploading"
+              ? "Uploading image"
+              : image.status === "uploaded"
+                ? "Image uploaded successfully"
+                : "Image upload failed";
+            const percent = document.createElement("span");
+            percent.textContent = `${image.progress || 0}%`;
+            label.append(status, percent);
+            const progress = document.createElement("progress");
+            progress.max = 100;
+            progress.value = image.progress || 0;
+            progress.setAttribute("aria-label", `Additional product image ${index + 1} upload progress`);
+            if (image.status === "uploaded") progress.dataset.state = "success";
+            if (image.status === "error") progress.dataset.state = "error";
+            progressWrap.append(label, progress);
+            item.append(progressWrap);
+          }
+          productAdditionalImagesPreviewList.append(item);
+        }
+      }
+
+      function validatedProductImageUrl(value, label) {
+        let parsed;
+        try {
+          parsed = new URL(value);
+        } catch {
+          throw new Error(`${label} must be a valid absolute HTTP or HTTPS URL.`);
+        }
+        if (!["http:", "https:"].includes(parsed.protocol) || !parsed.hostname || parsed.username || parsed.password) {
+          throw new Error(`${label} must be a valid absolute HTTP or HTTPS URL without credentials.`);
+        }
+        return parsed.href;
+      }
+
+      function validatedProductImageUrls(mainUrl, additionalUrls) {
+        const normalizedMainUrl = mainUrl ? validatedProductImageUrl(mainUrl, "Main image URL") : "";
+        const normalizedAdditionalUrls = additionalUrls.map((url, index) =>
+          validatedProductImageUrl(url, `Additional image URL ${index + 1}`),
+        );
+        const unique = new Set();
+        for (const url of [normalizedMainUrl, ...normalizedAdditionalUrls].filter(Boolean)) {
+          if (unique.has(url)) throw new Error("Product image URLs must not contain duplicates.");
+          unique.add(url);
+        }
+        return { mainUrl: normalizedMainUrl, additionalUrls: normalizedAdditionalUrls };
+      }
+
+      function productImageUrlsFromForm() {
+        const mainChanged = !productState.editKey || productImageState.mainTouched;
+        const additionalChanged = !productState.editKey || productImageState.additionalTouched;
+        const mainUrl = mainChanged
+          ? productMainImageLinkToggle.checked
+            ? productMainImageUrl.value.trim()
+            : productImageState.mainFile
+              ? ""
+              : productImageState.mainUrl
+          : "";
+        const additionalUrls = additionalChanged
+          ? productAdditionalImagesLinkToggle.checked
+            ? productAdditionalImages.value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean)
+            : productImageState.additional.filter((image) => image.url).map((image) => image.url)
+          : [];
+        const validated = validatedProductImageUrls(mainUrl, additionalUrls);
+        const changedUrls = [validated.mainUrl, ...validated.additionalUrls].filter(Boolean);
+        const unchangedUrls = [
+          ...(!mainChanged ? [productImageState.mainUrl] : []),
+          ...(!additionalChanged ? productImageState.additional.filter((image) => image.url).map((image) => image.url) : []),
+        ];
+        for (const url of unchangedUrls) {
+          try {
+            const normalized = validatedProductImageUrl(url, "Saved image URL");
+            if (changedUrls.includes(normalized)) {
+              throw new Error("Product image URLs must not contain duplicates.");
+            }
+          } catch (error) {
+            if (error.message === "Product image URLs must not contain duplicates.") throw error;
+          }
+        }
+        return {
+          mainUrl: mainChanged ? validated.mainUrl : undefined,
+          additionalUrls: additionalChanged ? validated.additionalUrls : undefined,
+        };
+      }
+
+      async function validateProductImageFile(file) {
+        if (!Object.prototype.hasOwnProperty.call(categoryImageMimeExtensions, file.type)) {
+          return "Choose a JPEG, PNG, WebP, or GIF image.";
+        }
+        if (file.size <= 0) return "The selected image is empty.";
+        if (file.size > maxCategoryImageBytes) return "Product images must be 5 MB or smaller.";
+        let signature;
+        try {
+          signature = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+        } catch {
+          return "The selected image could not be read. Choose it again.";
+        }
+        const matches = {
+          "image/jpeg": signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff,
+          "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((byte, index) => signature[index] === byte),
+          "image/webp": String.fromCharCode(...signature.slice(0, 4)) === "RIFF" &&
+            String.fromCharCode(...signature.slice(8, 12)) === "WEBP",
+          "image/gif": ["GIF87a", "GIF89a"].includes(String.fromCharCode(...signature.slice(0, 6))),
+        };
+        return matches[file.type] ? "" : "The selected file contents do not match its image type.";
+      }
+
+      function productImageUploadErrorMessage(action, error) {
+        console.error(`${action} failed (Firebase code: ${error?.code || "unknown"}).`, error);
+        const code = String(error?.code || "").toLowerCase();
+        if (code.includes("permission") || code.includes("unauthorized") || code.includes("unauthenticated")) {
+          return "Firebase Storage denied this upload. Check the admin session and Firebase Storage rules.";
+        }
+        if (code.includes("network")) return "A network error interrupted the image upload. Check your connection and retry.";
+        return isDevelopment
+          ? `${action} failed (${error?.code || "unknown"}): ${error?.message || String(error)}`
+          : `${action} failed. Please retry.`;
+      }
+
+      function uploadProductImage(file, key, onProgress) {
+        const extension = categoryImageMimeExtensions[file.type];
+        const objectPath = `product-images/${key}/${crypto.randomUUID()}.${extension}`;
+        const task = uploadBytesResumable(storageRef(storage, objectPath), file, {
+          contentType: file.type,
+        });
+        return new Promise((resolve, reject) => {
+          task.on(
+            "state_changed",
+            (snapshot) => {
+              const percent = snapshot.totalBytes
+                ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                : 0;
+              onProgress(percent);
+            },
+            reject,
+            async () => {
+              try {
+                resolve(await getDownloadURL(task.snapshot.ref));
+              } catch (error) {
+                reject(error);
+              }
+            },
+          );
+        });
+      }
+
+      async function uploadPendingProductImages(fields, key) {
+        if (productImageState.mainFile) {
+          productMainImageProgressWrap.hidden = false;
+          productMainImageProgress.value = 0;
+          productMainImageProgress.removeAttribute("data-state");
+          productMainImageProgressStatus.textContent = "Uploading main image";
+          productMainImageProgressPercent.textContent = "0%";
+          try {
+            const url = await uploadProductImage(productImageState.mainFile, key, (percent) => {
+              productMainImageProgress.value = percent;
+              productMainImageProgressPercent.textContent = `${percent}%`;
+            });
+            productImageState.mainUrl = url;
+            productImageState.mainFile = null;
+            if (productImageState.mainPreviewObjectUrl) {
+              URL.revokeObjectURL(productImageState.mainPreviewObjectUrl);
+              productImageState.mainPreviewObjectUrl = null;
+            }
+            productMainImageFile.value = "";
+            productMainImageProgress.value = 100;
+            productMainImageProgress.dataset.state = "success";
+            productMainImageProgressStatus.textContent = "Main image uploaded";
+            productMainImageProgressPercent.textContent = "100%";
+            fields.mainImageUrl = url;
+            renderProductMainImage();
+          } catch (uploadError) {
+            productMainImageProgress.dataset.state = "error";
+            productMainImageProgressStatus.textContent = "Main image upload failed";
+            setProductImageStatus("main", productImageUploadErrorMessage("Uploading main product image", uploadError), "error");
+            throw new Error(productMainImageStatus.textContent);
+          }
+        }
+
+        if (!productAdditionalImagesLinkToggle.checked) {
+          for (const [index, image] of productImageState.additional.entries()) {
+            if (!image.file) continue;
+            image.status = "uploading";
+            image.progress = 0;
+            renderProductAdditionalImages();
+            try {
+              image.url = await uploadProductImage(image.file, key, (percent) => {
+                image.progress = percent;
+                renderProductAdditionalImages();
+              });
+              image.file = null;
+              if (image.previewObjectUrl) {
+                URL.revokeObjectURL(image.previewObjectUrl);
+                image.previewObjectUrl = null;
+              }
+              image.status = "uploaded";
+              image.progress = 100;
+              renderProductAdditionalImages();
+            } catch (uploadError) {
+              image.status = "error";
+              renderProductAdditionalImages();
+              const message = productImageUploadErrorMessage(`Uploading additional product image ${index + 1}`, uploadError);
+              setProductImageStatus("additional", message, "error");
+              throw new Error(message);
+            }
+          }
+          if (Object.prototype.hasOwnProperty.call(fields, "additionalImageUrls")) {
+            fields.additionalImageUrls = productImageState.additional
+              .filter((image) => image.url)
+              .map((image) => image.url);
+          }
+        }
+      }
+
+      function setProductImageMode(section) {
+        const isMain = section === "main";
+        const toggle = isMain ? productMainImageLinkToggle : productAdditionalImagesLinkToggle;
+        const urlField = isMain ? productMainImageUrlField : productAdditionalImagesUrlField;
+        const uploadField = isMain ? productMainImageUploadField : productAdditionalImagesUploadField;
+        if (toggle.checked) {
+          const hasPendingFile = isMain
+            ? Boolean(productImageState.mainFile)
+            : productImageState.additional.some((image) => image.file);
+          if (hasPendingFile) {
+            toggle.checked = false;
+            setProductImageStatus(section, "Save or remove the selected image files before switching to image links.", "error");
+            return false;
+          }
+          if (isMain) productMainImageUrl.value = productImageState.mainUrl;
+          else productAdditionalImages.value = productImageState.additional.map((image) => image.url).filter(Boolean).join("\n");
+        } else {
+          try {
+            if (isMain) {
+              productImageState.mainUrl = validatedProductImageUrls(productMainImageUrl.value.trim(), []).mainUrl;
+            } else {
+              const urls = productAdditionalImages.value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean);
+              productImageState.additional = validatedProductImageUrls("", urls).additionalUrls.map((url) => ({ url, status: "saved" }));
+            }
+          } catch (error) {
+            toggle.checked = true;
+            setProductImageStatus(section, error.message, "error");
+            return false;
+          }
+          setProductImageStatus(section, "");
+        }
+        urlField.hidden = !toggle.checked;
+        uploadField.hidden = toggle.checked;
+        if (isMain) renderProductMainImage();
+        else renderProductAdditionalImages();
+        if (isMain) productImageState.mainTouched = true;
+        else productImageState.additionalTouched = true;
+        return true;
+      }
+
+      function setProductImageControlsDisabled(disabled) {
+        const mainDisabled = disabled || productImageState.mainValidating;
+        const additionalDisabled = disabled || productImageState.additionalValidating;
+        productMainImageLinkToggle.disabled = mainDisabled;
+        productMainImageUrl.disabled = mainDisabled;
+        productMainImageFile.disabled = mainDisabled;
+        document.querySelector("#product-main-image-remove").disabled = mainDisabled;
+        productAdditionalImagesLinkToggle.disabled = additionalDisabled;
+        productAdditionalImages.disabled = additionalDisabled;
+        productAdditionalImagesFiles.disabled = additionalDisabled;
+        productAdditionalImagesPreviewList.querySelectorAll("button[data-product-image-remove]")
+          .forEach((button) => { button.disabled = additionalDisabled; });
+      }
+
+      function removeProductMainImage() {
+        productImageState.mainTouched = true;
+        productImageState.mainUrl = "";
+        productImageState.mainFile = null;
+        if (productImageState.mainPreviewObjectUrl) {
+          URL.revokeObjectURL(productImageState.mainPreviewObjectUrl);
+          productImageState.mainPreviewObjectUrl = null;
+        }
+        productMainImageUrl.value = "";
+        productMainImageFile.value = "";
+        productMainImageProgressWrap.hidden = true;
+        productMainImageProgress.value = 0;
+        productMainImageProgress.removeAttribute("data-state");
+        setProductImageStatus("main", "");
+        renderProductMainImage();
+      }
+
+      productMainImageLinkToggle.addEventListener("change", () => setProductImageMode("main"));
+      productAdditionalImagesLinkToggle.addEventListener("change", () => setProductImageMode("additional"));
+      productMainImageUrl.addEventListener("input", () => {
+        productImageState.mainTouched = true;
+        setProductImageStatus("main", "");
+        renderProductMainImage();
+      });
+      productAdditionalImages.addEventListener("input", () => {
+        productImageState.additionalTouched = true;
+        setProductImageStatus("additional", "");
+        renderProductAdditionalImages();
+      });
+      document.querySelector("#product-main-image-remove").addEventListener("click", removeProductMainImage);
+      productAdditionalImagesPreviewList.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-product-image-remove]");
+        if (!button) return;
+        const index = Number(button.dataset.productImageRemove);
+        if (productAdditionalImagesLinkToggle.checked) {
+          const urls = productAdditionalImages.value.split(/\r?\n/);
+          urls.splice(index, 1);
+          productAdditionalImages.value = urls.join("\n");
+          productImageState.additionalTouched = true;
+        } else {
+          const [removed] = productImageState.additional.splice(index, 1);
+          if (removed?.previewObjectUrl) URL.revokeObjectURL(removed.previewObjectUrl);
+          productImageState.additionalTouched = true;
+        }
+        setProductImageStatus("additional", "");
+        renderProductAdditionalImages();
+      });
+      productMainImageFile.addEventListener("change", async () => {
+        const file = productMainImageFile.files?.[0];
+        if (!file) return;
+        const generation = ++productImageState.mainGeneration;
+        productImageState.mainValidating = true;
+        setProductImageControlsDisabled(productState.saving);
+        try {
+          const validationError = await validateProductImageFile(file);
+          if (generation !== productImageState.mainGeneration) return;
+          if (validationError) {
+            productMainImageFile.value = "";
+            setProductImageStatus("main", validationError, "error");
+            return;
+          }
+          if (productImageState.mainPreviewObjectUrl) URL.revokeObjectURL(productImageState.mainPreviewObjectUrl);
+          productImageState.mainFile = file;
+          productImageState.mainPreviewObjectUrl = URL.createObjectURL(file);
+          productImageState.mainTouched = true;
+          productMainImageUrl.value = "";
+          productMainImageProgressWrap.hidden = true;
+          productMainImageProgress.value = 0;
+          setProductImageStatus("main", "Ready to upload when you save the product.");
+          renderProductMainImage();
+        } finally {
+          if (generation === productImageState.mainGeneration) {
+            productImageState.mainValidating = false;
+            setProductImageControlsDisabled(productState.saving);
+          }
+        }
+      });
+      productAdditionalImagesFiles.addEventListener("change", async () => {
+        const files = [...(productAdditionalImagesFiles.files || [])];
+        productAdditionalImagesFiles.value = "";
+        if (!files.length) return;
+        const generation = ++productImageState.additionalGeneration;
+        productImageState.additionalValidating = true;
+        setProductImageControlsDisabled(productState.saving);
+        try {
+          const validated = [];
+          const errors = [];
+          for (const file of files) {
+            const validationError = await validateProductImageFile(file);
+            if (generation !== productImageState.additionalGeneration) return;
+            if (validationError) errors.push(`${file.name}: ${validationError}`);
+            else validated.push(file);
+          }
+          for (const file of validated) {
+            productImageState.additional.push({
+              file,
+              previewObjectUrl: URL.createObjectURL(file),
+              status: "queued",
+              progress: 0,
+            });
+          }
+          if (validated.length) productImageState.additionalTouched = true;
+          if (errors.length) {
+            setProductImageStatus("additional", errors.join(" "), "error");
+          } else {
+            const pendingCount = productImageState.additional.filter((image) => image.file).length;
+            setProductImageStatus(
+              "additional",
+              pendingCount ? `${pendingCount} image${pendingCount === 1 ? "" : "s"} ready to upload when you save the product.` : "",
+            );
+          }
+          renderProductAdditionalImages();
+        } finally {
+          if (generation === productImageState.additionalGeneration) {
+            productImageState.additionalValidating = false;
+            setProductImageControlsDisabled(productState.saving);
+          }
+        }
+      });
+
       function fillProductForm(product, key) {
         const form = document.querySelector("#product-form");
         form.reset();
+        clearProductImagePreviews();
         document.querySelector("#product-form-error").hidden = true;
         const hierarchyWarning = document.querySelector("#product-hierarchy-warning");
         hierarchyWarning.hidden = true;
@@ -14000,8 +14646,26 @@
         productState.reservedBarcodes.add(formBarcode);
         document.querySelector("#product-short-description").value = editing ? String(product.shortDescription ?? product.short_description ?? "") : "";
         document.querySelector("#product-long-description").value = editing ? String(product.longDescription ?? product.long_description ?? product.description ?? "") : "";
-        document.querySelector("#product-main-image").value = editing ? String(product.mainImageUrl ?? product.imageUrl ?? product.image ?? "") : "";
-        document.querySelector("#product-additional-images").value = editing ? (Array.isArray(product.additionalImageUrls ?? product.images) ? (product.additionalImageUrls ?? product.images).join("\n") : "") : "";
+        productImageState.mainUrl = editing ? String(product.mainImageUrl ?? product.imageUrl ?? product.image ?? "").trim() : "";
+        const savedAdditionalImages = editing ? product.additionalImageUrls ?? product.images : [];
+        productImageState.additional = Array.isArray(savedAdditionalImages)
+          ? savedAdditionalImages.filter((url) => typeof url === "string" && url.trim()).map((url) => ({ url: url.trim(), status: "saved" }))
+          : [];
+        productMainImageLinkToggle.checked = false;
+        productAdditionalImagesLinkToggle.checked = false;
+        productMainImageUrl.value = "";
+        productAdditionalImages.value = "";
+        productMainImageUrlField.hidden = true;
+        productMainImageUploadField.hidden = false;
+        productAdditionalImagesUrlField.hidden = true;
+        productAdditionalImagesUploadField.hidden = false;
+        productMainImageProgressWrap.hidden = true;
+        productMainImageProgress.value = 0;
+        productMainImageProgress.removeAttribute("data-state");
+        productMainImageProgressStatus.textContent = "";
+        productMainImageProgressPercent.textContent = "0%";
+        renderProductMainImage();
+        renderProductAdditionalImages();
         document.querySelector("#product-mrp").value = editing ? String(product.mrp ?? "") : "";
         document.querySelector("#product-selling-price").value = editing ? String(product.sellingPrice ?? product.price ?? "") : "";
         document.querySelector("#product-discounted-price").value = editing ? String(product.discountedPrice ?? product.discounted_price ?? "") : "";
@@ -14093,6 +14757,9 @@
       }
 
       function readProductForm(key) {
+        if (productImageState.mainValidating || productImageState.additionalValidating) {
+          throw new Error("Wait for image validation to finish before saving the product.");
+        }
         const id = document.querySelector("#product-id").value.trim();
         const name = document.querySelector("#product-name").value.trim();
         if (!id) throw new Error("Enter a Product ID.");
@@ -14116,15 +14783,7 @@
           existingProduct,
         );
         if (barcode && /[\u0000-\u001f\u007f]/.test(barcode)) throw new Error("Barcode values cannot contain control characters.");
-        const imageUrls = [
-          document.querySelector("#product-main-image").value.trim(),
-          ...document.querySelector("#product-additional-images").value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean),
-        ].filter(Boolean);
-        for (const imageUrl of imageUrls) {
-          let parsedUrl;
-          try { parsedUrl = new URL(imageUrl); } catch { throw new Error("Image URLs must be valid absolute URLs."); }
-          if (!["http:", "https:"].includes(parsedUrl.protocol)) throw new Error("Image URLs must use HTTP or HTTPS.");
-        }
+        const imageUrls = productImageUrlsFromForm();
         const sellingPrice = fieldNumber("product-selling-price", "Selling price", { required: true });
         const oldVariants = existingProduct?.variants;
         const variants = Array.from(document.querySelectorAll(".product-variant-row")).map((row, index) => {
@@ -14168,8 +14827,6 @@
           brand: document.querySelector("#product-brand").value.trim(),
           shortDescription: document.querySelector("#product-short-description").value.trim(),
           longDescription: document.querySelector("#product-long-description").value.trim(),
-          mainImageUrl: document.querySelector("#product-main-image").value.trim(),
-          additionalImageUrls: document.querySelector("#product-additional-images").value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean),
           masterCategoryId: master?.id || "",
           masterCategoryName: master?.name || "",
           categoryId: category?.id || "",
@@ -14190,6 +14847,8 @@
           variants: savedVariants,
           updatedAt: Date.now(),
         };
+        if (imageUrls.mainUrl !== undefined) fields.mainImageUrl = imageUrls.mainUrl;
+        if (imageUrls.additionalUrls !== undefined) fields.additionalImageUrls = imageUrls.additionalUrls;
         if (existingProduct) {
           for (const [camelId, snakeId, camelName, snakeName] of [
             ["masterCategoryId", "master_category_id", "masterCategoryName", "master_category_name"],
@@ -14221,6 +14880,7 @@
         event.preventDefault();
         if (productState.saving) return;
         productState.saving = true;
+        setProductImageControlsDisabled(true);
         const saveButton = document.querySelector("#product-save-button");
         const error = document.querySelector("#product-form-error");
         error.hidden = true;
@@ -14248,6 +14908,7 @@
             categoryState.products[key] = latestProduct.val();
           }
           const fields = readProductForm(key);
+          await uploadPendingProductImages(fields, key);
           if (productState.editKey) {
             await update(ref(database, `products/${key}`), fields);
             const updatedProduct = { ...categoryState.products[key] };
@@ -14272,6 +14933,7 @@
           error.hidden = false;
         } finally {
           productState.saving = false;
+          setProductImageControlsDisabled(false);
           saveButton.disabled = false;
           saveButton.removeAttribute("aria-busy");
           saveButton.textContent = productState.editKey ? "Save Changes" : "Save Product";
