@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUKANS INDIA - Official Marketplace App & Daily Grocery Store</title>
+    <style>
+        /* CSS Reset & Variable Tokens */
+        :root {
+            --primary: #4A231F;
+            --primary-light: #6B3A33;
+            --accent: #F1D9B5;
+            --bg-cream: #F5ECDD;
+            --card-bg: #FFFFFF;
+            --text-dark: #2E1A17;
+            --text-muted: #66524E;
+            --shadow: 0 10px 30px rgba(74, 35, 31, 0.08);
+            --border-color: #E4D8C8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #FAFAF7;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Top Sticky Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-badge {
+            background-color: var(--primary);
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 20px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .btn-header-download {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-header-download:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--bg-cream) 0%, #FFFFFF 100%);
+            padding: 70px 5% 90px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-title span {
+            color: #C0392B;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 35px;
+            max-width: 540px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-playstore {
+            background-color: #000000;
+            color: #FFFFFF;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .btn-playstore:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-playstore-icon {
+            width: 28px;
+            height: 28px;
+        }
+
+        .play-text-small {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            display: block;
+            font-weight: 500;
+        }
+
+        .play-text-large {
+            font-size: 16px;
+            display: block;
+        }
+
+        .hero-mockup {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .phone-frame {
+            width: 310px;
+            height: 620px;
+            background-color: #111111;
+            border-radius: 45px;
+            border: 12px solid #222222;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-screen {
+            background-color: var(--bg-cream);
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .app-header-mock {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .app-card-mock {
+            background: #FFFFFF;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 5%;
+            text-align: center;
+        }
+
+        .section-tag {
+            background-color: var(--accent);
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-heading {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 40px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            padding: 35px 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            text-align: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--bg-cream);
+            color: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* App Working & Flow Section */
+        .workflow-section {
+            background-color: var(--bg-cream);
+            padding: 80px 5%;
+        }
+
+        .step-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .step-box {
+            background-color: #FFFFFF;
+            padding: 25px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            color: #FFFFFF;
+            font-weight: 800;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        /* Copy Code Floating Bar */
+        .copy-code-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .btn-copy-full {
+            background-color: #27AE60;
+            color: #FFFFFF;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy-full:hover {
+            background-color: #219653;
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            padding: 60px 5% 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .footer-brand p {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 400px;
+        }
+
+        .footer-links h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #FFFFFF;
+            text-decoration: none;
+            opacity: 0.8;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 900px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-subtitle {
+                margin: 0 auto 30px;
+            }
+            .cta-buttons {
+                justify-content: center;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Navigation Header -->
+    <header>
+        <a href="#" class="logo-container">
+            <div class="logo-badge">D</div>
+            <span class="logo-text">DUKANS INDIA</span>
+        </a>
+        <nav>
+            <a href="#overview">Overview</a>
+            <a href="#working">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#contact">Contact</a>
+        </nav>
+        <a href="#download" class="btn-header-download">
+            <span>📲 Download App</span>
+        </a>
+    </header>
+
+    <!-- Main Hero Section -->
+    <section class="hero-section">
+        <div>
+            <span class="section-tag">Direct Local Marketplace</span>
+            <h1 class="hero-title">Apne Shehar Ki <span>Apni Dukan</span></h1>
+            <p class="hero-subtitle">
+                DUKANS INDIA brings your trusted neighborhood stores, daily essentials, fresh groceries, and household products directly to your doorstep with instant delivery and secure payments.
+            </p>
+            <div class="cta-buttons" id="download">
+                <a href="https://play.google.com/store/apps/details?id=com.dukans.india" target="_blank" class="btn-playstore">
+                    <svg class="btn-playstore-icon" viewBox="0 0 512 512" fill="#FFFFFF">
+                        <path d="M325.3 234.3L104.6 13l280.8 161.2-59.8 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l220.7-221.3 59.8 60.1L104.6 499z"/>
+                    </svg>
+                    <div>
+                        <span class="play-text-small">GET IT ON</span>
+                        <span class="play-text-large">Google Play</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-mockup">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="app-header-mock">
+                        <span>🛒 DUKANS INDIA</span>
+                        <span>🔍</span>
+                    </div>
+                    <div class="app-card-mock">
+                        <span style="font-size: 24px;">🥦</span>
+                        <div>
+                            <strong style="font-size: 13px; color: var(--primary);">Fresh Groceries</strong>
+                            <p style="font-size: 11px; color: var(--text-muted);">Delivered in 30 Mins</p>
+                        </div>
+                    </div>
+                    <div class="app-card-mock">
+                        <span style="font-size: 24px;">🥛</span>
+                        <div>
+                            <strong style="font-size: 13px; color: var(--primary);">Dairy & Milk Essentials</strong>
+                            <p style="font-size: 11px; color: var(--text-muted);">Sourced Daily</p>
+                        </div>
+                    </div>
+                    <div class="app-card-mock">
+                        <span style="font-size: 24px;">⚡</span>
+                        <div>
+                            <strong style="font-size: 13px; color: var(--primary);">Instant Support</strong>
+                            <p style="font-size: 11px; color: var(--text-muted);">1-Tap Callback</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- App Working & Overview Section -->
+    <section class="workflow-section" id="working">
+        <div style="text-align: center;">
+            <span class="section-tag">Simple & Seamless</span>
+            <h2 class="section-heading">How DUKANS INDIA Works</h2>
+        </div>
+        <div class="step-container">
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h3 style="color: var(--primary); margin-bottom: 8px;">1-Tap OTP Login</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Sign in instantly using your mobile number via secure Firebase OTP verification or Google Sign-In.</p>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h3 style="color: var(--primary); margin-bottom: 8px;">Browse Products</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Explore thousands of daily groceries, household staples, snacks, and personal care products at genuine prices.</p>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h3 style="color: var(--primary); margin-bottom: 8px;">Secure Checkout</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Pay safely using UPI, Netbanking, Credit/Debit Cards via Razorpay or choose Cash on Delivery (COD).</p>
+            </div>
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <h3 style="color: var(--primary); margin-bottom: 8px;">Live Tracking</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Receive real-time push notifications and track your delivery partner right to your home doorstep.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Grid -->
+    <section class="features-section" id="features">
+        <span class="section-tag">Why Choose Us</span>
+        <h2 class="section-heading">Built for Everyday Convenience</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3 class="feature-title">Ultra-Fast Delivery</h3>
+                <p class="feature-desc">Dedicated local fulfillment hubs ensure your grocery orders are packed with care and delivered in record time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">100% Safe Payments</h3>
+                <p class="feature-desc">Integrated PCI-DSS compliant Razorpay gateway ensures every UPI and card transaction is fully encrypted.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📞</div>
+                <h3 class="feature-title">Instant Helpdesk</h3>
+                <p class="feature-desc">Need assistance? Request an instant support callback directly from the app in your preferred native language.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💯</div>
+                <h3 class="feature-title">Quality Assurance</h3>
+                <p class="feature-desc">Every product undergoes strict freshness and hygiene inspections before dispatch to ensure 100% satisfaction.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Copy Code Button -->
+    <div class="copy-code-container">
+        <button class="btn-copy-full" onclick="copyEntireHTML()">
+            📋 Copy Full Code
+        </button>
+    </div>
+
+    <!-- Footer Section -->
+    <footer id="contact">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3>DUKANS INDIA</h3>
+                <p>DUKANS INDIA is a digital marketplace platform revolutionizing daily grocery shopping and local e-commerce across India.</p>
+                <div style="margin-top: 15px; font-size: 14px;">
+                    <p>📞 Phone: <a href="tel:+919203251821" style="color: var(--accent);">+91-9203251821</a></p>
+                    <p>✉️ Email: <a href="mailto:india@dukans.in" style="color: var(--accent);">india@dukans.in</a></p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Legal Policies</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Returns & Refund Policy</a></li>
+                    <li><a href="#">Account Deletion</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>App Links</h4>
+                <ul>
+                    <li><a href="https://play.google.com/store/apps/details?id=com.dukans.india" target="_blank">Download for Android</a></li>
+                    <li><a href="#">Customer Support</a></li>
+                    <li><a href="#">Help Center</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 DUKANS INDIA. All Rights Reserved. Built for India with ❤️</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Copy Functionality -->
+    <script>
+        function copyEntireHTML() {
+            const entireHTML = document.documentElement.outerHTML;
+            navigator.clipboard.writeText(entireHTML).then(() => {
+                const btn = document.querySelector('.btn-copy-full');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.style.backgroundColor = '#155724';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.backgroundColor = '#27AE60';
+                }, 2500);
+            }).catch(err => {
+                alert('Copy failed: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>
